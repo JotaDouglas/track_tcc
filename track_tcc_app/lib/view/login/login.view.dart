@@ -149,7 +149,7 @@ class _LoginViewState extends State<LoginView> {
                       duration: const Duration(milliseconds: 1600),
                       child: MaterialButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const HomeView(),

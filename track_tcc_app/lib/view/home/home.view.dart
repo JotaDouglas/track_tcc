@@ -13,6 +13,7 @@ class HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Center(
         child: _getBody(_currentIndex),
       ),
@@ -23,21 +24,21 @@ class HomeViewState extends State<HomeView> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.person,
-                  color: _currentIndex == 0 ? Colors.orange[900] : Colors.grey),
-              onPressed: () {
-                setState(() {
-                  _currentIndex = 0;
-                });
-              },
-            ),
-            const SizedBox(width: 40), // Espaço para o botão central
-            IconButton(
               icon: Icon(Icons.menu,
                   color: _currentIndex == 1 ? Colors.orange[900] : Colors.grey),
               onPressed: () {
                 setState(() {
                   _currentIndex = 1;
+                });
+              },
+            ),
+            const SizedBox(width: 40), // Espaço para o botão central
+            IconButton(
+              icon: Icon(Icons.person,
+                  color: _currentIndex == 0 ? Colors.orange[900] : Colors.grey),
+              onPressed: () {
+                setState(() {
+                  _currentIndex = 0;
                 });
               },
             ),
