@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:track_tcc_app/view/forgetKey.view.dart';
-import 'package:track_tcc_app/view/signup.view.dart';
+import 'package:track_tcc_app/view/home/home.view.dart';
+import 'package:track_tcc_app/view/login/forgetKey.view.dart';
+import 'package:track_tcc_app/view/login/signup.view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -147,7 +148,14 @@ class _LoginViewState extends State<LoginView> {
                     FadeInUp(
                       duration: const Duration(milliseconds: 1600),
                       child: MaterialButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeView(),
+                                ),
+                              );
+                        },
                         height: 50,
                         color: Colors.orange[900],
                         shape: RoundedRectangleBorder(

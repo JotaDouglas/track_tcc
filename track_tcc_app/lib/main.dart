@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:track_tcc_app/view/login.view.dart';
+import 'package:track_tcc_app/view/login/login.view.dart';
 
 void main() {
   runApp(const MyApp());
