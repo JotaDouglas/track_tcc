@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:track_tcc_app/view/login/login.view.dart';
 
 class CadastroView extends StatefulWidget {
   const CadastroView({super.key});
@@ -123,7 +124,12 @@ class CadastroViewState extends State<CadastroView> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pop(context);
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginView(),
+                                ),
+                              );
                             },
                             child: const Text(
                               " Faça login",

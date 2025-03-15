@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:track_tcc_app/view/login/login.view.dart';
 
 class RecuperacaoSenhaView extends StatelessWidget {
   const RecuperacaoSenhaView({super.key});
@@ -111,7 +112,12 @@ class RecuperacaoSenhaView extends StatelessWidget {
                         duration: const Duration(milliseconds: 1500),
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginView(),
+                                ),
+                              );
                           },
                           child: const Text(
                             "Voltar para Login",
