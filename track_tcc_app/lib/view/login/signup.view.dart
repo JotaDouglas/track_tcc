@@ -19,9 +19,10 @@ class CadastroViewState extends State<CadastroView> {
   TextEditingController confirmPasswordController = TextEditingController();
   LoginViewModel login = LoginViewModel();
 
-  void _validateAndSubmit() {
+  void _validateAndSubmit(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       log('Cadastro válido!');
+      await login.createEmailAndPassword(email: email, password: password);
       // Adicionar lógica de cadastro aqui
     }
   }
@@ -172,7 +173,7 @@ class CadastroViewState extends State<CadastroView> {
     return FadeInUp(
       duration: const Duration(milliseconds: 1600),
       child: MaterialButton(
-        onPressed: _validateAndSubmit,
+        onPressed:() =>  _validateAndSubmit(emailController.text, passwordController.text),
         height: 50,
         color: Colors.orange[900],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
