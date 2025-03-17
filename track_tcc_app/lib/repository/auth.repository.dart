@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthRepository {
@@ -11,21 +13,46 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    var res = await _firebaseAuth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    return res;
+    try {
+      var res = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      return res;
+    } on FirebaseException catch (e) {}
   }
 
-  Future<void> createUserWithEmailAndPassword({
+  Future createUserWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      var res = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Verifica se a criação foi bem-sucedida e obtém as informações do usuário
+      if (res.user != null) {
+        // A criação do usuário foi bem-sucedida
+        log("Usuário criado com sucesso: ${res.user!.email}");
+        // Aqui você pode fazer outras operações, como navegar para outra tela
+        return res.user; // Retorna o usuário criado
+      } else {
+        // Se o usuário não foi criado corretamente
+        log("Erro: não foi possível criar o usuário.");
+        return null;
+      }
+      // return res;
+    } on FirebaseException catch (e) {
+      // Imprime o erro para entender o que aconteceu
+      log("Erro ao criar usuário: ${e.message}");
+      log("Código do erro: ${e.code}");
+      log("Detalhes do erro: ${e.stackTrace}");
+      // Opcionalmente, você pode lançar o erro novamente ou retornar um valor específico
+      return null; // Ou qualquer outro valor para indicar falha
+    }
   }
 
   Future<void> signOut() async {
