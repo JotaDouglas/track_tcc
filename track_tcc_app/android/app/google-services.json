@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577641225848",
+    "project_id": "track-tcc-f55a9",
+    "storage_bucket": "track-tcc-f55a9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577641225848:android:d51f098af3908c1ad7578d",
+        "android_client_info": {
+          "package_name": "com.example.track_tcc_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDZdpMWw_WsxlzIj5SRWREwTqsI_4GzKQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
