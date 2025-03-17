@@ -3,6 +3,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:track_tcc_app/view/home/home.view.dart';
 import 'package:track_tcc_app/view/login/forgetKey.view.dart';
 import 'package:track_tcc_app/view/login/signup.view.dart';
+import 'package:track_tcc_app/view/widgets/loading.widget.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -12,6 +13,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  GlobalKey key = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +44,7 @@ class _LoginViewState extends State<LoginView> {
                         FadeInUp(
                           duration: const Duration(milliseconds: 1000),
                           child: const Text(
-                            "App Name",
+                            "Track Safe",
                             style: TextStyle(color: Colors.white, fontSize: 40),
                           ),
                         ),
@@ -50,7 +52,7 @@ class _LoginViewState extends State<LoginView> {
                         FadeInUp(
                           duration: const Duration(milliseconds: 1300),
                           child: const Text(
-                            "Subtítulo",
+                            "Compartilhando segurança para todos",
                             style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                         ),
@@ -148,13 +150,14 @@ class _LoginViewState extends State<LoginView> {
                     FadeInUp(
                       duration: const Duration(milliseconds: 1600),
                       child: MaterialButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const HomeView(),
-                                ),
-                              );
+                        onPressed: () async {
+                          // Navigator.pushReplacement(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //         builder: (context) => const HomeView(),
+                          //       ),
+                          //     );
+                          await Dialogs.showLoading(context, key);
                         },
                         height: 50,
                         color: Colors.orange[900],
