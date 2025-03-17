@@ -7,14 +7,15 @@ class AuthRepository {
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
-  Future<void> signInWithEmailAndPassword({
+  Future signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await _firebaseAuth.signInWithEmailAndPassword(
+    var res = await _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
+    return res;
   }
 
   Future<void> createUserWithEmailAndPassword({
