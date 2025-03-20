@@ -64,7 +64,7 @@ class _LoginViewState extends State<LoginView> {
                         FadeInUp(
                           duration: const Duration(milliseconds: 1300),
                           child: const Text(
-                            "Compartilhando segurança para todos",
+                            "Tranquilidade que te acompanha",
                             style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                         ),
