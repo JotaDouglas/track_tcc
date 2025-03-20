@@ -68,8 +68,8 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
               ),
               const SizedBox(height: 20),
               Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                decoration: const BoxDecoration(
+                  color: Colors.white,
                   // borderRadius: const BorderRadius.only(
                   //   topLeft: Radius.circular(60),
                   //   topRight: Radius.circular(60),
