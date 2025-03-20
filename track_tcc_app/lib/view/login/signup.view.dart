@@ -73,7 +73,9 @@ class CadastroViewState extends State<CadastroView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
+
         child: Form(
           key: _formKey,
           child: Column(
@@ -127,10 +129,10 @@ class CadastroViewState extends State<CadastroView> {
   Widget _buildForm() {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(60), topRight: Radius.circular(60)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        // borderRadius:  BorderRadius.only(
+        //     topLeft: Radius.circular(60), topRight: Radius.circular(60)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(30),
