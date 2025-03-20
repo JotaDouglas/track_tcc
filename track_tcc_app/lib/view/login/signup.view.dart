@@ -222,6 +222,17 @@ class CadastroViewState extends State<CadastroView> {
             }
           } catch (e) {
             log("Erro ao validar e enviar: $e");
+            if (mounted && Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+              if (mounted) {
+                await Dialogs.showAlert(
+                  context: context,
+                  title: "Erro!",
+                  message:
+                      "Ocorreu um erro ao criar sua conta. Verifique a sua conexão e suas informações.",
+                );
+              }
           }
         },
         height: 50,
