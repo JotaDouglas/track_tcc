@@ -70,10 +70,10 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(60),
-                    topRight: Radius.circular(60),
-                  ),
+                  // borderRadius: const BorderRadius.only(
+                  //   topLeft: Radius.circular(60),
+                  //   topRight: Radius.circular(60),
+                  // ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(30),
@@ -88,7 +88,6 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Container(
-                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: Colors.grey.shade200),
@@ -96,10 +95,14 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
                             ),
                             child: TextField(
                               controller: emailController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: "E-mail",
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
+                                prefixIcon: const Icon(Icons.email),
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                // border: InputBorder.none,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             ),
                           ),
@@ -137,12 +140,12 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
                                     );
                                   }
                                 }
-                              }else{
+                              } else {
                                 await Dialogs.showAlert(
-                                      context: context,
-                                      title: "Erro!",
-                                      message:
-                                          "Verifique os dados e tente novamente");
+                                    context: context,
+                                    title: "Erro!",
+                                    message:
+                                        "Verifique os dados e tente novamente");
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -182,9 +185,9 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             "Voltar para Login",
-                            style: TextStyle(color: Colors.blue),
+                            style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),

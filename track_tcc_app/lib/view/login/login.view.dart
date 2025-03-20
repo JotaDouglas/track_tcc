@@ -28,6 +28,7 @@ class _LoginViewState extends State<LoginView> {
     final authViewModel = Provider.of<LoginViewModel>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -46,7 +47,7 @@ class _LoginViewState extends State<LoginView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 100),
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -70,15 +71,15 @@ class _LoginViewState extends State<LoginView> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
+            const SizedBox(height: 20),
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                // color: Colors.grey[100],
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(60),
                   topRight: Radius.circular(60),
                 ),
@@ -87,7 +88,7 @@ class _LoginViewState extends State<LoginView> {
                 padding: const EdgeInsets.all(30),
                 child: Column(
                   children: <Widget>[
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
                     FadeInUp(
                       duration: const Duration(milliseconds: 1400),
                       child: Form(
@@ -100,7 +101,7 @@ class _LoginViewState extends State<LoginView> {
                           child: Column(
                             children: <Widget>[
                               Container(
-                                padding: const EdgeInsets.all(10),
+                                // padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom:
@@ -109,10 +110,14 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                                 child: TextFormField(
                                   controller: _emailController,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     hintText: "E-mail",
-                                    hintStyle: TextStyle(color: Colors.grey),
-                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.email),
+                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    // border: InputBorder.none,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -122,8 +127,9 @@ class _LoginViewState extends State<LoginView> {
                                   },
                                 ),
                               ),
+                              const SizedBox(height: 10),
                               Container(
-                                padding: const EdgeInsets.all(10),
+                                // padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom:
@@ -133,10 +139,14 @@ class _LoginViewState extends State<LoginView> {
                                 child: TextFormField(
                                   controller: _passwordController,
                                   obscureText: true,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     hintText: "Senha",
-                                    hintStyle: TextStyle(color: Colors.grey),
-                                    border: InputBorder.none,
+                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    // border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.lock),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -169,7 +179,7 @@ class _LoginViewState extends State<LoginView> {
                             },
                             child: Text(
                               "Esqueceu a senha?",
-                              style: TextStyle(color: Colors.grey[700]),
+                              style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -252,9 +262,9 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               " Inscreva-se",
-                              style: TextStyle(color: Colors.blue),
+                              style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],

@@ -22,22 +22,27 @@ class CadastroViewState extends State<CadastroView> {
   LoginViewModel login = LoginViewModel();
 
   Future _validateAndSubmit(String email, String password) async {
-    if (_formKey.currentState!.validate()) {
-      log('Cadastro válido!');
-      User? logar =
-          await login.createEmailAndPassword(email: email, password: password);
-      if (logar?.uid != null) {
-        return true;
-      } else {
-        return false;
-      }
+    if (!_formKey.currentState!.validate()) {
+      return false;
+    }else{
+      return true;
+    }
+  }
+
+  Future _submit(String email, String password) async {
+    User? logar =
+        await login.createEmailAndPassword(email: email, password: password);
+    if (logar?.uid != null) {
+      return true;
+    } else {
+      return false;
     }
   }
 
   String? _validateEmail(String? value) {
-    // if (value == null || value.isEmpty) {
-    //   return 'O e-mail é obrigatório';
-    // }
+    if (value == null || value.isEmpty) {
+      return 'O e-mail é obrigatório';
+    }
     // final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$');
     // if (!emailRegex.hasMatch(value)) {
     //   return 'Digite um e-mail válido';
@@ -56,6 +61,9 @@ class CadastroViewState extends State<CadastroView> {
   }
 
   String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'A senha é obrigatória';
+    }
     if (value != passwordController.text) {
       return 'As senhas não coincidem';
     }
@@ -132,10 +140,13 @@ class CadastroViewState extends State<CadastroView> {
             FadeInUp(
                 duration: const Duration(milliseconds: 1400),
                 child: _buildTextField("E-mail",
-                    controller: emailController, validator: _validateEmail)),
+                    icon: Icons.email,
+                    controller: emailController,
+                    validator: _validateEmail)),
             FadeInUp(
               duration: const Duration(milliseconds: 1400),
               child: _buildTextField("Senha",
+                  icon: Icons.lock,
                   controller: passwordController,
                   isPassword: true,
                   validator: _validatePassword),
@@ -143,6 +154,7 @@ class CadastroViewState extends State<CadastroView> {
             FadeInUp(
               duration: const Duration(milliseconds: 1400),
               child: _buildTextField("Confirme a senha",
+                  icon: Icons.lock,
                   controller: confirmPasswordController,
                   isPassword: true,
                   validator: _validateConfirmPassword),
@@ -160,7 +172,8 @@ class CadastroViewState extends State<CadastroView> {
   Widget _buildTextField(String hint,
       {bool isPassword = false,
       required TextEditingController controller,
-      required String? Function(String?) validator}) {
+      required String? Function(String?) validator,
+      required IconData icon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: TextFormField(
@@ -169,8 +182,12 @@ class CadastroViewState extends State<CadastroView> {
         validator: validator,
         decoration: InputDecoration(
           hintText: hint,
+          prefixIcon: Icon(icon),
           hintStyle: const TextStyle(color: Colors.grey),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          // border: InputBorder.none,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       ),
     );
@@ -181,14 +198,18 @@ class CadastroViewState extends State<CadastroView> {
       duration: const Duration(milliseconds: 1600),
       child: MaterialButton(
         onPressed: () async {
-          if (!mounted)
-            return; // Verifica se o widget ainda está na árvore de widgets
-
-          Dialogs.showLoading(context, null);
-
           try {
-            var criar = await _validateAndSubmit(
+            var validate = await _validateAndSubmit(
                 emailController.text, passwordController.text);
+
+            if (!validate) return;
+
+            if (!mounted) return;
+
+            Dialogs.showLoading(context, null);
+            //123345
+            var criar =
+                await _submit(emailController.text, passwordController.text);
             if (criar) {
               if (mounted && Navigator.canPop(context)) {
                 Navigator.pop(context);
@@ -223,16 +244,16 @@ class CadastroViewState extends State<CadastroView> {
           } catch (e) {
             log("Erro ao validar e enviar: $e");
             if (mounted && Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-              if (mounted) {
-                await Dialogs.showAlert(
-                  context: context,
-                  title: "Erro!",
-                  message:
-                      "Ocorreu um erro ao criar sua conta. Verifique a sua conexão e suas informações.",
-                );
-              }
+              Navigator.pop(context);
+            }
+            if (mounted) {
+              await Dialogs.showAlert(
+                context: context,
+                title: "Erro!",
+                message:
+                    "Ocorreu um erro ao criar sua conta. Verifique a sua conexão e suas informações.",
+              );
+            }
           }
         },
         height: 50,
@@ -259,8 +280,9 @@ class CadastroViewState extends State<CadastroView> {
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (context) => const LoginView()));
             },
-            child:
-                const Text(" Faça login", style: TextStyle(color: Colors.blue)),
+            child: Text("Fazer login",
+                style: TextStyle(
+                    color: Colors.orange[900], fontWeight: FontWeight.bold)),
           ),
         ],
       ),
