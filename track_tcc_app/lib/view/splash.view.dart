@@ -1,5 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
+
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,37 +22,37 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    final authViewModel = Provider.of<LoginViewModel>(context, listen: false);
     _checkLoginStatus();
   }
 
-  Future readUser()async{
+  Future readUser() async {
     await authViewModel.loadUserFromPrefs();
   }
 
   // Verifica se o usuário já está autenticado
   void _checkLoginStatus() async {
+    final authViewModel = Provider.of<LoginViewModel>(context, listen: false);
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
-    await Future.delayed(const Duration(seconds: 2)); // Simula carregamento
+    await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {
       if (user != null) {
-        await readUser();
+        await authViewModel.loadUserFromPrefs();
+        log("Redirecionando para HomeView");
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeView()),
-          (Route<dynamic> route) => false, // Remove todas as rotas anteriores
+          (Route<dynamic> route) => false,
         );
       } else {
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginView()),
-            (Route<dynamic> route) => false, // Remove todas as rotas anteriores
-          );
-        }
+        log("Redirecionando para LoginView");
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginView()),
+          (Route<dynamic> route) => false,
+        );
       }
     }
   }
