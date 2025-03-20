@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
+import 'package:track_tcc_app/view/widgets/loading.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class CadastroView extends StatefulWidget {
@@ -19,11 +21,16 @@ class CadastroViewState extends State<CadastroView> {
   TextEditingController confirmPasswordController = TextEditingController();
   LoginViewModel login = LoginViewModel();
 
-  void _validateAndSubmit(String email, String password) async {
+  Future _validateAndSubmit(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       log('Cadastro válido!');
-      await login.createEmailAndPassword(email: email, password: password);
-      // Adicionar lógica de cadastro aqui
+      User? logar =
+          await login.createEmailAndPassword(email: email, password: password);
+      if (logar?.uid != null) {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 
@@ -173,7 +180,37 @@ class CadastroViewState extends State<CadastroView> {
     return FadeInUp(
       duration: const Duration(milliseconds: 1600),
       child: MaterialButton(
-        onPressed:() =>  _validateAndSubmit(emailController.text, passwordController.text),
+        onPressed: () async {
+          if (!mounted)
+            return; // Verifica se o widget ainda está na árvore de widgets
+
+          Dialogs.showLoading(context, null);
+
+          try {
+            await _validateAndSubmit(
+                emailController.text, passwordController.text);
+          } catch (e) {
+            log("Erro ao validar e enviar: $e");
+          } finally {
+            if (mounted && Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          }
+
+          if (mounted) {
+            await Dialogs.showAlert(
+                context: context,
+                title: "Sucesso!",
+                message: "Sua conta foi criada com sucesso!");
+          }
+
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginView()),
+            );
+          }
+        },
         height: 50,
         color: Colors.orange[900],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),

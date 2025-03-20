@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:track_tcc_app/repository/auth.repository.dart';
 part 'login.viewmodel.g.dart';
@@ -19,16 +20,26 @@ abstract class LoginViewModelBase with Store {
     );
   }
 
-  Future createEmailAndPassword({
+  Future<User?> createEmailAndPassword({
     required String email,
     required String password,
   }) async {
+    try {
+      // Criar o usuário
+      User? userCredential =
+          await authRepository.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    var res = await authRepository.authStateChanges;
-    log(res.toString());
-    await authRepository.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+      User? newUser = userCredential; // Obtém o usuário corretamente
+
+      // Exibir informações do usuário no log
+      log("Usuário criado: ${newUser?.uid}");
+      return newUser;
+    } catch (e) {
+      log("Erro ao criar usuário: $e");
+      return null;
+    }
   }
 }

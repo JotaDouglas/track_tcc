@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Dialogs {
   static Future<void> showLoading(
     BuildContext context,
-    GlobalKey key, {
+    GlobalKey? key, {
     String texto = '',
   }) async {
     return showDialog<void>(
@@ -11,7 +11,7 @@ class Dialogs {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return SimpleDialog(
-          key: key,
+          // key: key,
           backgroundColor: Colors.white,
           children: <Widget>[
             Center(
@@ -30,6 +30,33 @@ class Dialogs {
               ]),
             )
           ],
+        );
+      },
+    );
+  }
+
+  static Future showAlert({
+    required BuildContext context,
+    required title,
+    required message,
+  }) async {
+    return showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return PopScope(
+          child: AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                child: const Text("OK"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
