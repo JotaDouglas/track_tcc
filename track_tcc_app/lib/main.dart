@@ -1,11 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
   await Firebase.initializeApp();
   runApp(const MyApp());
 }

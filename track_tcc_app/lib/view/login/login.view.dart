@@ -1,8 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:track_tcc_app/view/home/home.view.dart';
 import 'package:track_tcc_app/view/login/forgetKey.view.dart';
 import 'package:track_tcc_app/view/login/signup.view.dart';
 import 'package:track_tcc_app/view/widgets/loading.widget.dart';
@@ -178,7 +181,6 @@ class _LoginViewState extends State<LoginView> {
                       child: MaterialButton(
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            
                             Dialogs.showLoading(context, null);
 
                             await authViewModel.loginWithEmailAndPassword(
@@ -186,18 +188,31 @@ class _LoginViewState extends State<LoginView> {
                               password: _passwordController.text.trim(),
                             );
 
-                            if (mounted) {
-                              Navigator.pop(context);
-                            }
-
-                            if (authViewModel.errorMessage != null) {
+                            if (authViewModel.loginUser != null) {
+                              log("Usuário já logado: ${authViewModel.loginUser?.email}");
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomeView()),
+                                (Route<dynamic> route) =>
+                                    false, // Remove todas as rotas anteriores
+                              );
+                            } else {
+                              log("Nenhum usuário logado.");
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(authViewModel.errorMessage!),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                Navigator.pop(context);
+                              }
+
+                              if (authViewModel.errorMessage != null) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text(authViewModel.errorMessage!),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
                             }
                           }
