@@ -55,6 +55,17 @@ class AuthRepository {
     }
   }
 
+  Future forgetKey(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      log("E-mail de redefinição de senha enviado para: $email");
+      return true;
+    } catch (e) {
+      log("Erro ao enviar e-mail de redefinição de senha: $e");
+      return false;
+    }
+  }
+
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
   }

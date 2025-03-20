@@ -42,4 +42,10 @@ abstract class LoginViewModelBase with Store {
       return null;
     }
   }
+
+  Future forgetKey({required String email})async{
+    bool res = false;
+    res = await authRepository.forgetKey(email);
+    return res;
+  }
 }

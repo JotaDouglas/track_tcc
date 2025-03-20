@@ -1,9 +1,27 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
+import 'package:track_tcc_app/view/widgets/loading.widget.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
-class RecuperacaoSenhaView extends StatelessWidget {
+class RecuperacaoSenhaView extends StatefulWidget {
   const RecuperacaoSenhaView({super.key});
+
+  @override
+  RecuperacaoSenhaViewState createState() => RecuperacaoSenhaViewState();
+}
+
+class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
+  LoginViewModel login = LoginViewModel();
+  TextEditingController emailController = TextEditingController();
+
+  Future forgetKey(String email) async {
+    var res = await login.forgetKey(email: email);
+
+    return res;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +94,9 @@ class RecuperacaoSenhaView extends StatelessWidget {
                                 bottom: BorderSide(color: Colors.grey.shade200),
                               ),
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
+                            child: TextField(
+                              controller: emailController,
+                              decoration: const InputDecoration(
                                 hintText: "E-mail",
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
@@ -90,7 +109,51 @@ class RecuperacaoSenhaView extends StatelessWidget {
                       FadeInUp(
                         duration: const Duration(milliseconds: 1600),
                         child: MaterialButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            if (emailController.text.isNotEmpty) {
+                              Dialogs.showLoading(context, null);
+
+                              bool res = await forgetKey(emailController.text);
+
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+
+                              if (res) {
+                                if (mounted) {
+                                  await Dialogs.showAlert(
+                                      context: context,
+                                      title: "Sucesso!",
+                                      message:
+                                          "O e-mail foi enviado com sucesso!");
+                                }
+                                if (res) {
+                                  if (mounted) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginView()),
+                                    );
+                                  }
+                                }
+                              }else{
+                                await Dialogs.showAlert(
+                                      context: context,
+                                      title: "Erro!",
+                                      message:
+                                          "Verifique os dados e tente novamente");
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      "Por favor, insira um e-mail válido."),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
                           height: 50,
                           color: Colors.orange[900],
                           shape: RoundedRectangleBorder(
@@ -113,11 +176,11 @@ class RecuperacaoSenhaView extends StatelessWidget {
                         child: TextButton(
                           onPressed: () {
                             Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginView(),
-                                ),
-                              );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginView(),
+                              ),
+                            );
                           },
                           child: const Text(
                             "Voltar para Login",
