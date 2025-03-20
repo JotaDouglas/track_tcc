@@ -26,6 +26,7 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
