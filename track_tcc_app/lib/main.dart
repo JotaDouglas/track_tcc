@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
+import 'package:track_tcc_app/view/splash.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 void main() async {
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const LoginView(),
+        home: const SplashScreen(),
       ),
     );
   }
