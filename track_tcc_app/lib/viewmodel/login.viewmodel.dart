@@ -65,8 +65,14 @@ abstract class LoginViewModelBase with Store {
     String? jsonString = prefs.getString('user_data');
 
     if (jsonString != null) {
+      log("Usuário carregado do SharedPreferences: $jsonString");
       Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-      loginUser = Login.fromJson(jsonMap);
+
+      runInAction(() {
+        loginUser = Login.fromJson(jsonMap);
+      });
+    } else {
+      log("Nenhum usuário encontrado no SharedPreferences");
     }
   }
 
