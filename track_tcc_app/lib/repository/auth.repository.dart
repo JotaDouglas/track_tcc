@@ -9,18 +9,32 @@ class AuthRepository {
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
-  Future signInWithEmailAndPassword({
+  Future<UserCredential?> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      var res = await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential? res = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
       return res;
-    } on FirebaseException catch (e) {}
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_handleAuthError(e));
+    }
+  }
+
+  String _handleAuthError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'Usuário não encontrado.';
+      case 'invalid-email':
+        return 'Email inválido.';
+      case 'invalid-credential':
+        return 'Usuário não encontrado.';
+      default:
+        return 'Ocorreu um erro inesperado.';
+    }
   }
 
   Future createUserWithEmailAndPassword({

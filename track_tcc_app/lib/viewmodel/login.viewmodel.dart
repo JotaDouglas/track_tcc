@@ -9,15 +9,24 @@ class LoginViewModel = LoginViewModelBase with _$LoginViewModel;
 
 abstract class LoginViewModelBase with Store {
   AuthRepository authRepository = AuthRepository();
+  UserCredential? userCredential;
+  String? errorMessage;
 
-  Future loginWithEmailAndPassword({
+  Future<void> loginWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await authRepository.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      userCredential = await authRepository.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      errorMessage = null; // Limpa erro se for sucesso
+    } catch (e) {
+      errorMessage = e.toString();
+      userCredential = null;
+    } 
   }
 
   Future<User?> createEmailAndPassword({
@@ -43,7 +52,7 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  Future forgetKey({required String email})async{
+  Future forgetKey({required String email}) async {
     bool res = false;
     res = await authRepository.forgetKey(email);
     return res;
