@@ -187,28 +187,41 @@ class CadastroViewState extends State<CadastroView> {
           Dialogs.showLoading(context, null);
 
           try {
-            await _validateAndSubmit(
+            var criar = await _validateAndSubmit(
                 emailController.text, passwordController.text);
+            if (criar) {
+              if (mounted && Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+
+              if (mounted) {
+                await Dialogs.showAlert(
+                    context: context,
+                    title: "Sucesso!",
+                    message: "Sua conta foi criada com sucesso!");
+              }
+
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginView()),
+                );
+              }
+            } else {
+              if (mounted && Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+              if (mounted) {
+                await Dialogs.showAlert(
+                  context: context,
+                  title: "Erro!",
+                  message:
+                      "Ocorreu um erro ao criar sua conta. Verifique suas informações e tente novamente.",
+                );
+              }
+            }
           } catch (e) {
             log("Erro ao validar e enviar: $e");
-          } finally {
-            if (mounted && Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
-          }
-
-          if (mounted) {
-            await Dialogs.showAlert(
-                context: context,
-                title: "Sucesso!",
-                message: "Sua conta foi criada com sucesso!");
-          }
-
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginView()),
-            );
           }
         },
         height: 50,
