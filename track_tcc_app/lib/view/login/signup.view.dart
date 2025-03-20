@@ -75,7 +75,7 @@ class CadastroViewState extends State<CadastroView> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-
+        reverse: true,
         child: Form(
           key: _formKey,
           child: Column(
@@ -138,7 +138,7 @@ class CadastroViewState extends State<CadastroView> {
         padding: const EdgeInsets.all(30),
         child: Column(
           children: <Widget>[
-            const SizedBox(height: 60),
+            const SizedBox(height: 40),
             FadeInUp(
                 duration: const Duration(milliseconds: 1400),
                 child: _buildTextField("E-mail",
