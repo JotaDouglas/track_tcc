@@ -25,9 +25,9 @@ class SplashScreenState extends State<SplashScreen> {
     _checkLoginStatus();
   }
 
-  Future readUser() async {
-    await authViewModel.loadUserFromPrefs();
-  }
+  // Future readUser() async {
+  //   // await authViewModel.loadUserFromPrefs();
+  // }
 
   // Verifica se o usuário já está autenticado
   void _checkLoginStatus() async {
@@ -39,7 +39,7 @@ class SplashScreenState extends State<SplashScreen> {
 
     if (mounted) {
       if (user != null) {
-        await authViewModel.loadUserFromPrefs();
+        // await authViewModel.loadUserFromPrefs();
         log("Redirecionando para HomeView");
         Navigator.pushAndRemoveUntil(
           context,

@@ -56,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
                         FadeInUp(
                           duration: const Duration(milliseconds: 1000),
                           child: const Text(
-                            "Track Safe",
+                            "Zelo App",
                             style: TextStyle(color: Colors.white, fontSize: 40),
                           ),
                         ),
