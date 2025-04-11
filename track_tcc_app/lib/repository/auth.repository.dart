@@ -20,11 +20,6 @@ class AuthRepository {
         email: email,
         password: password,
       );
-
-      if(res.user?.email != null){
-        preferences = await SharedPreferences.getInstance(); 
-        preferences.setString("email", res.user!.email!);       
-      }
       return res;
     } on FirebaseAuthException catch (e) {
       throw Exception(_handleAuthError(e));

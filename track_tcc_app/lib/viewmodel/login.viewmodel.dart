@@ -1,8 +1,10 @@
 // import 'dart:convert';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/model/login.model.dart';
 import 'package:track_tcc_app/repository/auth.repository.dart';
@@ -42,7 +44,7 @@ abstract class LoginViewModelBase with Store {
           uidUsuario: userCredential!.user!.uid,
         );
 
-        // await saveUserData(loginUser!); // Salva os dados localmente
+        await saveUserData(loginUser!); // Salva os dados localmente
       }
 
       errorMessage = null; // Limpa erro se o login for bem-sucedido
@@ -52,29 +54,30 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// 🔹 Salva os dados do usuário no SharedPreferences
-  // Future<void> saveUserData(Login login) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   String jsonString = jsonEncode(login.toJson());
-  //   await prefs.setString('user_data', jsonString);
-  // }
+  // 🔹 Salva os dados do usuário no SharedPreferences
+  Future<void> saveUserData(Login login) async {
+    final prefs = await SharedPreferences.getInstance();
+    String jsonString = jsonEncode(login.toJson());
+    await prefs.setString('user_data', jsonString);
+  }
 
   // /// 🔹 Recupera os dados do usuário salvo no SharedPreferences
-  // Future<void> loadUserFromPrefs() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   String? jsonString = prefs.getString('user_data');
+  Future<void> loadUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? jsonString = prefs.getString('user_data');
 
-  //   if (jsonString != null) {
-  //     log("Usuário carregado do SharedPreferences: $jsonString");
-  //     Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    if (jsonString != null) {
+      log("Usuário carregado do SharedPreferences: $jsonString");
+      Map<String, dynamic> jsonMap = jsonDecode(jsonString);
 
-  //     runInAction(() {
-  //       loginUser = Login.fromJson(jsonMap);
-  //     });
-  //   } else {
-  //     log("Nenhum usuário encontrado no SharedPreferences");
-  //   }
-  // }
+      runInAction(() {
+        loginUser = Login.fromJson(jsonMap);
+      });
+      
+    } else {
+      log("Nenhum usuário encontrado no SharedPreferences");
+    }
+  }
 
   /// 🔹 Cria um usuário e salva os dados
   Future<User?> createEmailAndPassword({
@@ -113,8 +116,8 @@ abstract class LoginViewModelBase with Store {
   /// 🔹 Faz logout e limpa os dados salvos
   Future<void> logout() async {
     await authRepository.signOut();
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.remove('user_data'); // Remove os dados do usuário
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_data'); // Remove os dados do usuário
     loginUser = null; // Limpa o estado local
   }
 }
