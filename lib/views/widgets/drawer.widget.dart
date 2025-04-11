@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:track_tcc_app/view/login/login.view.dart';
-import 'package:track_tcc_app/view/track/tracking.view.dart';
+import 'package:track_tcc_app/views/login/login.view.dart';
+import 'package:track_tcc_app/views/track/tracking.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class DrawerWidget extends StatelessWidget {

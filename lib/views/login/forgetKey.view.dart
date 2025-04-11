@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:track_tcc_app/view/login/login.view.dart';
-import 'package:track_tcc_app/view/widgets/loading.widget.dart';
+import 'package:track_tcc_app/views/login/login.view.dart';
+import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class RecuperacaoSenhaView extends StatefulWidget {

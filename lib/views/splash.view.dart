@@ -3,8 +3,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:track_tcc_app/view/home/home.view.dart';
-import 'package:track_tcc_app/view/login/login.view.dart';
+import 'package:track_tcc_app/views/home/home.view.dart';
+import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class SplashScreen extends StatefulWidget {

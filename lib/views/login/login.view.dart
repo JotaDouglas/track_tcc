@@ -5,10 +5,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:track_tcc_app/view/home/home.view.dart';
-import 'package:track_tcc_app/view/login/forgetKey.view.dart';
-import 'package:track_tcc_app/view/login/signup.view.dart';
-import 'package:track_tcc_app/view/widgets/loading.widget.dart';
+import 'package:track_tcc_app/views/home/home.view.dart';
+import 'package:track_tcc_app/views/login/forgetKey.view.dart';
+import 'package:track_tcc_app/views/login/signup.view.dart';
+import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class LoginView extends StatefulWidget {

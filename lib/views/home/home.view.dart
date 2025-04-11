@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
-import 'package:track_tcc_app/view/widgets/drawer.widget.dart';
+import 'package:track_tcc_app/views/widgets/drawer.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class HomeView extends StatefulWidget {

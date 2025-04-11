@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:track_tcc_app/view/splash.view.dart';
+import 'package:track_tcc_app/views/splash.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 void main() async {
