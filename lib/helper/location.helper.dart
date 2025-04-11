@@ -33,7 +33,8 @@ class Locationhelper {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(accuracy: LocationAccuracy.best));
+          locationSettings:
+              const LocationSettings(accuracy: LocationAccuracy.best));
 
       List<Placemark> placemarks =
           await placemarkFromCoordinates(position.latitude, position.longitude);
@@ -50,7 +51,11 @@ class Locationhelper {
         log(placemarks[0].toString());
         Placemark place = placemarks[0];
         return PlaceModel(
-          city: place.locality == '' ? place.subAdministrativeArea == '' ? "Desconhecido" : place.subAdministrativeArea: place.locality,
+          city: place.locality == ''
+              ? place.subAdministrativeArea == ''
+                  ? "Desconhecido"
+                  : place.subAdministrativeArea
+              : place.locality,
           country: place.country ?? "Desconhecido",
           latitude: position.latitude,
           longitude: position.longitude,
@@ -64,5 +69,37 @@ class Locationhelper {
     }
 
     return null;
+  }
+
+  Future<void> checkGps() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Verifica se o GPS está ativado
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // GPS desativado, pede para o usuário ativar
+      await Geolocator.openLocationSettings();
+      return;
+    }
+
+    // Verifica permissões
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissão negada
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissão negada permanentemente
+      await Geolocator.openAppSettings();
+      return;
+    }
+
+    // GPS ativo e permissões ok, pode prosseguir
+    Position position = await Geolocator.getCurrentPosition();
   }
 }
