@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/view/widgets/drawer.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
@@ -14,6 +18,43 @@ class HomeViewState extends State<HomeView> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>(); // Chave do Scaffold
+
+  @override
+  void initState() {
+    requestLocationPermission();
+    super.initState();
+  }
+
+  Future<void> requestLocationPermission() async {
+    var status = await Permission.location.status;
+
+    if (!status.isGranted) {
+      status = await Permission.location.request();
+    }
+
+    if (status.isDenied || status.isPermanentlyDenied) {
+      // Exibe alerta ou redireciona o usuário para configurações
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Permissão necessária'),
+            content: const Text(
+                'Por favor, ative a permissão de localização nas configurações.'),
+            actions: [
+              TextButton(
+                onPressed: () => openAppSettings(),
+                child: const Text('Abrir configurações'),
+              ),
+            ],
+          ),
+        );
+      }
+    }else{
+      log("Permissões aceitas");
+      Locationhelper().checkGps();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,5 +108,3 @@ class HomeViewState extends State<HomeView> {
     );
   }
 }
-
-
