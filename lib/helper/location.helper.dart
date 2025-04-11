@@ -117,6 +117,6 @@ class Locationhelper {
     }
 
     // GPS ativo e permissões ok, pode prosseguir
-    Position position = await Geolocator.getCurrentPosition();
+    // Position position = await Geolocator.getCurrentPosition();
   }
 }
