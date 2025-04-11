@@ -1,13 +1,32 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
+import 'package:track_tcc_app/view/widgets/loading.widget.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
-class RecuperacaoSenhaView extends StatelessWidget {
+class RecuperacaoSenhaView extends StatefulWidget {
   const RecuperacaoSenhaView({super.key});
+
+  @override
+  RecuperacaoSenhaViewState createState() => RecuperacaoSenhaViewState();
+}
+
+class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
+  LoginViewModel login = LoginViewModel();
+  TextEditingController emailController = TextEditingController();
+
+  Future forgetKey(String email) async {
+    var res = await login.forgetKey(email: email);
+
+    return res;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
@@ -50,12 +69,12 @@ class RecuperacaoSenhaView extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(60),
-                    topRight: Radius.circular(60),
-                  ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  // borderRadius: const BorderRadius.only(
+                  //   topLeft: Radius.circular(60),
+                  //   topRight: Radius.circular(60),
+                  // ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(30),
@@ -70,17 +89,21 @@ class RecuperacaoSenhaView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Container(
-                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: Colors.grey.shade200),
                               ),
                             ),
-                            child: const TextField(
+                            child: TextField(
+                              controller: emailController,
                               decoration: InputDecoration(
                                 hintText: "E-mail",
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
+                                prefixIcon: const Icon(Icons.email),
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                // border: InputBorder.none,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             ),
                           ),
@@ -90,7 +113,51 @@ class RecuperacaoSenhaView extends StatelessWidget {
                       FadeInUp(
                         duration: const Duration(milliseconds: 1600),
                         child: MaterialButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            if (emailController.text.isNotEmpty) {
+                              Dialogs.showLoading(context, null);
+
+                              bool res = await forgetKey(emailController.text);
+
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+
+                              if (res) {
+                                if (mounted) {
+                                  await Dialogs.showAlert(
+                                      context: context,
+                                      title: "Sucesso!",
+                                      message:
+                                          "O e-mail foi enviado com sucesso!");
+                                }
+                                if (res) {
+                                  if (mounted) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginView()),
+                                    );
+                                  }
+                                }
+                              } else {
+                                await Dialogs.showAlert(
+                                    context: context,
+                                    title: "Erro!",
+                                    message:
+                                        "Verifique os dados e tente novamente");
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      "Por favor, insira um e-mail válido."),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
                           height: 50,
                           color: Colors.orange[900],
                           shape: RoundedRectangleBorder(
@@ -113,15 +180,15 @@ class RecuperacaoSenhaView extends StatelessWidget {
                         child: TextButton(
                           onPressed: () {
                             Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginView(),
-                                ),
-                              );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginView(),
+                              ),
+                            );
                           },
-                          child: const Text(
+                          child: Text(
                             "Voltar para Login",
-                            style: TextStyle(color: Colors.blue),
+                            style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
