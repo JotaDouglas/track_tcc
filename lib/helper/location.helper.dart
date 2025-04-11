@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:track_tcc_app/model/place.model.dart';
@@ -71,7 +72,7 @@ class Locationhelper {
     return null;
   }
 
-  Future<void> checkGps() async {
+  Future<void> checkGps(context) async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -86,7 +87,23 @@ class Locationhelper {
     // Verifica permissões
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Permissão necessária'),
+          content: const Text(
+              'Por favor, ative a permissão de localização nas configurações.'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                permission = await Geolocator.requestPermission();
+              },
+              child: const Text('Abrir configurações'),
+            ),
+          ],
+        ),
+      );
+
       if (permission == LocationPermission.denied) {
         // Permissão negada
         return;

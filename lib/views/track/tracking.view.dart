@@ -89,7 +89,7 @@ class _TrackPageState extends State<TrackPage> {
     if (status.isDenied || status.isPermanentlyDenied) {
       // Exibe alerta ou redireciona o usuário para configurações
       if (mounted) {
-        showDialog(
+        await showDialog(
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Permissão necessária'),

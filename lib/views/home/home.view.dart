@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -21,11 +23,13 @@ class HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
-    requestLocationPermission();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      requestLocationPermission(context);
+    });
   }
 
-  Future<void> requestLocationPermission() async {
+  Future<void> requestLocationPermission(BuildContext context) async {
     var status = await Permission.location.status;
 
     if (!status.isGranted) {
@@ -35,7 +39,7 @@ class HomeViewState extends State<HomeView> {
     if (status.isDenied || status.isPermanentlyDenied) {
       // Exibe alerta ou redireciona o usuário para configurações
       if (mounted) {
-        showDialog(
+        await showDialog(
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Permissão necessária'),
@@ -50,9 +54,11 @@ class HomeViewState extends State<HomeView> {
           ),
         );
       }
-    }else{
+    } else {
       log("Permissões aceitas");
-      Locationhelper().checkGps();
+      if (mounted) {
+        Locationhelper().checkGps(context);
+      }
     }
   }
 
