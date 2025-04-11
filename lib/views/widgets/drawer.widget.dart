@@ -33,10 +33,9 @@ class DrawerWidget extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.exit_to_app),
+            leading: const Icon(Icons.pin_drop),
             title: const Text("Track"),
             onTap: () {
-              authViewModel.logout();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const TrackPage()),
