@@ -1,8 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:track_tcc_app/view/home/home.view.dart';
 import 'package:track_tcc_app/view/login/forgetKey.view.dart';
 import 'package:track_tcc_app/view/login/signup.view.dart';
+import 'package:track_tcc_app/view/widgets/loading.widget.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -12,9 +19,16 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<LoginViewModel>(context);
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -33,7 +47,7 @@ class _LoginViewState extends State<LoginView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 100),
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -42,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
                         FadeInUp(
                           duration: const Duration(milliseconds: 1000),
                           child: const Text(
-                            "App Name",
+                            "Zelo App",
                             style: TextStyle(color: Colors.white, fontSize: 40),
                           ),
                         ),
@@ -50,22 +64,22 @@ class _LoginViewState extends State<LoginView> {
                         FadeInUp(
                           duration: const Duration(milliseconds: 1300),
                           child: const Text(
-                            "Subtítulo",
+                            "Tranquilidade que te acompanha",
                             style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
+            const SizedBox(height: 20),
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                // color: Colors.grey[100],
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(60),
                   topRight: Radius.circular(60),
                 ),
@@ -74,50 +88,76 @@ class _LoginViewState extends State<LoginView> {
                 padding: const EdgeInsets.all(30),
                 child: Column(
                   children: <Widget>[
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
                     FadeInUp(
                       duration: const Duration(milliseconds: 1400),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom:
-                                      BorderSide(color: Colors.grey.shade200),
+                      child: Form(
+                        key: _formKey,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              Container(
+                                // padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom:
+                                        BorderSide(color: Colors.grey.shade200),
+                                  ),
+                                ),
+                                child: TextFormField(
+                                  controller: _emailController,
+                                  decoration: InputDecoration(
+                                    hintText: "E-mail",
+                                    prefixIcon: const Icon(Icons.email),
+                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    // border: InputBorder.none,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Digite um e-mail válido';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
-                              child: const TextField(
-                                decoration: InputDecoration(
-                                  hintText: "E-mail",
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  border: InputBorder.none,
+                              const SizedBox(height: 10),
+                              Container(
+                                // padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom:
+                                        BorderSide(color: Colors.grey.shade200),
+                                  ),
+                                ),
+                                child: TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: true,
+                                  decoration:  InputDecoration(
+                                    hintText: "Senha",
+                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    // border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.lock),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Digite sua senha';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom:
-                                      BorderSide(color: Colors.grey.shade200),
-                                ),
-                              ),
-                              child: const TextField(
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  hintText: "Senha",
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -132,13 +172,14 @@ class _LoginViewState extends State<LoginView> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RecuperacaoSenhaView(),
+                                  builder: (context) =>
+                                      const RecuperacaoSenhaView(),
                                 ),
                               );
                             },
                             child: Text(
                               "Esqueceu a senha?",
-                              style: TextStyle(color: Colors.grey[700]),
+                              style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -148,13 +189,43 @@ class _LoginViewState extends State<LoginView> {
                     FadeInUp(
                       duration: const Duration(milliseconds: 1600),
                       child: MaterialButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            Dialogs.showLoading(context, null);
+
+                            await authViewModel.loginWithEmailAndPassword(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                            );
+
+                            if (authViewModel.loginUser != null) {
+                              log("Usuário já logado: ${authViewModel.loginUser?.email}");
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const HomeView(),
-                                ),
+                                    builder: (context) => const HomeView()),
+                                (Route<dynamic> route) =>
+                                    false, // Remove todas as rotas anteriores
                               );
+                            } else {
+                              log("Nenhum usuário logado.");
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+
+                              if (authViewModel.errorMessage != null) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text(authViewModel.errorMessage!),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          }
                         },
                         height: 50,
                         color: Colors.orange[900],
@@ -191,9 +262,9 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               " Inscreva-se",
-                              style: TextStyle(color: Colors.blue),
+                              style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
