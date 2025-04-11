@@ -64,16 +64,18 @@ abstract class LoginViewModelBase with Store {
   // /// 🔹 Recupera os dados do usuário salvo no SharedPreferences
   Future<void> loadUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+
     String? jsonString = prefs.getString('user_data');
 
     if (jsonString != null) {
+      
       log("Usuário carregado do SharedPreferences: $jsonString");
+
       Map<String, dynamic> jsonMap = jsonDecode(jsonString);
 
       runInAction(() {
         loginUser = Login.fromJson(jsonMap);
       });
-      
     } else {
       log("Nenhum usuário encontrado no SharedPreferences");
     }
