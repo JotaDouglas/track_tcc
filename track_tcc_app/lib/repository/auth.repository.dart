@@ -1,11 +1,13 @@
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  late SharedPreferences preferences;
   User? get currentUser => _firebaseAuth.currentUser;
+
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
@@ -18,6 +20,11 @@ class AuthRepository {
         email: email,
         password: password,
       );
+
+      if(res.user?.email != null){
+        preferences = await SharedPreferences.getInstance(); 
+        preferences.setString("email", res.user!.email!);       
+      }
       return res;
     } on FirebaseAuthException catch (e) {
       throw Exception(_handleAuthError(e));

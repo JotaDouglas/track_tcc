@@ -1,11 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
-
 import 'dart:developer';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/view/home/home.view.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
@@ -31,15 +28,13 @@ class SplashScreenState extends State<SplashScreen> {
 
   // Verifica se o usuário já está autenticado
   void _checkLoginStatus() async {
-    final authViewModel = Provider.of<LoginViewModel>(context, listen: false);
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? login = prefs.getString("email");
 
-    await Future.delayed(const Duration(seconds: 2));
+    // await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {
-      if (user != null) {
-        // await authViewModel.loadUserFromPrefs();
+      if (login != null) {
         log("Redirecionando para HomeView");
         Navigator.pushAndRemoveUntil(
           context,
