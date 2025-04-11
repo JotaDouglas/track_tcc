@@ -3,7 +3,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/view/home/home.view.dart';
 import 'package:track_tcc_app/view/login/login.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
@@ -17,6 +16,7 @@ class SplashScreen extends StatefulWidget {
 
 class SplashScreenState extends State<SplashScreen> {
   LoginViewModel authViewModel = LoginViewModel();
+
   @override
   void initState() {
     super.initState();
@@ -32,13 +32,13 @@ class SplashScreenState extends State<SplashScreen> {
   // Verifica se o usuário já está autenticado
   void _checkLoginStatus() async {
     authViewModel = Provider.of<LoginViewModel>(context, listen: false);
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? login = prefs.getString("user_data");
 
-    // await Future.delayed(const Duration(seconds: 2));
+    await authViewModel.loadUserFromPrefs();
+
+    final user = authViewModel.loginUser;
 
     if (mounted) {
-      if (login != null) {
+      if (user != null) {
         log("Redirecionando para HomeView");
         await readUser();
         Navigator.pushAndRemoveUntil(
