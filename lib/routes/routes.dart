@@ -4,6 +4,7 @@ import 'package:track_tcc_app/views/login/forgetKey.view.dart';
 import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/views/login/signup.view.dart';
 import 'package:track_tcc_app/views/splash.view.dart';
+import 'package:track_tcc_app/views/track/historico/historico.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
 
 class AppRouter {
@@ -37,7 +38,7 @@ class AppRouter {
       GoRoute(
           path: "/historic",
           name: 'historic',
-          builder: (context, status) => const TrackPage()),
+          builder: (context, status) => const HistoricoView()),
     ],
   );
   static GoRouter get router => _router;
