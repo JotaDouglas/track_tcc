@@ -34,6 +34,10 @@ class AppRouter {
           path: "/track",
           name: 'track',
           builder: (context, status) => const TrackPage()),
+      GoRoute(
+          path: "/historic",
+          name: 'historic',
+          builder: (context, status) => const TrackPage()),
     ],
   );
   static GoRouter get router => _router;
