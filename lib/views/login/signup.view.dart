@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:go_router/go_router.dart';
 import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
@@ -225,10 +226,7 @@ class CadastroViewState extends State<CadastroView> {
               }
 
               if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginView()),
-                );
+                GoRouter.of(context).pushReplacement('/login');
               }
             } else {
               if (mounted && Navigator.canPop(context)) {
