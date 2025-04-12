@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:track_tcc_app/views/login/login.view.dart';
-import 'package:track_tcc_app/views/track/tracking.view.dart';
+import 'package:go_router/go_router.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class DrawerWidget extends StatelessWidget {
@@ -36,10 +35,7 @@ class DrawerWidget extends StatelessWidget {
             leading: const Icon(Icons.pin_drop),
             title: const Text("Track"),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TrackPage()),
-              );
+              GoRouter.of(context).push('/track');
             },
           ),
           ListTile(
@@ -47,11 +43,7 @@ class DrawerWidget extends StatelessWidget {
             title: const Text("Logout"),
             onTap: () {
               authViewModel.logout();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginView()),
-                (Route<dynamic> route) => false,
-              );
+              GoRouter.of(context).pushReplacement('/login');
             },
           ),
         ],

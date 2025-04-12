@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:track_tcc_app/views/splash.view.dart';
+import 'package:track_tcc_app/routes/routes.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 void main() async {
@@ -23,14 +23,15 @@ class MyApp extends StatelessWidget {
           create: (_) => LoginViewModel(),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
+        routerConfig: AppRouter.router,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const SplashScreen(),
+        
       ),
     );
   }
