@@ -3,6 +3,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
@@ -113,7 +114,8 @@ class _LoginViewState extends State<LoginView> {
                                   decoration: InputDecoration(
                                     hintText: "E-mail",
                                     prefixIcon: const Icon(Icons.email),
-                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    hintStyle:
+                                        const TextStyle(color: Colors.grey),
                                     // border: InputBorder.none,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10),
@@ -139,9 +141,10 @@ class _LoginViewState extends State<LoginView> {
                                 child: TextFormField(
                                   controller: _passwordController,
                                   obscureText: true,
-                                  decoration:  InputDecoration(
+                                  decoration: InputDecoration(
                                     hintText: "Senha",
-                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    hintStyle:
+                                        const TextStyle(color: Colors.grey),
                                     // border: InputBorder.none,
                                     prefixIcon: const Icon(Icons.lock),
                                     border: OutlineInputBorder(
@@ -169,17 +172,13 @@ class _LoginViewState extends State<LoginView> {
                         children: [
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RecuperacaoSenhaView(),
-                                ),
-                              );
+                              GoRouter.of(context).push('forgot');
                             },
                             child: Text(
                               "Esqueceu a senha?",
-                              style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: Colors.orange[900],
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -200,13 +199,7 @@ class _LoginViewState extends State<LoginView> {
 
                             if (authViewModel.loginUser != null) {
                               log("Usuário já logado: ${authViewModel.loginUser?.email}");
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const HomeView()),
-                                (Route<dynamic> route) =>
-                                    false, // Remove todas as rotas anteriores
-                              );
+                              GoRouter.of(context).pushReplacement('/home');
                             } else {
                               log("Nenhum usuário logado.");
                               if (mounted) {
@@ -255,16 +248,13 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const CadastroView(),
-                                ),
-                              );
+                              GoRouter.of(context).push('register');
                             },
                             child: Text(
                               " Inscreva-se",
-                              style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: Colors.orange[900],
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
