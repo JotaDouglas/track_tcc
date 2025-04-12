@@ -19,7 +19,7 @@ class AppRouter {
           name: 'login',
           builder: (context, status) => const LoginView()),
       GoRoute(
-          path: "/register",
+          path: "/login/register",
           name: 'register',
           builder: (context, status) => const CadastroView()),
       GoRoute(
@@ -27,7 +27,7 @@ class AppRouter {
           name: 'home',
           builder: (context, status) => const HomeView()),
       GoRoute(
-          path: "/forgot",
+          path: "/login/forgot",
           name: 'forgot',
           builder: (context, status) => const RecuperacaoSenhaView()),
       GoRoute(
