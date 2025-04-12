@@ -35,6 +35,7 @@ class DrawerWidget extends StatelessWidget {
             leading: const Icon(Icons.route),
             title: const Text("Track"),
             onTap: () {
+              Navigator.pop(context);
               GoRouter.of(context).push('/track');
             },
           ),
@@ -42,6 +43,7 @@ class DrawerWidget extends StatelessWidget {
             leading: const Icon(Icons.list),
             title: const Text("Historico"),
             onTap: () {
+              Navigator.pop(context);
               GoRouter.of(context).push('/historic');
             },
           ),
