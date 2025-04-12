@@ -172,7 +172,7 @@ class _LoginViewState extends State<LoginView> {
                         children: [
                           InkWell(
                             onTap: () {
-                              GoRouter.of(context).push('forgot');
+                              GoRouter.of(context).push('/login/forgot');
                             },
                             child: Text(
                               "Esqueceu a senha?",
@@ -248,7 +248,7 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           InkWell(
                             onTap: () {
-                              GoRouter.of(context).push('register');
+                              GoRouter.of(context).push('/login/register');
                             },
                             child: Text(
                               " Inscreva-se",
