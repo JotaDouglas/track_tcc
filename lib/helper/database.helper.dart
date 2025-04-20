@@ -35,8 +35,10 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE rota (
         id INTEGER PRIMARY KEY,
-        ponto_inicial TEXT,
-        ponto_final TEXT,
+        lat_inicial TEXT,
+        long_inicial TEXT,
+        lat_final TEXT,
+        long_final TEXT,
         data_hora TEXT,
         distancia TEXT,
         titulo TEXT

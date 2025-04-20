@@ -41,10 +41,18 @@ class DrawerWidget extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.list),
-            title: const Text("Historico"),
+            title: const Text("Mapa"),
             onTap: () {
               Navigator.pop(context);
               GoRouter.of(context).push('/historic');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.list),
+            title: const Text("Historico"),
+            onTap: () {
+              Navigator.pop(context);
+              GoRouter.of(context).push('/historico-home');
             },
           ),
           ListTile(
