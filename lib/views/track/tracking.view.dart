@@ -158,7 +158,7 @@ class _TrackPageState extends State<TrackPage> {
                   child: CircularProgressIndicator(),
                 ),
               trackList.isEmpty
-                  ? const Center(child: Text("Nenhum local registrado ainda."))
+                  ? Expanded( child: const Center(child: Text("Nenhum local registrado.")))
                   : Expanded(
                       child: TrackingMapWidget(
                         trackList: listMap,
