@@ -152,13 +152,10 @@ class _TrackPageState extends State<TrackPage> {
         children: [
           Column(
             children: [
-              if (isLoading)
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
               trackList.isEmpty
-                  ? Expanded( child: const Center(child: Text("Nenhum local registrado.")))
+                  ? Expanded(
+                      child:
+                          const Center(child: Text("Nenhum local registrado.")))
                   : Expanded(
                       child: TrackingMapWidget(
                         trackList: listMap,
@@ -167,6 +164,15 @@ class _TrackPageState extends State<TrackPage> {
                     ),
               const SizedBox(height: 70),
             ],
+          ),
+          Positioned(
+            child: Visibility(
+              visible: isLoading,
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: LinearProgressIndicator(),
+              ),
+            ),
           ),
           Positioned(
             bottom: 16,
