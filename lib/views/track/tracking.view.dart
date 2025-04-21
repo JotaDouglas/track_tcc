@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
+import 'package:track_tcc_app/views/map.view.dart';
 
 class TrackPage extends StatefulWidget {
   const TrackPage({super.key});
@@ -16,11 +19,13 @@ class TrackPage extends StatefulWidget {
 class _TrackPageState extends State<TrackPage> {
   final Locationhelper _locationHelper = Locationhelper();
   final TrackingViewModel viewModel = TrackingViewModel();
+  final MapController _mapController = MapController();
 
   List<PlaceModel> trackList = [];
   bool isLoading = false;
   Timer? temp;
   bool loopOn = false;
+  List<LatLng> listMap = [];
 
   @override
   void initState() {
@@ -64,6 +69,7 @@ class _TrackPageState extends State<TrackPage> {
 
       if (newLocal != null) {
         await viewModel.startTracking(newLocal); // Insere a nova rota
+        listMap.add(LatLng(newLocal.latitude!, newLocal.longitude!));
         setState(() {
           trackList.insert(0, newLocal);
         });
@@ -105,10 +111,13 @@ class _TrackPageState extends State<TrackPage> {
 
           if (newLocal != null) {
             await viewModel.trackLocation(newLocal); // Insere ponto no banco
+            final pos = LatLng(newLocal.latitude!, newLocal.longitude!);
+            listMap.add(pos);
 
             setState(() {
               trackList.insert(0, newLocal);
             });
+            _mapController.move(pos, 16);
           }
         } catch (e) {
           log("Erro ao obter localização: $e");
@@ -148,38 +157,14 @@ class _TrackPageState extends State<TrackPage> {
                   padding: EdgeInsets.all(8.0),
                   child: CircularProgressIndicator(),
                 ),
-              Expanded(
-                child: trackList.isEmpty
-                    ? const Center(
-                        child: Text("Nenhum local registrado ainda."))
-                    : ListView.builder(
-                        reverse: false,
-                        itemCount: trackList.length,
-                        itemBuilder: (context, index) {
-                          final local = trackList[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            child: ListTile(
-                              title:
-                                  Text(local.adress ?? 'Endereço desconhecido'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Cidade: ${local.city ?? '--'}"),
-                                  Text("País: ${local.country ?? '--'}"),
-                                  Text(
-                                      "Latitude: ${local.latitude?.toStringAsFixed(6)}"),
-                                  Text(
-                                      "Longitude: ${local.longitude?.toStringAsFixed(6)}"),
-                                  Text("Data: ${local.dateTime.toString()}"),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+              trackList.isEmpty
+                  ? const Center(child: Text("Nenhum local registrado ainda."))
+                  : Expanded(
+                      child: TrackingMapWidget(
+                        trackList: listMap,
+                        mapController: _mapController,
                       ),
-              ),
+                    ),
               const SizedBox(height: 70),
             ],
           ),

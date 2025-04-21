@@ -49,6 +49,12 @@ dependencies:
   sqflite: ^2.4.1
   path: ^1.9.0
   flutter_map: ^7.0.2
+  # Teste de plugins
+  flutter_map_tile_caching: ^10.0.0 # se quiser cache offline depois
+  latlong2: ^0.9.1
+
+  # flutter_map_marker: ^1.0.1
+  # flutter_map_line: ^1.0.1
 
 dev_dependencies:
   flutter_test:
