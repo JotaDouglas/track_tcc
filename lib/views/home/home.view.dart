@@ -69,7 +69,15 @@ class HomeViewState extends State<HomeView> {
     return Scaffold(
       key: _scaffoldKey, // Adicionando a chave ao Scaffold
       appBar: AppBar(
-        title: const Text("Home"),
+        title: const Text(
+          "Z E L O",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
         automaticallyImplyLeading: false,
       ),
 
