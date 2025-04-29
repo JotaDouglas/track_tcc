@@ -2,9 +2,8 @@
 
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:track_tcc_app/views/home/home.view.dart';
-import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -41,18 +40,10 @@ class SplashScreenState extends State<SplashScreen> {
       if (user != null) {
         log("Redirecionando para HomeView");
         await readUser();
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeView()),
-          (Route<dynamic> route) => false,
-        );
+        GoRouter.of(context).pushReplacement('/home');
       } else {
         log("Redirecionando para LoginView");
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginView()),
-          (Route<dynamic> route) => false,
-        );
+        GoRouter.of(context).pushReplacement('/login');
       }
     }
   }

@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:track_tcc_app/helper/database.helper.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/model/login.model.dart';
 import 'package:track_tcc_app/repository/auth.repository.dart';
@@ -45,6 +46,7 @@ abstract class LoginViewModelBase with Store {
         );
 
         await saveUserData(loginUser!); // Salva os dados localmente
+        final db = await DatabaseHelper().database;
       }
 
       errorMessage = null; // Limpa erro se o login for bem-sucedido

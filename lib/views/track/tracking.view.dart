@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
+import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
+import 'package:track_tcc_app/views/map.view.dart';
+import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 
 class TrackPage extends StatefulWidget {
   const TrackPage({super.key});
@@ -15,63 +20,14 @@ class TrackPage extends StatefulWidget {
 
 class _TrackPageState extends State<TrackPage> {
   final Locationhelper _locationHelper = Locationhelper();
+  final TrackingViewModel viewModel = TrackingViewModel();
+  final MapController _mapController = MapController();
+
   List<PlaceModel> trackList = [];
   bool isLoading = false;
   Timer? temp;
   bool loopOn = false;
-
-  Future startTrack() async {
-    toggleLoading();
-
-    if (loopOn) {
-      getCurrentLocation();
-    } else {
-      stopTracking();
-    }
-  }
-
-  void toggleLoading() {
-    setState(() {
-      loopOn = !loopOn;
-    });
-  }
-
-  void stopTracking() {
-    temp?.cancel();
-    log('rastreamento finalizado');
-  }
-
-  Future getCurrentLocation() async {
-    log('Start Track');
-
-    temp = Timer.periodic(
-      const Duration(seconds: 20),
-      (timer) async {
-        setState(() {
-          isLoading = true;
-        });
-
-        try {
-          final newLocal = await _locationHelper.actuallyPosition();
-
-          setState(() {
-            trackList.insert(
-                0, newLocal!); // Insere o novo local no topo da lista
-          });
-        } catch (e) {
-          log("erro ao obter localização: $e");
-          stopTracking();
-          toggleLoading();
-        }
-
-        Future.delayed(const Duration(seconds: 1)).then(
-          (_) => setState(() {
-            isLoading = false;
-          }),
-        );
-      },
-    );
-  }
+  List<LatLng> listMap = [];
 
   @override
   void initState() {
@@ -87,14 +43,14 @@ class _TrackPageState extends State<TrackPage> {
     }
 
     if (status.isDenied || status.isPermanentlyDenied) {
-      // Exibe alerta ou redireciona o usuário para configurações
       if (mounted) {
         await showDialog(
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Permissão necessária'),
             content: const Text(
-                'Por favor, ative a permissão de localização nas configurações.'),
+              'Por favor, ative a permissão de localização nas configurações.',
+            ),
             actions: [
               TextButton(
                 onPressed: () => openAppSettings(),
@@ -107,57 +63,177 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
+  void popWidget() {
+    Navigator.pop(context);
+  }
+
+  Future<void> startTrack() async {
+    if (!loopOn) Dialogs.showLoading(context, GlobalKey());
+    toggleTrackingState();
+
+    if (loopOn) {
+      final newLocal = await _locationHelper.actuallyPosition();
+      if (newLocal != null) {
+        await viewModel.startTracking(newLocal); // Insere a nova rota
+        // ignore: use_build_context_synchronously
+        listMap.add(LatLng(newLocal.latitude!, newLocal.longitude!));
+        setState(() {
+          trackList.insert(0, newLocal);
+        });
+        getCurrentLocation(); // Começa o loop de rastreamento
+      } else {
+        toggleTrackingState(); // Cancela se não tiver localização
+      }
+    } else {
+      if (trackList.isNotEmpty) {
+        await viewModel.stopTracking(trackList.first); // Finaliza a rota
+        setState(() {
+          trackList.clear();
+        });
+      }
+      stopTracking(); // Cancela o timer
+    }
+  }
+
+  void toggleTrackingState() {
+    setState(() {
+      loopOn = !loopOn;
+    });
+  }
+
+  void stopTracking() {
+    temp?.cancel();
+    log('Rastreamento finalizado');
+  }
+
+  Future<void> getCurrentLocation() async {
+    log('Iniciando loop de rastreamento...');
+    popWidget();
+
+    temp = Timer.periodic(
+      const Duration(seconds: 5),
+      (timer) async {
+        setState(() {
+          isLoading = true;
+        });
+
+        try {
+          final newLocal = await _locationHelper.actuallyPosition();
+
+          if (newLocal != null) {
+            await viewModel.trackLocation(newLocal); // Insere ponto no banco
+            final pos = LatLng(newLocal.latitude!, newLocal.longitude!);
+            listMap.add(pos);
+
+            setState(() {
+              trackList.insert(0, newLocal);
+            });
+            _mapController.move(pos, 16);
+          }
+        } catch (e) {
+          log("Erro ao obter localização: $e");
+          stopTracking();
+          toggleTrackingState();
+        }
+
+        await Future.delayed(const Duration(seconds: 1));
+        setState(() {
+          isLoading = false;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("TRACK"),
+        title: const Text(
+          "TRACKING",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
+        foregroundColor: Colors.white,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          if (isLoading) const LinearProgressIndicator(),
-          Expanded(
-            child: trackList.isEmpty
-                ? const Center(child: Text("Nenhum local registrado ainda."))
-                : ListView.builder(
-                    reverse: false,
-                    itemCount: trackList.length,
-                    itemBuilder: (context, index) {
-                      final local = trackList[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          title: Text(local.adress ?? 'Endereço desconhecido'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Cidade: ${local.city ?? '--'}"),
-                              Text("País: ${local.country ?? '--'}"),
-                              Text(
-                                  "Latitude: ${local.latitude?.toStringAsFixed(6)}"),
-                              Text(
-                                  "Longitude: ${local.longitude?.toStringAsFixed(6)}"),
-                              Text("Data: ${local.dateTime.toString()}"),
-                            ],
+          Column(
+            children: [
+              trackList.isEmpty
+                  ? Expanded(
+                      child: Center(
+                          child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/newTracking.svg',
+                          width: size.width * 0.3,
+                          height: size.height * 0.3,
+                          fit: BoxFit.contain,
+                          semanticsLabel: 'Nova ilustração de tracking',
+                          colorFilter: ColorFilter.mode(
+                            Colors.orange[800] ??
+                                Colors.orange, // cor que você quiser
+                            BlendMode.srcIn, // mantém a forma do SVG
                           ),
                         ),
-                      );
-                    },
+                        const Text(
+                          "Inicie um novo rastreamento.",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    )))
+                  : Expanded(
+                      child: TrackingMapWidget(
+                        trackList: listMap,
+                        mapController: _mapController,
+                      ),
+                    ),
+              const SizedBox(height: 70),
+            ],
+          ),
+          Positioned(
+            child: Visibility(
+              visible: isLoading,
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: LinearProgressIndicator(),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  startTrack();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                ),
+                child: Text(
+                  loopOn ? 'Parar Rastreamento' : 'Iniciar Rastreamento',
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          startTrack();
-        },
-        backgroundColor: Colors.green[900],
-        child: Icon(
-          loopOn ? Icons.pause : Icons.play_arrow,
-          color: Colors.white,
-        ),
       ),
     );
   }
