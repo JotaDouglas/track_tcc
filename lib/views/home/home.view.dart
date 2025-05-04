@@ -106,6 +106,7 @@ class HomeViewState extends State<HomeView> {
                 setState(() {
                   _currentIndex = 0;
                 });
+                
               },
             ),
           ],
