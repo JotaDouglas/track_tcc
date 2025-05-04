@@ -33,14 +33,6 @@ class DrawerWidget extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.route),
-            title: const Text("Usuário"),
-            onTap: () {
-              Navigator.pop(context);
-              GoRouter.of(context).push('/perfil-user');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.route),
             title: const Text("Track"),
             onTap: () {
               Navigator.pop(context);
@@ -61,6 +53,14 @@ class DrawerWidget extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               GoRouter.of(context).push('/historico-home');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("Perfil"),
+            onTap: () {
+              Navigator.pop(context);
+              GoRouter.of(context).push('/perfil-user');
             },
           ),
           ListTile(
