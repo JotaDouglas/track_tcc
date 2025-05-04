@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_tcc_app/helper/database.helper.dart';
@@ -44,6 +45,14 @@ abstract class LoginViewModelBase with Store {
           email: email,
           uidUsuario: userCredential!.user!.uid,
         );
+        final storageDb = FirebaseDatabase.instance.ref();
+        final userId = userCredential!.user!.uid;
+
+        final snapshot = await storageDb.child('users/$userId').get();
+        if (snapshot.exists) {
+          final data = Map<String, dynamic>.from(snapshot.value as Map);
+          loginUser!.username = data['name'] ?? '';
+        }
 
         await saveUserData(loginUser!); // Salva os dados localmente
         final db = await DatabaseHelper().database;
@@ -70,7 +79,6 @@ abstract class LoginViewModelBase with Store {
     String? jsonString = prefs.getString('user_data');
 
     if (jsonString != null) {
-      
       log("Usuário carregado do SharedPreferences: $jsonString");
 
       Map<String, dynamic> jsonMap = jsonDecode(jsonString);
