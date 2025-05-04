@@ -25,7 +25,7 @@ class AppRouter {
       GoRoute(
           path: "/login/register",
           name: 'register',
-          builder: (context, status) => const CadastroView()),
+          builder: (context, status) => const CadastroStepperView()),
       GoRoute(
           path: "/home",
           name: 'home',

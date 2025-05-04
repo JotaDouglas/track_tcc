@@ -1,290 +1,224 @@
-import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
-import 'package:go_router/go_router.dart';
-import 'package:track_tcc_app/views/login/login.view.dart';
-import 'package:track_tcc_app/views/widgets/loading.widget.dart';
-import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
-class CadastroView extends StatefulWidget {
-  const CadastroView({super.key});
+import 'package:go_router/go_router.dart';
+import 'package:track_tcc_app/views/widgets/loading.widget.dart';
+
+class CadastroStepperView extends StatefulWidget {
+  const CadastroStepperView({super.key});
 
   @override
-  CadastroViewState createState() => CadastroViewState();
+  State<CadastroStepperView> createState() => _CadastroStepperViewState();
 }
 
-class CadastroViewState extends State<CadastroView> {
+class _CadastroStepperViewState extends State<CadastroStepperView> {
+  int _currentStep = 0;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
-  LoginViewModel login = LoginViewModel();
 
-  Future _validateAndSubmit(String email, String password) async {
-    if (!_formKey.currentState!.validate()) {
-      return false;
-    }else{
-      return true;
-    }
-  }
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final nameController = TextEditingController();
+  GlobalKey<State<StatefulWidget>>? key;
 
-  Future _submit(String email, String password) async {
-    User? logar =
-        await login.createEmailAndPassword(email: email, password: password);
-    if (logar?.uid != null) {
-      return true;
+  final _auth = FirebaseAuth.instance;
+  final _db = FirebaseDatabase.instance.ref();
+
+  Future<void> _onStepContinue() async {
+    if (_currentStep == 0) {
+      if (_formKey.currentState?.validate() ?? false) {
+        setState(() => _currentStep += 1);
+      }
+    } else if (_currentStep == 1) {
+      if (nameController.text.trim().isNotEmpty) {
+        setState(() => _currentStep += 1);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Digite seu nome completo.")),
+        );
+      }
     } else {
-      return false;
+      Dialogs.showLoading(context, key);
+
+      try {
+        final userCredential = await _auth.createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        final uid = userCredential.user?.uid;
+
+        if (uid != null) {
+          await _db.child('users/$uid').set({
+            'name': nameController.text.trim(),
+            'email': emailController.text.trim(),
+          });
+
+          if (mounted) Navigator.pop(context);
+
+          if (mounted) {
+            await Dialogs.showAlert(
+              context: context,
+              title: "Sucesso!",
+              message: "Sua conta foi criada com sucesso!",
+            );
+            GoRouter.of(context).pushReplacement('/login');
+          }
+        } else {
+          throw Exception("UID nulo após criação.");
+        }
+      } catch (e) {
+        if (mounted) Navigator.pop(context);
+        if (mounted) {
+          await Dialogs.showAlert(
+            context: context,
+            title: "Erro",
+            message: "Erro ao criar conta: ${e.toString()}",
+          );
+        }
+      }
     }
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'O e-mail é obrigatório';
+  void _onStepCancel() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep -= 1);
     }
-    // final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$');
-    // if (!emailRegex.hasMatch(value)) {
-    //   return 'Digite um e-mail válido';
-    // }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'A senha é obrigatória';
-    }
-    if (value.length < 6) {
-      return 'A senha deve ter pelo menos 6 caracteres';
-    }
-    return null;
-  }
-
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'A senha é obrigatória';
-    }
-    if (value != passwordController.text) {
-      return 'As senhas não coincidem';
-    }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        reverse: true,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildForm(),
-            ],
+      appBar: AppBar(
+        title: const Text(
+          "Z E L O",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
+        automaticallyImplyLeading: false,
+      ),
+      body: SafeArea(
+        child: Stepper(
+          type: StepperType.horizontal,
+          currentStep: _currentStep,
+          onStepContinue: _onStepContinue,
+          onStepCancel: _onStepCancel,
+          controlsBuilder: (context, details) {
+            return Row(
+              children: [
+                ElevatedButton(
+                  onPressed: details.onStepContinue,
+                  child: const Text('Continuar'),
+                ),
+                const SizedBox(width: 10),
+                if (_currentStep > 0)
+                  OutlinedButton(
+                    onPressed: details.onStepCancel,
+                    child: const Text('Voltar'),
+                  ),
+              ],
+            );
+          },
+          steps: [
+            Step(
+              title: Text(_currentStep == 0 ? "Informações da conta" : ""),
+              content: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildTextField(
+                      label: "E-mail",
+                      controller: emailController,
+                      icon: Icons.email,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Informe o e-mail'
+                          : null,
+                    ),
+                    _buildTextField(
+                      label: "Senha",
+                      controller: passwordController,
+                      icon: Icons.lock,
+                      isPassword: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Informe a senha';
+                        }
+                        if (value.length < 6) {
+                          return 'Mínimo 6 caracteres';
+                        }
+                        return null;
+                      },
+                    ),
+                    _buildTextField(
+                      label: "Confirmar Senha",
+                      controller: confirmPasswordController,
+                      icon: Icons.lock,
+                      isPassword: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Confirme sua senha';
+                        }
+                        if (value != passwordController.text) {
+                          return 'As senhas não coincidem';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              isActive: _currentStep >= 0,
+              state: _currentStep > 0 ? StepState.complete : StepState.indexed,
+            ),
+            Step(
+              title: Text(_currentStep == 1 ? "Dados pessoais" : ""),
+              content: _buildTextField(
+                label: "Nome completo",
+                controller: nameController,
+                icon: Icons.person,
+                validator: (_) => null,
+              ),
+              isActive: _currentStep >= 1,
+              state: _currentStep > 1 ? StepState.complete : StepState.indexed,
+            ),
+            Step(
+              title: Text(_currentStep == 1 ? "Finalizar" : ""),
+              content:
+                  const Text("Clique em Continuar para concluir o cadastro."),
+              isActive: _currentStep >= 2,
+              state: _currentStep == 2 ? StepState.indexed : StepState.disabled,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          colors: [
-            Colors.orange.shade900,
-            Colors.orange.shade800,
-            Colors.orange.shade400,
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const SizedBox(height: 80),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1000),
-              child: const Text("Cadastro",
-                  style: TextStyle(color: Colors.white, fontSize: 40)),
-            ),
-            const SizedBox(height: 10),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1300),
-              child: const Text("Crie sua conta",
-                  style: TextStyle(color: Colors.white, fontSize: 18)),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildForm() {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        // borderRadius:  BorderRadius.only(
-        //     topLeft: Radius.circular(60), topRight: Radius.circular(60)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 40),
-            FadeInUp(
-                duration: const Duration(milliseconds: 1400),
-                child: _buildTextField("E-mail",
-                    icon: Icons.email,
-                    controller: emailController,
-                    validator: _validateEmail)),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildTextField("Senha",
-                  icon: Icons.lock,
-                  controller: passwordController,
-                  isPassword: true,
-                  validator: _validatePassword),
-            ),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildTextField("Confirme a senha",
-                  icon: Icons.lock,
-                  controller: confirmPasswordController,
-                  isPassword: true,
-                  validator: _validateConfirmPassword),
-            ),
-            const SizedBox(height: 40),
-            _buildSubmitButton(),
-            const SizedBox(height: 50),
-            _buildLoginRedirect(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String hint,
-      {bool isPassword = false,
-      required TextEditingController controller,
-      required String? Function(String?) validator,
-      required IconData icon}) {
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    bool isPassword = false,
+    required String? Function(String?) validator,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
         obscureText: isPassword,
         validator: validator,
         decoration: InputDecoration(
-          hintText: hint,
+          labelText: label,
           prefixIcon: Icon(icon),
-          hintStyle: const TextStyle(color: Colors.grey),
-          // border: InputBorder.none,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1600),
-      child: MaterialButton(
-        onPressed: () async {
-          try {
-            var validate = await _validateAndSubmit(
-                emailController.text, passwordController.text);
-
-            if (!validate) return;
-
-            if (!mounted) return;
-
-            Dialogs.showLoading(context, null);
-            //123345
-            var criar =
-                await _submit(emailController.text, passwordController.text);
-            if (criar) {
-              if (mounted && Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-
-              if (mounted) {
-                await Dialogs.showAlert(
-                    context: context,
-                    title: "Sucesso!",
-                    message: "Sua conta foi criada com sucesso!");
-              }
-
-              if (mounted) {
-                GoRouter.of(context).pushReplacement('/login');
-              }
-            } else {
-              if (mounted && Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-              if (mounted) {
-                await Dialogs.showAlert(
-                  context: context,
-                  title: "Erro!",
-                  message:
-                      "Ocorreu um erro ao criar sua conta. Verifique suas informações e tente novamente.",
-                );
-              }
-            }
-          } catch (e) {
-            log("Erro ao validar e enviar: $e");
-            if (mounted && Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
-            if (mounted) {
-              await Dialogs.showAlert(
-                context: context,
-                title: "Erro!",
-                message:
-                    "Ocorreu um erro ao criar sua conta. Verifique a sua conexão e suas informações.",
-              );
-            }
-          }
-        },
-        height: 50,
-        color: Colors.orange[900],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        child: const Center(
-          child: Text("Cadastrar",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoginRedirect() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1500),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Já tem uma conta?", style: TextStyle(color: Colors.grey[700])),
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => const LoginView()));
-            },
-            child: Text("Fazer login",
-                style: TextStyle(
-                    color: Colors.orange[900], fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
