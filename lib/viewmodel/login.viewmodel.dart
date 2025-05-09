@@ -16,16 +16,12 @@ class LoginViewModel = LoginViewModelBase with _$LoginViewModel;
 abstract class LoginViewModelBase with Store {
   AuthRepository authRepository = AuthRepository();
   final supabase = Supabase.instance.client;
+
   @observable
   Login? loginUser; // Usuário autenticado
   @observable
   String? errorMessage;
   @observable
-  // UserCredential? userCredential;
-
-  // LoginViewModelBase() {
-  //   loadUserFromPrefs(); // Carrega os dados salvos ao iniciar
-  // }
 
   /// 🔹 Faz login e salva os dados no SharedPreferences
   Future<void> loginWithEmailAndPassword({
@@ -33,22 +29,10 @@ abstract class LoginViewModelBase with Store {
     required String password,
   }) async {
     try {
-      // userCredential = await supabase.auth.signInWithPassword(
-      //   email: email,
-      //   password: password,
-      // );
-
-      // if (userCredential?.user != null) {
-      //   loginUser = Login(
-      //     id: userCredential!.user!.uid,
-      //     email: email,
-      //     uidUsuario: userCredential!.user!.uid,
-      //   );
-
-      //   await saveUserData(loginUser!); // Salva os dados localmente
-      //   final db = await DatabaseHelper().database;
-      // }
-
+      await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
       errorMessage = null; // Limpa erro se o login for bem-sucedido
     } catch (e) {
       errorMessage = e.toString();
@@ -83,28 +67,15 @@ abstract class LoginViewModelBase with Store {
   }
 
   /// 🔹 Cria um usuário e salva os dados
-  Future<User?> createEmailAndPassword({
+  Future createEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      User? newUser = await supabase.auth.signUp(
+      return await supabase.auth.signUp(
         email: email,
         password: password,
-      ) as User?;
-
-      if (newUser != null) {
-        loginUser = Login(
-          // id: newUser.uid,
-          email: email,
-          // uidUsuario: newUser.uid,
-        );
-
-        // await saveUserData(loginUser!);
-      }
-
-      // log("Usuário criado: ${newUser?.uid}");
-      return newUser;
+      );
     } catch (e) {
       log("Erro ao criar usuário: $e");
       return null;
