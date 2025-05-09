@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
@@ -31,13 +30,13 @@ class CadastroViewState extends State<CadastroView> {
   }
 
   Future _submit(String email, String password) async {
-    User? logar =
-        await login.createEmailAndPassword(email: email, password: password);
-    if (logar?.uid != null) {
-      return true;
-    } else {
-      return false;
-    }
+    // User? logar =
+    //     await login.createEmailAndPassword(email: email, password: password);
+    // if (logar.confirmationSentAt != null ) {
+    //   return true;
+    // } else {
+    //   return false;
+    // }
   }
 
   String? _validateEmail(String? value) {

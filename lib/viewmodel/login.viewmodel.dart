@@ -2,11 +2,10 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:track_tcc_app/helper/database.helper.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/login.model.dart';
 import 'package:track_tcc_app/repository/auth.repository.dart';
 
@@ -16,12 +15,13 @@ class LoginViewModel = LoginViewModelBase with _$LoginViewModel;
 
 abstract class LoginViewModelBase with Store {
   AuthRepository authRepository = AuthRepository();
+  final supabase = Supabase.instance.client;
   @observable
   Login? loginUser; // Usuário autenticado
   @observable
   String? errorMessage;
   @observable
-  UserCredential? userCredential;
+  // UserCredential? userCredential;
 
   // LoginViewModelBase() {
   //   loadUserFromPrefs(); // Carrega os dados salvos ao iniciar
@@ -33,26 +33,26 @@ abstract class LoginViewModelBase with Store {
     required String password,
   }) async {
     try {
-      userCredential = await authRepository.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // userCredential = await supabase.auth.signInWithPassword(
+      //   email: email,
+      //   password: password,
+      // );
 
-      if (userCredential?.user != null) {
-        loginUser = Login(
-          id: userCredential!.user!.uid,
-          email: email,
-          uidUsuario: userCredential!.user!.uid,
-        );
+      // if (userCredential?.user != null) {
+      //   loginUser = Login(
+      //     id: userCredential!.user!.uid,
+      //     email: email,
+      //     uidUsuario: userCredential!.user!.uid,
+      //   );
 
-        await saveUserData(loginUser!); // Salva os dados localmente
-        final db = await DatabaseHelper().database;
-      }
+      //   await saveUserData(loginUser!); // Salva os dados localmente
+      //   final db = await DatabaseHelper().database;
+      // }
 
       errorMessage = null; // Limpa erro se o login for bem-sucedido
     } catch (e) {
       errorMessage = e.toString();
-      userCredential = null;
+      // userCredential = null;
     }
   }
 
@@ -70,7 +70,6 @@ abstract class LoginViewModelBase with Store {
     String? jsonString = prefs.getString('user_data');
 
     if (jsonString != null) {
-      
       log("Usuário carregado do SharedPreferences: $jsonString");
 
       Map<String, dynamic> jsonMap = jsonDecode(jsonString);
@@ -89,22 +88,22 @@ abstract class LoginViewModelBase with Store {
     required String password,
   }) async {
     try {
-      User? newUser = await authRepository.createUserWithEmailAndPassword(
+      User? newUser = await supabase.auth.signUp(
         email: email,
         password: password,
-      );
+      ) as User?;
 
       if (newUser != null) {
         loginUser = Login(
-          id: newUser.uid,
+          // id: newUser.uid,
           email: email,
-          uidUsuario: newUser.uid,
+          // uidUsuario: newUser.uid,
         );
 
         // await saveUserData(loginUser!);
       }
 
-      log("Usuário criado: ${newUser?.uid}");
+      // log("Usuário criado: ${newUser?.uid}");
       return newUser;
     } catch (e) {
       log("Erro ao criar usuário: $e");

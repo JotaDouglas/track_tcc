@@ -1,13 +1,17 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:track_tcc_app/helper/supabase.helper.dart';
 import 'package:track_tcc_app/routes/routes.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
+  await Supabase.initialize(
+    url: SupabaseLogin().supabaseUrl,
+    anonKey: SupabaseLogin().supabaseKey,
+  );
   runApp(const MyApp());
 }
 
@@ -31,7 +35,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        
       ),
     );
   }

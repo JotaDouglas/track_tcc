@@ -41,28 +41,19 @@ mixin _$LoginViewModel on LoginViewModelBase, Store {
     });
   }
 
-  late final _$userCredentialAtom =
-      Atom(name: 'LoginViewModelBase.userCredential', context: context);
-
   @override
-  UserCredential? get userCredential {
-    _$userCredentialAtom.reportRead();
-    return super.userCredential;
-  }
-
-  @override
-  set userCredential(UserCredential? value) {
-    _$userCredentialAtom.reportWrite(value, super.userCredential, () {
-      super.userCredential = value;
-    });
+  ObservableFuture<void> loginWithEmailAndPassword(
+      {required String email, required String password}) {
+    final _$future =
+        super.loginWithEmailAndPassword(email: email, password: password);
+    return ObservableFuture<void>(_$future, context: context);
   }
 
   @override
   String toString() {
     return '''
 loginUser: ${loginUser},
-errorMessage: ${errorMessage},
-userCredential: ${userCredential}
+errorMessage: ${errorMessage}
     ''';
   }
 }
