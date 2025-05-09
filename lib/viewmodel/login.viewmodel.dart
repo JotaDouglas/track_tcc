@@ -29,10 +29,18 @@ abstract class LoginViewModelBase with Store {
     required String password,
   }) async {
     try {
-      await supabase.auth.signInWithPassword(
+      User? usuario = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
-      );
+      ) as User?;
+      if (usuario != null) {
+        Login logar = Login(
+          email: usuario.email,
+          uidUsuario: usuario.id,
+          id: usuario.id,
+        );
+        saveUserData(logar);
+      }
       errorMessage = null; // Limpa erro se o login for bem-sucedido
     } catch (e) {
       errorMessage = e.toString();
