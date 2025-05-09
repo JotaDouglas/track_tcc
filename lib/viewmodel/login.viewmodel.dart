@@ -104,10 +104,15 @@ abstract class LoginViewModelBase with Store {
     loginUser = null; // Limpa o estado local
   }
 
-  Future insertUsuario(
-      {required String nome, required String sobrenome}) async {
-    await supabase
-        .from('usuarios')
-        .insert({'nome': nome, 'sobrenome': sobrenome});
+  Future insertUsuario({
+    required String nome,
+    required String sobrenome,
+  }) async {
+    await supabase.from('usuarios').insert(
+      {
+        'nome': nome,
+        'sobrenome': sobrenome,
+      },
+    );
   }
 }
