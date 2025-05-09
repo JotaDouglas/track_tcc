@@ -1,4 +1,3 @@
-// import 'dart:convert';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -18,7 +17,7 @@ abstract class LoginViewModelBase with Store {
   final supabase = Supabase.instance.client;
 
   @observable
-  Login? loginUser; // Usuário autenticado
+  Login? loginUser;
   @observable
   String? errorMessage;
   @observable
@@ -31,7 +30,7 @@ abstract class LoginViewModelBase with Store {
     try {
       var usuario = await supabase.auth.signInWithPassword(
         email: email,
-        password: password,
+        password: password,        
       );
       if (usuario.user != null) {
         loginUser = Login(
@@ -41,10 +40,9 @@ abstract class LoginViewModelBase with Store {
         );
         saveUserData(loginUser!);
       }
-      errorMessage = null; // Limpa erro se o login for bem-sucedido
+      errorMessage = null;
     } catch (e) {
       errorMessage = e.toString();
-      // userCredential = null;
     }
   }
 
@@ -92,13 +90,13 @@ abstract class LoginViewModelBase with Store {
 
   /// 🔹 Esqueci minha senha
   Future<bool> forgetKey({required String email}) async {
-    // return await authRepository.forgetKey(email);
-    return false;
+    await supabase.auth.resetPasswordForEmail(email);
+    return true;
   }
 
   /// 🔹 Faz logout e limpa os dados salvos
   Future<void> logout() async {
-    // await authRepository.signOut();
+    await supabase.auth.signOut();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data'); // Remove os dados do usuário
     loginUser = null; // Limpa o estado local
