@@ -25,16 +25,32 @@ abstract class LoginViewModelBase with Store {
   @observable
   String? idNewUser;
 
-  /// 🔹 Faz login e salva os dados no SharedPreferences
+  //Criação de conta via email e senha
+  Future createEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      AuthResponse? create = await authRepository
+          .createUserWithEmailAndPassword(email: email, password: password);
+      if (create?.user != null) {
+        idNewUser = create?.user!.id;
+      }
+      return true;
+    } catch (e) {
+      log("Erro ao criar usuário: $e");
+      return false;
+    }
+  }
+
+  // login com shared preferences
   Future<void> loginWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      var usuario = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      var usuario =
+          await authRepository.loginWithEmail(email: email, password: password);
       if (usuario.user != null) {
         loginUser = Login(
           email: usuario.user!.email,
@@ -49,14 +65,14 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  // 🔹 Salva os dados do usuário no SharedPreferences
+  // Salva os dados do usuário no SharedPreferences
   Future<void> saveUserData(Login login) async {
     final prefs = await SharedPreferences.getInstance();
     String jsonString = jsonEncode(login.toJson());
     await prefs.setString('user_data', jsonString);
   }
 
-  // /// 🔹 Recupera os dados do usuário salvo no SharedPreferences
+  // Recupera os dados do usuário salvo no SharedPreferences
   Future<void> loadUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -72,24 +88,6 @@ abstract class LoginViewModelBase with Store {
       });
     } else {
       log("Nenhum usuário encontrado no SharedPreferences");
-    }
-  }
-
-  /// 🔹 Cria um usuário e salva os dados
-  Future createEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      AuthResponse? create = await authRepository
-          .createUserWithEmailAndPassword(email: email, password: password);
-      if (create?.user != null) {
-        idNewUser = create?.user!.id;
-      }
-      return true;
-    } catch (e) {
-      log("Erro ao criar usuário: $e");
-      return false;
     }
   }
 
