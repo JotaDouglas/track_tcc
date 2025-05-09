@@ -134,7 +134,8 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
                                 }
                                 if (res) {
                                   if (mounted) {
-                                    GoRouter.of(context).pushReplacement('/login');
+                                    GoRouter.of(context)
+                                        .pushReplacement('/login');
                                   }
                                 }
                               } else {
@@ -175,16 +176,13 @@ class RecuperacaoSenhaViewState extends State<RecuperacaoSenhaView> {
                         duration: const Duration(milliseconds: 1500),
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginView(),
-                              ),
-                            );
+                            GoRouter.of(context).pop();
                           },
                           child: Text(
                             "Voltar para Login",
-                            style: TextStyle(color: Colors.orange[900], fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.orange[900],
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),

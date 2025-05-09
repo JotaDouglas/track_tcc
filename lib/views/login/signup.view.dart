@@ -277,8 +277,7 @@ class CadastroViewState extends State<CadastroView> {
           Text("Já tem uma conta?", style: TextStyle(color: Colors.grey[700])),
           TextButton(
             onPressed: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => const LoginView()));
+              GoRouter.of(context).pop();
             },
             child: Text("Fazer login",
                 style: TextStyle(
