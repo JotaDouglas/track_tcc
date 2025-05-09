@@ -33,7 +33,7 @@ abstract class LoginViewModelBase with Store {
     try {
       var usuario = await supabase.auth.signInWithPassword(
         email: email,
-        password: password,        
+        password: password,
       );
       if (usuario.user != null) {
         loginUser = Login(
@@ -81,12 +81,10 @@ abstract class LoginViewModelBase with Store {
     required String password,
   }) async {
     try {
-      AuthResponse? create = await supabase.auth.signUp(
-        email: email,
-        password: password,
-      );
-      if(create.user != null){
-        idNewUser = create.user!.id;
+      AuthResponse? create = await authRepository
+          .createUserWithEmailAndPassword(email: email, password: password);
+      if (create?.user != null) {
+        idNewUser = create?.user!.id;
       }
       return true;
     } catch (e) {
@@ -109,7 +107,10 @@ abstract class LoginViewModelBase with Store {
     loginUser = null; // Limpa o estado local
   }
 
-  Future insertUsuario({required String nome, required String sobrenome})async{
-    await supabase.from('usuarios').insert({'nome': nome, 'sobrenome': sobrenome});
+  Future insertUsuario(
+      {required String nome, required String sobrenome}) async {
+    await supabase
+        .from('usuarios')
+        .insert({'nome': nome, 'sobrenome': sobrenome});
   }
 }

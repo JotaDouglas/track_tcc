@@ -1,64 +1,31 @@
-
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthRepository {
-  // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   late SharedPreferences preferences;
-  // User? get currentUser => _firebaseAuth.currentUser;
-
-  // Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+  final supabase = Supabase.instance.client;
 
   Future signInWithEmailAndPassword({
     required String email,
     required String password,
+  }) async {}
+
+
+  Future createUserWithEmailAndPassword({
+    required String email,
+    required String password,
   }) async {
-    // try {
-    //   // UserCredential? res = await _firebaseAuth.signInWithEmailAndPassword(
-    //   //   email: email,
-    //   //   password: password,
-    //   // );
-    //   return res;
-    // } on FirebaseAuthException catch (e) {
-    //   throw Exception(_handleAuthError(e));
-    // }
+    try {
+      AuthResponse? account = await supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      return account;
+    } catch (e) {
+      return null;
+    }
   }
-
-  // String _handleAuthError(e) {
-  //   switch (e.code) {
-  //     case 'user-not-found':
-  //       return 'Usuário não encontrado.';
-  //     case 'invalid-email':
-  //       return 'Email inválido.';
-  //     case 'invalid-credential':
-  //       return 'Usuário não encontrado.';
-  //     default:
-  //       return 'Ocorreu um erro inesperado.';
-  //   }
-}
-
-Future createUserWithEmailAndPassword({
-  required String email,
-  required String password,
-}) async {
-  // try {
-  //   var res = await _firebaseAuth.createUserWithEmailAndPassword(
-  //     email: email,
-  //     password: password,
-  //   );
-
-  //   // Verifica se a criação foi bem-sucedida e obtém as informações do usuário
-  //   if (res.user != null) {
-  //     // A criação do usuário foi bem-sucedida
-  //     log("Usuário criado com sucesso: ${res.user!.email}");
-  //     // Aqui você pode fazer outras operações, como navegar para outra tela
-  //     return res.user; // Retorna o usuário criado
-  //   } else {
-  //     // Se o usuário não foi criado corretamente
-  //     log("Erro: não foi possível criar o usuário.");
-  //     return null;
-  //   }
-  //   // return res;
-  // } catch (e) {}
+  
 }
 
 Future forgetKey(String email) async {
