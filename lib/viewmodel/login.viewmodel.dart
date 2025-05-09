@@ -91,19 +91,20 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// 🔹 Esqueci minha senha
+  //Esqueci minha senha
   Future<bool> forgetKey({required String email}) async {
-    await supabase.auth.resetPasswordForEmail(email);
+    await authRepository.forgetKey(email);
     return true;
   }
 
-  /// 🔹 Faz logout e limpa os dados salvos
+  //Faz logout e limpa os dados salvos
   Future<void> logout() async {
     await supabase.auth.signOut();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data'); // Remove os dados do usuário
     loginUser = null; // Limpa o estado local
   }
+  
 
   Future insertUsuario(
       {required String nome, required String sobrenome}) async {
