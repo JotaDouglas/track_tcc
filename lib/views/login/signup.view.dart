@@ -3,8 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:track_tcc_app/views/login/login.view.dart';
+import 'package:provider/provider.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
@@ -25,15 +24,15 @@ class CadastroViewState extends State<CadastroView> {
   Future _validateAndSubmit(String email, String password) async {
     if (!_formKey.currentState!.validate()) {
       return false;
-    }else{
+    } else {
       return true;
     }
   }
 
   Future _submit(String email, String password) async {
-    User? logar =
+    bool logar =
         await login.createEmailAndPassword(email: email, password: password);
-    if (logar?.id != null ) {
+    if (logar) {
       return true;
     } else {
       return false;
@@ -73,6 +72,7 @@ class CadastroViewState extends State<CadastroView> {
 
   @override
   Widget build(BuildContext context) {
+    login = Provider.of<LoginViewModel>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -211,13 +211,9 @@ class CadastroViewState extends State<CadastroView> {
 
             Dialogs.showLoading(context, null);
             //123345
-            var criar =
+            bool criar =
                 await _submit(emailController.text, passwordController.text);
             if (criar) {
-              if (mounted && Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-
               if (mounted) {
                 await Dialogs.showAlert(
                     context: context,
@@ -226,7 +222,10 @@ class CadastroViewState extends State<CadastroView> {
               }
 
               if (mounted) {
-                GoRouter.of(context).pushReplacement('/login');
+                if (mounted && Navigator.canPop(context)) {
+                  GoRouter.of(context)
+                      .pushReplacement('/login/register/name');
+                }
               }
             } else {
               if (mounted && Navigator.canPop(context)) {

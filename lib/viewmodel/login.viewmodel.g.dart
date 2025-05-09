@@ -41,19 +41,28 @@ mixin _$LoginViewModel on LoginViewModelBase, Store {
     });
   }
 
+  late final _$idNewUserAtom =
+      Atom(name: 'LoginViewModelBase.idNewUser', context: context);
+
   @override
-  ObservableFuture<void> loginWithEmailAndPassword(
-      {required String email, required String password}) {
-    final _$future =
-        super.loginWithEmailAndPassword(email: email, password: password);
-    return ObservableFuture<void>(_$future, context: context);
+  String? get idNewUser {
+    _$idNewUserAtom.reportRead();
+    return super.idNewUser;
+  }
+
+  @override
+  set idNewUser(String? value) {
+    _$idNewUserAtom.reportWrite(value, super.idNewUser, () {
+      super.idNewUser = value;
+    });
   }
 
   @override
   String toString() {
     return '''
 loginUser: ${loginUser},
-errorMessage: ${errorMessage}
+errorMessage: ${errorMessage},
+idNewUser: ${idNewUser}
     ''';
   }
 }
