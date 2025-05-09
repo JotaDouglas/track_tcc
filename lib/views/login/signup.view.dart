@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
@@ -30,13 +31,13 @@ class CadastroViewState extends State<CadastroView> {
   }
 
   Future _submit(String email, String password) async {
-    // User? logar =
-    //     await login.createEmailAndPassword(email: email, password: password);
-    // if (logar.confirmationSentAt != null ) {
-    //   return true;
-    // } else {
-    //   return false;
-    // }
+    User? logar =
+        await login.createEmailAndPassword(email: email, password: password);
+    if (logar?.id != null ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   String? _validateEmail(String? value) {
