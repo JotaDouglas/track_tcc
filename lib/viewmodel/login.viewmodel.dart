@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/login.model.dart';
 import 'package:track_tcc_app/repository/auth.repository.dart';
@@ -104,7 +103,6 @@ abstract class LoginViewModelBase with Store {
     await prefs.remove('user_data'); // Remove os dados do usuário
     loginUser = null; // Limpa o estado local
   }
-  
 
   Future insertUsuario(
       {required String nome, required String sobrenome}) async {
