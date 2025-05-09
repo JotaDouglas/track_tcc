@@ -113,12 +113,13 @@ abstract class LoginViewModelBase with Store {
 
   /// 🔹 Esqueci minha senha
   Future<bool> forgetKey({required String email}) async {
-    return await authRepository.forgetKey(email);
+    // return await authRepository.forgetKey(email);
+    return false;
   }
 
   /// 🔹 Faz logout e limpa os dados salvos
   Future<void> logout() async {
-    await authRepository.signOut();
+    // await authRepository.signOut();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data'); // Remove os dados do usuário
     loginUser = null; // Limpa o estado local
