@@ -50,6 +50,6 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-    // await _firebaseAuth.signOut();
+    await supabase.auth.signOut();
   }
 }

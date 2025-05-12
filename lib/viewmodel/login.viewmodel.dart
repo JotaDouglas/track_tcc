@@ -24,6 +24,9 @@ abstract class LoginViewModelBase with Store {
   @observable
   String? idNewUser;
 
+  @observable
+  String? emailUser;
+
   //Criação de conta via email e senha
   Future createEmailAndPassword({
     required String email,
@@ -34,8 +37,11 @@ abstract class LoginViewModelBase with Store {
           .createUserWithEmailAndPassword(email: email, password: password);
       if (create?.user != null) {
         idNewUser = create?.user!.id;
+        emailUser = create?.user?.email;
+        return true;
+      }else{
+        return false;
       }
-      return true;
     } catch (e) {
       log("Erro ao criar usuário: $e");
       return false;
@@ -98,7 +104,7 @@ abstract class LoginViewModelBase with Store {
 
   //Faz logout e limpa os dados salvos
   Future<void> logout() async {
-    await supabase.auth.signOut();
+    await authRepository.signOut();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data'); // Remove os dados do usuário
     loginUser = null; // Limpa o estado local
@@ -110,8 +116,10 @@ abstract class LoginViewModelBase with Store {
   }) async {
     await supabase.from('usuarios').insert(
       {
-        'nome': nome,
-        'sobrenome': sobrenome,
+        'nome': "$nome + $sobrenome",
+        "email": emailUser,
+        "user_id": idNewUser,
+        "tipo_usuario": "responsavel",
       },
     );
   }
