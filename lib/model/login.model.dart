@@ -24,9 +24,8 @@ class Login {
     return Login(
       id: json['id'],
       email: json['email'],
-      // password: json['password'],
       username: json['username'],
-      uidUsuario: json['id'],
+      uidUsuario: json['uidUsuario'],
     );
   }
 }
