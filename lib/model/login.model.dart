@@ -1,6 +1,6 @@
 
 class Login {
-  String? id;
+  int? id;
   String? email;
   String? password;
   String? username;

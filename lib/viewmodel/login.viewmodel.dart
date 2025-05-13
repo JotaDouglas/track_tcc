@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/login.model.dart';
@@ -39,7 +40,7 @@ abstract class LoginViewModelBase with Store {
         idNewUser = create?.user!.id;
         emailUser = create?.user?.email;
         return true;
-      }else{
+      } else {
         return false;
       }
     } catch (e) {
@@ -57,10 +58,13 @@ abstract class LoginViewModelBase with Store {
       var usuario =
           await authRepository.loginWithEmail(email: email, password: password);
       if (usuario.user != null) {
+        var dadosUsuario = await loadUsuario(usuario.user!.id);
+
         loginUser = Login(
           email: usuario.user!.email,
           uidUsuario: usuario.user!.id,
-          id: usuario.user!.id,
+          id: dadosUsuario['id_usuario'],
+          username: dadosUsuario['nome'] ?? "usuario",
         );
         saveUserData(loginUser!);
       }
@@ -114,13 +118,22 @@ abstract class LoginViewModelBase with Store {
     required String nome,
     required String sobrenome,
   }) async {
-    await supabase.from('usuarios').insert(
+    return await supabase.from('usuarios').insert(
       {
-        'nome': "$nome + $sobrenome",
+        'nome': "$nome $sobrenome",
         "email": emailUser,
         "user_id": idNewUser,
         "tipo_usuario": "responsavel",
       },
     );
+  }
+
+  Future loadUsuario(String id) async {
+    try {
+      var res = await authRepository.loadUsuario(id);
+      return res;
+    } catch (e) {
+      return false;
+    }
   }
 }

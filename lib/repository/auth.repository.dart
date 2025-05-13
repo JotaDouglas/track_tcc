@@ -18,7 +18,7 @@ class AuthRepository {
       );
       return account;
     } catch (e) {
-      return null;
+      return e;
     }
   }
 
@@ -51,5 +51,21 @@ class AuthRepository {
 
   Future<void> signOut() async {
     await supabase.auth.signOut();
+  }
+
+  Future loadUsuario(String id) async {
+    try {
+      
+      final data = await supabase
+          .from('usuarios')
+          .select()
+          .eq('user_id', id); // equals filter
+
+      
+      return data.first;
+          
+    } catch (e) {
+      return false;
+    }
   }
 }

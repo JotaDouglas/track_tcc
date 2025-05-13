@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
@@ -151,24 +153,40 @@ class _UserCadastroViewState extends State<UserCadastroView> {
             // Aqui você pode fazer algo com os dados:
             final nome = nomeController.text;
             final sobrenome = sobrenomeController.text;
-
-            await loginVM.insertUsuario(nome: nome, sobrenome: sobrenome);
-
-            if (mounted) {
-              // Exemplo: mostrar num dialog
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Dados recebidos"),
-                  content: Text("Nome: $nome\nSobrenome: $sobrenome"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("OK"),
-                    ),
-                  ],
-                ),
-              );
+            try {
+              var res =
+                  await loginVM.insertUsuario(nome: nome, sobrenome: sobrenome);
+              if (mounted) {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Sucesso"),
+                    content: Text("Cadastro Realizado Com Sucesso!"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => GoRouter.of(context).pop(),
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            } catch (e) {
+              if (mounted) {
+                return await showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Erro"),
+                    content: Text("Ocorreu um erro inesperado."),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+              }
             }
           }
         },

@@ -18,6 +18,7 @@ class HomeView extends StatefulWidget {
 
 class HomeViewState extends State<HomeView> {
   int _currentIndex = 0;
+  LoginViewModel dados = LoginViewModel();
   final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>(); // Chave do Scaffold
 
@@ -62,10 +63,18 @@ class HomeViewState extends State<HomeView> {
     }
   }
 
+  Future testRev(String id) async {
+    try {
+      var res = await dados.loadUsuario(id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<LoginViewModel>(context, listen: false);
-
+    // testRev(authViewModel.loginUser!.id!);
     return Scaffold(
       key: _scaffoldKey, // Adicionando a chave ao Scaffold
       appBar: AppBar(
