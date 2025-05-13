@@ -25,7 +25,7 @@ class DrawerWidget extends StatelessWidget {
                 const Icon(Icons.account_circle, size: 50, color: Colors.white),
                 const SizedBox(height: 10),
                 Text(
-                  authViewModel.loginUser?.email ?? "Usuário",
+                  authViewModel.loginUser?.username ?? "Usuário",
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ],

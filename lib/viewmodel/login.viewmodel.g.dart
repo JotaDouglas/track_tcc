@@ -41,19 +41,19 @@ mixin _$LoginViewModel on LoginViewModelBase, Store {
     });
   }
 
-  late final _$userCredentialAtom =
-      Atom(name: 'LoginViewModelBase.userCredential', context: context);
+  late final _$idNewUserAtom =
+      Atom(name: 'LoginViewModelBase.idNewUser', context: context);
 
   @override
-  UserCredential? get userCredential {
-    _$userCredentialAtom.reportRead();
-    return super.userCredential;
+  String? get idNewUser {
+    _$idNewUserAtom.reportRead();
+    return super.idNewUser;
   }
 
   @override
-  set userCredential(UserCredential? value) {
-    _$userCredentialAtom.reportWrite(value, super.userCredential, () {
-      super.userCredential = value;
+  set idNewUser(String? value) {
+    _$idNewUserAtom.reportWrite(value, super.idNewUser, () {
+      super.idNewUser = value;
     });
   }
 
@@ -62,7 +62,7 @@ mixin _$LoginViewModel on LoginViewModelBase, Store {
     return '''
 loginUser: ${loginUser},
 errorMessage: ${errorMessage},
-userCredential: ${userCredential}
+idNewUser: ${idNewUser}
     ''';
   }
 }
