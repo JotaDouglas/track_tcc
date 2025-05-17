@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
@@ -30,8 +31,11 @@ class _PerfilViewState extends State<PerfilView> {
         backgroundColor: Colors.orange[900],
         centerTitle: true,
         title: const Text(
-          'PERFIL',
-          style: TextStyle(color: Colors.white),
+          'Perfil',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         iconTheme: IconThemeData(color: Colors.white),
       ),
@@ -95,15 +99,14 @@ class _PerfilViewState extends State<PerfilView> {
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    const Text('Trajetos',
-                        textAlign: TextAlign.center),
+                    const Text('Trajetos', textAlign: TextAlign.center),
                   ],
                 ),
                 const SizedBox(width: 40),
                 Column(
                   children: [
                     Text(
-                      '${totalKm.toStringAsFixed(1)}',
+                      totalKm.toStringAsFixed(1),
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
@@ -120,7 +123,9 @@ class _PerfilViewState extends State<PerfilView> {
               children: [
                 OutlinedButton.icon(
                   icon: const Icon(Icons.edit, size: 18),
-                  onPressed: () {},
+                  onPressed: () {
+                    GoRouter.of(context).push('/user-perfil-edit');
+                  },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.orange[900]!),
                     foregroundColor: Colors.orange[900],

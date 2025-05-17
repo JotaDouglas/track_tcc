@@ -9,6 +9,7 @@ import 'package:track_tcc_app/views/login/userDates.view.dart';
 import 'package:track_tcc_app/views/splash.view.dart';
 import 'package:track_tcc_app/views/track/historico/historico.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
+import 'package:track_tcc_app/views/user/edit_perfil.view.dart';
 import 'package:track_tcc_app/views/user/perfil.view.dart';
 
 class AppRouter {
@@ -59,6 +60,10 @@ class AppRouter {
           path: "/user-perfil",
           name: 'user-perfil',
           builder: (context, status) => const PerfilView()),
+      GoRoute(
+          path: "/user-perfil-edit",
+          name: 'user-perfil-edit',
+          builder: (context, status) => const EditarPerfilView()),
     ],
   );
   static GoRouter get router => _router;
