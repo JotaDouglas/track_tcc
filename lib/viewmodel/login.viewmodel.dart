@@ -119,7 +119,8 @@ abstract class LoginViewModelBase with Store {
   }) async {
     return await supabase.from('usuarios').insert(
       {
-        'nome': "$nome $sobrenome",
+        'nome': nome,
+        'sobrenome': sobrenome,
         "email": emailUser,
         "user_id": idNewUser,
         "tipo_usuario": "responsavel",
