@@ -75,6 +75,21 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
+  Future<void> reloadUser() async {
+    var dadosUsuario = await loadUsuario(loginUser!.uidUsuario!);
+    var usuario = loginUser!;
+
+    loginUser = Login(
+      email: usuario.email,
+      uidUsuario: usuario.uidUsuario,
+      id: dadosUsuario['id_usuario'],
+      username: dadosUsuario['nome'] ?? "usuario",
+      sobrenome: dadosUsuario['sobrenome'] ?? "",
+      bio: dadosUsuario['biografia'] ?? "",
+    );
+    saveUserData(loginUser!);
+  }
+
   // Salva os dados do usuário no SharedPreferences
   Future<void> saveUserData(Login login) async {
     final prefs = await SharedPreferences.getInstance();
@@ -128,6 +143,53 @@ abstract class LoginViewModelBase with Store {
         "tipo_usuario": "responsavel",
       },
     );
+  }
+
+  Future<bool> updateUsuario({
+    required int userId,
+    required String nome,
+    required String sobrenome,
+    required String biografia,
+  }) async {
+    try {
+      final data = {
+        'nome': nome,
+        'sobrenome': sobrenome,
+        'biografia': biografia,
+      };
+
+      final response = await supabase
+          .from('usuarios')
+          .update(data)
+          .eq('id_usuario', userId)
+          .select(); // importante para ver o resultado da atualização
+
+      if (response.isEmpty) {
+        log('Nenhum registro foi atualizado.');
+        return false; // não atualizou nada
+      }
+
+      var dados = response.first;
+
+      loginUser = Login(
+        email: dados['email'],
+        uidUsuario: dados['user_id'],
+        id: dados['id_usuario'],
+        username: dados['nome'] ?? "usuario",
+        sobrenome: dados['sobrenome'] ?? "",
+        bio: dados['biografia'] ?? "",
+      );
+
+      saveUserData(loginUser!);
+
+      loadUserFromPrefs();
+
+      log('Atualização bem-sucedida: $response');
+      return true;
+    } catch (e) {
+      log('Erro ao atualizar: $e');
+      return false;
+    }
   }
 
   Future loadUsuario(String id) async {
