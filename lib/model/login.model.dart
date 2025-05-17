@@ -5,8 +5,10 @@ class Login {
   String? password;
   String? username;
   String? uidUsuario;
+  String? sobrenome;
+  String? bio;
 
-  Login({this.email, this.password, this.uidUsuario, this.username, this.id});
+  Login({this.email, this.password, this.uidUsuario, this.username, this.id, this.sobrenome, this.bio});
 
   // Converte o objeto para um Map (JSON)
   Map<String, dynamic> toJson() {
@@ -16,6 +18,8 @@ class Login {
       'password': password,
       'username': username,
       'uidUsuario': uidUsuario,
+      'sobrenome': sobrenome,
+      'biografia': bio,
     };
   }
 
@@ -26,6 +30,8 @@ class Login {
       email: json['email'],
       username: json['username'],
       uidUsuario: json['uidUsuario'],
+      sobrenome: json['sobrenome'],
+      bio: json['biografia'],
     );
   }
 }

@@ -14,9 +14,6 @@ class _PerfilViewState extends State<PerfilView> {
   @override
   Widget build(BuildContext context) {
     // Dados simulados, substitua pelos dados reais
-    final String nome = "Irina";
-    final String sobrenome = "Sans";
-    final String localizacao = "Roma, Itália";
     final String bio =
         "Busco explorar o mundo e viver aventuras emocionantes. Siga minhas aventuras!";
     final int amigos = 120;
@@ -54,7 +51,7 @@ class _PerfilViewState extends State<PerfilView> {
 
             // Nome e sobrenome
             Text(
-              user?.username ?? "Seu nome aqui.",
+              user?.username != null && user?.sobrenome != null ? "${user?.username} ${user?.sobrenome}" : "User1234",
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 

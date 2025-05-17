@@ -64,6 +64,8 @@ abstract class LoginViewModelBase with Store {
           uidUsuario: usuario.user!.id,
           id: dadosUsuario['id_usuario'],
           username: dadosUsuario['nome'] ?? "usuario",
+          sobrenome: dadosUsuario['sobrenome'] ?? "",
+          bio: dadosUsuario['biografia'] ?? "",
         );
         saveUserData(loginUser!);
       }
