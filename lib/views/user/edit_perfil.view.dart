@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
+import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 
 class EditarPerfilView extends StatefulWidget {
   const EditarPerfilView({super.key});
@@ -133,18 +134,38 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
 
                     try {
                       if (_formKey.currentState?.validate() ?? false) {
-                        await loginVM.updateUsuario(
+                        Dialogs.showLoading(context, null);
+
+                        final sucesso = await loginVM.updateUsuario(
                           userId: user!.id!,
                           nome: nome,
                           sobrenome: sobrenome,
                           biografia: bio,
                         );
+
+                        Navigator.pop(context); // fecha o loading (importante)
+
+                        if (!sucesso) {
+                          if (mounted) {
+                            await showDialog(
+                              context: context,
+                              builder: (_) => const AlertDialog(
+                                title: Text("Erro"),
+                                content: Text(
+                                    "Não foi possível atualizar o perfil."),
+                              ),
+                            );
+                          }
+                          return;
+                        }
+
                         if (mounted) {
-                          showDialog(
+                          await showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
                               title: const Text("Sucesso"),
-                              content: Text("Perfil Ataulizado Com Sucesso!"),
+                              content:
+                                  const Text("Perfil atualizado com sucesso!"),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
@@ -157,12 +178,15 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                         }
                       }
                     } catch (e) {
+                      // fecha o loading em caso de erro também
+                      Navigator.pop(context);
+
                       if (mounted) {
-                        return await showDialog(
+                        await showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
                             title: const Text("Erro"),
-                            content: Text("Ocorreu um erro inesperado."),
+                            content: const Text("Ocorreu um erro inesperado."),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
