@@ -104,7 +104,7 @@ abstract class LoginViewModelBase with Store {
     String? jsonString = prefs.getString('user_data');
 
     if (jsonString != null) {
-      log("Usuário carregado do SharedPreferences: $jsonString");
+      // log("Usuário carregado do SharedPreferences: $jsonString");
 
       Map<String, dynamic> jsonMap = jsonDecode(jsonString);
 
@@ -184,7 +184,7 @@ abstract class LoginViewModelBase with Store {
 
       loadUserFromPrefs();
 
-      log('Atualização bem-sucedida: $response');
+      // log('Atualização bem-sucedida: $response');
       return true;
     } catch (e) {
       log('Erro ao atualizar: $e');

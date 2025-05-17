@@ -56,7 +56,7 @@ class HomeViewState extends State<HomeView> {
         );
       }
     } else {
-      log("Permissões aceitas");
+      // log("Permissões aceitas");
       if (mounted) {
         Locationhelper().checkGps(context);
       }

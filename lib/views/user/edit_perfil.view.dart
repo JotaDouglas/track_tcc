@@ -147,13 +147,9 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
 
                         if (!sucesso) {
                           if (mounted) {
-                            await showDialog(
-                              context: context,
-                              builder: (_) => const AlertDialog(
-                                title: Text("Erro"),
-                                content: Text(
-                                    "Não foi possível atualizar o perfil."),
-                              ),
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text("Não foi possível atualizar o perfil.")),
                             );
                           }
                           return;
