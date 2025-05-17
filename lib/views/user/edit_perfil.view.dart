@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class EditarPerfilView extends StatefulWidget {
   const EditarPerfilView({super.key});
@@ -23,6 +25,12 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
   @override
   Widget build(BuildContext context) {
     final corPrincipal = Colors.orange[900];
+    final authViewModel = Provider.of<LoginViewModel>(context);
+    var user = authViewModel.loginUser;
+    
+    nomeController.text = user?.username ?? '';
+    sobrenomeController.text = user?.sobrenome ?? '';
+    bioController.text = user?.bio ?? '';
 
     return Scaffold(
       appBar: AppBar(
