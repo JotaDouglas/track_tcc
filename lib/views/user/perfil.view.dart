@@ -36,7 +36,7 @@ class _PerfilViewState extends State<PerfilView> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -119,35 +119,41 @@ class _PerfilViewState extends State<PerfilView> {
 
                 const SizedBox(height: 24),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.edit, size: 18),
-                      onPressed: () {
-                        GoRouter.of(context).push('/user-perfil-edit');
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.orange[900]!),
-                        foregroundColor: Colors.orange[900],
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.edit, size: 18),
+                          onPressed: () {
+                            GoRouter.of(context).push('/user-perfil-edit');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.orange[900]!),
+                            foregroundColor: Colors.orange[900],
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          label: const Text("Editar Perfil"),
+                        ),
                       ),
-                      label: const Text("Editar Perfil"),
-                    ),
-                    const SizedBox(width: 16),
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.person_add_alt_1, size: 18),
-                      label: const Text("Adicionar amigo"),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.orange[900]!),
-                        foregroundColor: Colors.orange[900],
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.person_add_alt_1, size: 18),
+                          label: const Text("Adicionar amigo"),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.orange[900]!),
+                            foregroundColor: Colors.orange[900],
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 24),
