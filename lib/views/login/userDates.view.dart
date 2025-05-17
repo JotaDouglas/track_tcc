@@ -164,7 +164,8 @@ class _UserCadastroViewState extends State<UserCadastroView> {
                     content: Text("Cadastro Realizado Com Sucesso!"),
                     actions: [
                       TextButton(
-                        onPressed: () => GoRouter.of(context).pop(),
+                        onPressed: () =>
+                            GoRouter.of(context).push('/login'),
                         child: const Text("OK"),
                       ),
                     ],
