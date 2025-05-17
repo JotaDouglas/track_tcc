@@ -13,9 +13,7 @@ class PerfilView extends StatefulWidget {
 class _PerfilViewState extends State<PerfilView> {
   @override
   Widget build(BuildContext context) {
-    // Dados simulados, substitua pelos dados reais
-    final String bio =
-        "Busco explorar o mundo e viver aventuras emocionantes. Siga minhas aventuras!";
+  
     final int amigos = 120;
     final int rotasCompartilhadas = 45;
     final double totalKm = 327.8;
