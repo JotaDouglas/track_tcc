@@ -65,7 +65,7 @@ class HomeViewState extends State<HomeView> {
 
   Future testRev(String id) async {
     try {
-      var res = await dados.loadUsuario(id);
+       await dados.loadUsuario(id);
     } catch (e) {
       return null;
     }

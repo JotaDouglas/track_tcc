@@ -154,8 +154,7 @@ class _UserCadastroViewState extends State<UserCadastroView> {
             final nome = nomeController.text;
             final sobrenome = sobrenomeController.text;
             try {
-              var res =
-                  await loginVM.insertUsuario(nome: nome, sobrenome: sobrenome);
+              await loginVM.insertUsuario(nome: nome, sobrenome: sobrenome);
               if (mounted) {
                 showDialog(
                   context: context,
@@ -164,8 +163,7 @@ class _UserCadastroViewState extends State<UserCadastroView> {
                     content: Text("Cadastro Realizado Com Sucesso!"),
                     actions: [
                       TextButton(
-                        onPressed: () =>
-                            GoRouter.of(context).push('/login'),
+                        onPressed: () => GoRouter.of(context).push('/login'),
                         child: const Text("OK"),
                       ),
                     ],
