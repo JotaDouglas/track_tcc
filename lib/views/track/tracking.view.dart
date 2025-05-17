@@ -210,7 +210,7 @@ class _TrackPageState extends State<TrackPage> {
             ),
           ),
           Positioned(
-            bottom: 16,
+            bottom: 50,
             left: 16,
             right: 16,
             child: SizedBox(

@@ -149,7 +149,8 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text("Não foi possível atualizar o perfil.")),
+                                  content: Text(
+                                      "Não foi possível atualizar o perfil.")),
                             );
                           }
                           return;
@@ -200,10 +201,13 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     backgroundColor: corPrincipal,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Salvar', style: TextStyle(fontSize: 16)),
+                  child: const Text('Atualizar', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),
             ],
