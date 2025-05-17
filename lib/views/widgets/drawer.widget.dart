@@ -40,6 +40,14 @@ class DrawerWidget extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("Perfil"),
+            onTap: () {
+              Navigator.pop(context);
+              GoRouter.of(context).push('/user-perfil');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.list),
             title: const Text("Mapa"),
             onTap: () {

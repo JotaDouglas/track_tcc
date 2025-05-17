@@ -1,0 +1,106 @@
+import 'package:flutter/material.dart';
+
+class PerfilView extends StatelessWidget {
+  const PerfilView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Dados simulados, substitua pelos dados reais
+    final String nome = "Irina";
+    final String sobrenome = "Sans";
+    final String localizacao = "Roma, Itália";
+    final String bio = "Busco explorar o mundo e viver aventuras emocionantes. Siga minhas aventuras!";
+    final int amigos = 120;
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.orange[900],
+        centerTitle: true,
+        title: const Text(
+          'Perfil',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Foto de Perfil (ícone)
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.orange[900],
+              child: const Icon(Icons.person, size: 50, color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+
+            // Nome e sobrenome
+            Text(
+              '$nome $sobrenome',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 4),
+
+            // Localização
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  localizacao,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Botão de ação (opcional)
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.person_add_alt_1),
+              label: const Text("Adicionar amigo"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange[900],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Contagem de amigos
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Text('$amigos', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    const Text('Amigos'),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Sobre mim
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'SOBRE MIM',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange[900]),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              bio,
+              textAlign: TextAlign.justify,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

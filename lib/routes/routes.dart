@@ -9,6 +9,7 @@ import 'package:track_tcc_app/views/login/userDates.view.dart';
 import 'package:track_tcc_app/views/splash.view.dart';
 import 'package:track_tcc_app/views/track/historico/historico.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
+import 'package:track_tcc_app/views/user/perfil.view.dart';
 
 class AppRouter {
   static final _router = GoRouter(
@@ -54,6 +55,10 @@ class AppRouter {
           path: "/historico-detalhes",
           name: 'historico-detalhes',
           builder: (context, status) => const RotaDetalhePage(rotaId: null,)),
+      GoRoute(
+          path: "/user-perfil",
+          name: 'user-perfil',
+          builder: (context, status) => const PerfilView()),
     ],
   );
   static GoRouter get router => _router;
