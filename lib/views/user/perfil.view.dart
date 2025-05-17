@@ -159,7 +159,7 @@ class _PerfilViewState extends State<PerfilView> {
             ),
             const SizedBox(height: 8),
             Text(
-              bio,
+              user?.bio != null && user!.bio!.isNotEmpty ? user.bio! : "Este é o meu espaço onde posso falar sobre mim",
               textAlign: TextAlign.justify,
               style: const TextStyle(fontSize: 16),
             ),
