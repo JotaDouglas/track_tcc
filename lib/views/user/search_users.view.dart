@@ -97,7 +97,18 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Buscar amigos')),
+      appBar: AppBar(
+        title: const Text(
+          "BUSCAR AMIGOS",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
       body: Column(
         children: [
           Padding(
@@ -107,7 +118,8 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
               decoration: InputDecoration(
                 hintText: 'Digite o nome ou sobrenome...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ),
@@ -124,7 +136,10 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
                   title: Text(nome),
-                  subtitle: Text(bio),
+                  subtitle: Text(
+                    bio,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   trailing: ElevatedButton(
                     onPressed: jaSolicitado
                         ? null
