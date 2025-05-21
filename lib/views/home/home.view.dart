@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
       body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 20),
+            padding: const EdgeInsets.only(top: 80, left: 20, right: 20, bottom: 20),
             decoration: BoxDecoration(
               color: Colors.orange[900],
               borderRadius: const BorderRadius.only(
@@ -102,8 +102,8 @@ class _HomeViewState extends State<HomeView> {
               mainAxisSpacing: 16,
               children: [
                 buildCard(
-                  icon: Icons.route,
-                  label: "Track",
+                  icon: Icons.navigation,
+                  label: "Compartilhar \n Posição",
                   onTap: () => GoRouter.of(context).push('/track'),
                 ),
                 buildCard(
@@ -116,11 +116,11 @@ class _HomeViewState extends State<HomeView> {
                   label: "Buscar Amigos",
                   onTap: () => GoRouter.of(context).push('/user-search'),
                 ),
-                buildCard(
-                  icon: Icons.map,
-                  label: "Mapa",
-                  onTap: () => GoRouter.of(context).push('/historic'),
-                ),
+                // buildCard(
+                //   icon: Icons.map,
+                //   label: "Mapa",
+                //   onTap: () => GoRouter.of(context).push('/historic'),
+                // ),
                 buildCard(
                   icon: Icons.history,
                   label: "Histórico",
