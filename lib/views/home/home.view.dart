@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -64,7 +63,7 @@ class HomeViewState extends State<HomeView> {
 
   Future testRev(String id) async {
     try {
-       await dados.loadUsuario(id);
+      await dados.loadUsuario(id);
     } catch (e) {
       return null;
     }
@@ -91,7 +90,21 @@ class HomeViewState extends State<HomeView> {
 
       drawer: DrawerWidget(authViewModel: authViewModel),
       body: Center(
-        child: Text(authViewModel.loginUser?.email ?? "Sem e-mail"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(authViewModel.loginUser?.email != null
+                ? "Email: ${authViewModel.loginUser?.email}"
+                : "Sem e-mail"),
+            Text(authViewModel.loginUser?.username != null
+                ? "Nome: ${authViewModel.loginUser?.username}"
+                : "Sem nome"),
+            Text(authViewModel.loginUser?.sobrenome != null
+                ? "Sobrenome: ${authViewModel.loginUser?.sobrenome}"
+                : "Sem sobrenome"),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),

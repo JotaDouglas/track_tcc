@@ -11,6 +11,7 @@ import 'package:track_tcc_app/views/track/historico/historico.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
 import 'package:track_tcc_app/views/user/edit_perfil.view.dart';
 import 'package:track_tcc_app/views/user/perfil.view.dart';
+import 'package:track_tcc_app/views/user/search_users.view.dart';
 
 class AppRouter {
   static final _router = GoRouter(
@@ -64,6 +65,10 @@ class AppRouter {
           path: "/user-perfil-edit",
           name: 'user-perfil-edit',
           builder: (context, status) => const EditarPerfilView()),
+      GoRoute(
+          path: "/user-search",
+          name: 'user-search',
+          builder: (context, status) => const BuscarAmigosView()),
     ],
   );
   static GoRouter get router => _router;
