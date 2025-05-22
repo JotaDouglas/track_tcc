@@ -62,85 +62,115 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.only(top: 80, left: 20, right: 20, bottom: 20),
-            decoration: BoxDecoration(
-              color: Colors.orange[900],
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Olá, $nome 👋',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+          Column(
+            children: [
+              Stack(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(
+                        top: 80, left: 20, right: 20, bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[900],
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                    ),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Olá, $nome 👋',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Seja bem-vindo de volta!',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ],
+                    ),
                   ),
+                  Positioned(
+                    top: 35,
+                    right: 10,
+                    child: FilledButton(
+                      onPressed: () {
+                        authViewModel.logout();
+                        GoRouter.of(context).pushReplacement('/login');
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                          Colors.orange[800],
+                        ),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.logout, color: Colors.white),
+                          SizedBox(width: 5),
+                          Text("Sair", style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: GridView.count(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  children: [
+                    buildCard(
+                      icon: Icons.person,
+                      label: "Perfil",
+                      onTap: () => GoRouter.of(context).push('/user-perfil'),
+                    ),
+                    buildCard(
+                      icon: Icons.person_search,
+                      label: "Buscar\n Amigos",
+                      onTap: () => GoRouter.of(context).push('/user-search'),
+                    ),
+                    buildCard(
+                      icon: Icons.history,
+                      label: "Histórico",
+                      onTap: () => GoRouter.of(context).push('/historico-home'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Seja bem-vindo de volta!',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: GridView.count(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                buildCard(
-                  icon: Icons.navigation,
-                  label: "Compartilhar \n Posição",
-                  onTap: () => GoRouter.of(context).push('/track'),
+          Positioned(
+            bottom: 30,
+            left: 16,
+            right: 16,
+            child: FilledButton.icon(
+              onPressed: () => GoRouter.of(context).push('/track'),
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.orange[900]),
+                padding: WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(vertical: 16),
                 ),
-                buildCard(
-                  icon: Icons.person,
-                  label: "Perfil",
-                  onTap: () => GoRouter.of(context).push('/user-perfil'),
-                ),
-                buildCard(
-                  icon: Icons.person_search,
-                  label: "Buscar Amigos",
-                  onTap: () => GoRouter.of(context).push('/user-search'),
-                ),
-                // buildCard(
-                //   icon: Icons.map,
-                //   label: "Mapa",
-                //   onTap: () => GoRouter.of(context).push('/historic'),
-                // ),
-                buildCard(
-                  icon: Icons.history,
-                  label: "Histórico",
-                  onTap: () => GoRouter.of(context).push('/historico-home'),
-                ),
-                buildCard(
-                  icon: Icons.logout,
-                  label: "Sair",
-                  onTap: () {
-                    authViewModel.logout();
-                    GoRouter.of(context).pushReplacement('/login');
-                  },
-                ),
-              ],
+              ),
+              icon: const Icon(Icons.navigation, color: Colors.white),
+              label: const Text(
+                "Compartilhar Posição",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-  
 }
