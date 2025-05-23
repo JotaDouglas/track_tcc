@@ -11,7 +11,7 @@ Widget buildCard({
   return GestureDetector(
     onTap: onTap,
     child: Card(
-      elevation: 3,
+      elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: color ?? Colors.white,
       child: Center(
