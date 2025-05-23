@@ -51,7 +51,7 @@ class _RotasPageState extends State<RotasPage> {
                       children: [
                         Text('Início: ${rota.latitude}, ${rota.longitude}'),
                         // Text('Fim: ${rota.la}, ${rota.longFinal}'),
-                        Text('Data: ${rota.dateTime}'),
+                        Text('Data: ${rota.dateInicial}'),
                         Text('Distância: ${rota.id ?? '--'} km'),
                       ],
                     ),

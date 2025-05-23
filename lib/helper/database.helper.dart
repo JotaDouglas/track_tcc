@@ -39,7 +39,8 @@ class DatabaseHelper {
         long_inicial TEXT,
         lat_final TEXT,
         long_final TEXT,
-        data_hora TEXT,
+        data_hora_inicio TEXT,
+        data_hora_fim TEXT,
         distancia TEXT,
         titulo TEXT
         )

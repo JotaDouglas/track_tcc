@@ -47,7 +47,7 @@ class _RotaDetalhePageState extends State<RotaDetalhePage> {
                   child: ListTile(
                     title: Text('Lat: ${p.latitude?.toStringAsFixed(6)}'),
                     subtitle: Text(
-                        'Lon: ${p.longitude?.toStringAsFixed(6)}\nData: ${p.dateTime}'),
+                        'Lon: ${p.longitude?.toStringAsFixed(6)}\nData: ${p.dateInicial}'),
                   ),
                 );
               },

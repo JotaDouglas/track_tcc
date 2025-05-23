@@ -4,7 +4,8 @@ class PlaceModel {
   double? latitude;
   double? longitude;
   String? adress;
-  String? dateTime;
+  String? dateInicial;
+  String? dateFinal;
   int? id;
   String? titulo;
 
@@ -14,7 +15,8 @@ class PlaceModel {
     this.country,
     this.latitude,
     this.longitude,
-    this.dateTime,
+    this.dateInicial,
+    this.dateFinal,
     this.id,
     this.titulo,
   });
@@ -22,9 +24,14 @@ class PlaceModel {
   factory PlaceModel.fromMap(Map<String, dynamic> map) {
     return PlaceModel(
       id: map['id'],
-      latitude: map['latitude'] != null ? double.tryParse(map['latitude'].toString()) : null,
-      longitude: map['longitude'] != null ? double.tryParse(map['longitude'].toString()) : null,
-      dateTime: map['data_hora'],
+      latitude: map['latitude'] != null
+          ? double.tryParse(map['latitude'].toString())
+          : null,
+      longitude: map['longitude'] != null
+          ? double.tryParse(map['longitude'].toString())
+          : null,
+      dateInicial: map['data_hora_inicio'],
+      dateFinal: map['data_hora_fim'],
       // Campos city, country e adress provavelmente não estão na tabela rotas_points
       // então deixamos como null mesmo
       city: null,
@@ -38,8 +45,8 @@ class PlaceModel {
       'id': id,
       'latitude': latitude?.toString(),
       'longitude': longitude?.toString(),
-      'data_hora': dateTime,
+      'data_hora_inicio': dateInicial,
+      'data_hora_fim': dateFinal,
     };
   }
-
 }

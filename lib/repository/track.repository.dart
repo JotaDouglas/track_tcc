@@ -9,8 +9,8 @@ class TrackRepository {
     return await db.insert('rota', {
       'lat_inicial': location.latitude,
       'long_inicial': location.longitude,
-      'data_hora': DateTime.now().toString(),
-      'titulo': 'Trajeto ${DateTime.now().microsecondsSinceEpoch}',
+      'data_hora_inicio': DateTime.now().toString(),
+      'titulo': 'Trajeto #${DateTime.now().microsecondsSinceEpoch.toString()}',
     });
   }
 
@@ -21,6 +21,8 @@ class TrackRepository {
       {
         'lat_final': location.latitude,
         'long_final': location.longitude,
+        'data_hora_fim': DateTime.now().toString(),
+        
       },
       where: 'id = ?',
       whereArgs: [rotaId],
@@ -47,7 +49,7 @@ class TrackRepository {
   Future<List<PlaceModel>> getAllRotas() async {
     final db = await _dbHelper.database;
 
-    final result = await db.query('rota', orderBy: 'data_hora DESC');
+    final result = await db.query('rota', orderBy: 'data_hora_inicio DESC');
 
     return result.map((row) => PlaceModel.fromMap(row)).toList();
   }
