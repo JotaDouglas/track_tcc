@@ -74,12 +74,13 @@ class _TrackPageState extends State<TrackPage> {
     if (loopOn) {
       final newLocal = await _locationHelper.actuallyPosition();
       if (newLocal != null) {
-        await viewModel.insertTracking(newLocal); // Insere a nova rota
-        // ignore: use_build_context_synchronously
+        await viewModel.insertTracking(newLocal);
         listMap.add(LatLng(newLocal.latitude!, newLocal.longitude!));
-        setState(() {
-          trackList.insert(0, newLocal);
-        });
+        setState(
+          () {
+            trackList.insert(0, newLocal);
+          },
+        );
         getCurrentLocation(); // Começa o loop de rastreamento
       } else {
         toggleTrackingState(); // Cancela se não tiver localização
