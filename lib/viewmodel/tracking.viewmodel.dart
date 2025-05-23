@@ -15,7 +15,7 @@ abstract class TrackingViewModelBase with Store {
   ObservableList<PlaceModel> trackList = ObservableList<PlaceModel>();
 
   @action
-  Future<void> startTracking(PlaceModel initialLocation) async {
+  Future<void> insertTracking(PlaceModel initialLocation) async {
     final rotaId = await trackRepository.insertRota(initialLocation);
     currentRotaId = rotaId;
     trackList.clear();

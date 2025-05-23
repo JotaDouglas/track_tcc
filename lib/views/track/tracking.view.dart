@@ -74,7 +74,7 @@ class _TrackPageState extends State<TrackPage> {
     if (loopOn) {
       final newLocal = await _locationHelper.actuallyPosition();
       if (newLocal != null) {
-        await viewModel.startTracking(newLocal); // Insere a nova rota
+        await viewModel.insertTracking(newLocal); // Insere a nova rota
         // ignore: use_build_context_synchronously
         listMap.add(LatLng(newLocal.latitude!, newLocal.longitude!));
         setState(() {

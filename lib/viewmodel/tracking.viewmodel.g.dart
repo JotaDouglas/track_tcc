@@ -25,13 +25,13 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     });
   }
 
-  late final _$startTrackingAsyncAction =
-      AsyncAction('TrackingViewModelBase.startTracking', context: context);
+  late final _$insertTrackingAsyncAction =
+      AsyncAction('TrackingViewModelBase.insertTracking', context: context);
 
   @override
-  Future<void> startTracking(PlaceModel initialLocation) {
-    return _$startTrackingAsyncAction
-        .run(() => super.startTracking(initialLocation));
+  Future<void> insertTracking(PlaceModel initialLocation) {
+    return _$insertTrackingAsyncAction
+        .run(() => super.insertTracking(initialLocation));
   }
 
   late final _$trackLocationAsyncAction =
