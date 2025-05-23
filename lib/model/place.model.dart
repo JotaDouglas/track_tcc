@@ -33,8 +33,6 @@ class PlaceModel {
       dateInicial: map['data_hora_inicio'],
       dateFinal: map['data_hora_fim'],
       titulo: map['titulo'],
-      // Campos city, country e adress provavelmente não estão na tabela rotas_points
-      // então deixamos como null mesmo
       city: null,
       country: null,
       adress: null,
