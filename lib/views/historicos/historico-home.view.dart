@@ -49,10 +49,10 @@ class _RotasPageState extends State<RotasPage> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Início: ${rota.latitude}, ${rota.longitude}'),
+                        // Text('Início: ${rota.latitude}, ${rota.longitude}'),
                         // Text('Fim: ${rota.la}, ${rota.longFinal}'),
                         Text('Data: ${rota.dateInicial}'),
-                        Text('Distância: ${rota.id ?? '--'} km'),
+                        // Text('Distância: ${rota.id ?? '--'} km'),
                       ],
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios),
