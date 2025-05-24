@@ -43,10 +43,11 @@ class CadastroViewState extends State<CadastroView> {
     if (value == null || value.isEmpty) {
       return 'O e-mail é obrigatório';
     }
-    // final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$');
-    // if (!emailRegex.hasMatch(value)) {
-    //   return 'Digite um e-mail válido';
-    // }
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+    if (!emailRegex.hasMatch(value)) {
+      return 'Digite um e-mail válido';
+    }
     return null;
   }
 
