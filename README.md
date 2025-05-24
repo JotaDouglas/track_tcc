@@ -1,16 +1,56 @@
-# track_tcc_app
+# 🛰️ Zelo App – Rastreamento e Monitoramento por GPS
 
-A new Flutter project.
+O **Zelo App** é uma aplicação desenvolvida em Flutter para **rastreamento de localização em tempo real**, com foco em **segurança pessoal** e **compartilhamento controlado** da sua rota com pessoas autorizadas. Ideal para situações em que você deseja que alguém acompanhe seu trajeto — seja por precaução, segurança ou assistência em tempo real.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📌 Objetivo
 
-A few resources to get you started if this is your first Flutter project:
+Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário compartilha sua posição apenas durante trajetos específicos, com contatos de confiança. O app também permite o envio de **alertas** e **notificações rápidas** para assistência em situações suspeitas ou emergenciais.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Funcionalidades
+
+- ✅ Histórico de rotas realizadas (com visualização via mapa)
+- ✅ Visualização de trajetos com **polylines**
+- ✅ **Armazenamento offline** da localização, com envio posterior quando houver conexão
+- 🚧 (Em desenvolvimento) **Compartilhamento de localização controlado** (por tempo limitado e com contatos escolhidos)
+- 🚧 (Em desenvolvimento) Botões de **alerta rápido** para suporte em caso de emergência
+- 🚧 (Em desenvolvimento) Compartilhamento online em tempo real
+- 🚧 (Em desenvolvimento) Notificações para contatos chave
+
+---
+
+## 🛠️ Tecnologias utilizadas
+
+- **Flutter** – Interface e lógica principal da aplicação
+- **Supabase** – Backend (autenticação, banco de dados, API)
+- **Mapbox** – Exibição de mapas e trajetos
+
+---
+
+## 📱 Diferenciais
+
+- 🔒 Compartilhamento **controlado** da localização (somente quando você quiser)
+- 📡 Funciona mesmo **offline**: armazena dados localmente e sincroniza depois
+- 📍 Exibição clara de trajetos com início/fim e polylines
+- 🧩 Pensado para segurança pessoal e suporte em situações de risco
+
+---
+
+## ▶️ Como rodar o projeto
+
+1. **Instale o Flutter (versão 3.24.5)**  
+   Siga as instruções oficiais: [Flutter Install](https://docs.flutter.dev/get-started/install)
+
+2. **Instale o Android Studio**  
+   É necessário para compilar o app e utilizar um emulador Android.
+
+3. **Clone o repositório:**
+
+git clone https://github.com/seu-usuario/zelo_app.git
+cd zelo_app
+
+4. Rode o projeto
+flutter run
