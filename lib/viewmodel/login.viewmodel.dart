@@ -63,9 +63,9 @@ abstract class LoginViewModelBase with Store {
           email: usuario.user!.email,
           uidUsuario: usuario.user!.id,
           id: dadosUsuario != null ? dadosUsuario['id_usuario'] : 000,
-          username: dadosUsuario != null ?  dadosUsuario['nome'] : "usuario",
-          sobrenome: dadosUsuario != null ?  dadosUsuario['sobrenome'] : "",
-          bio: dadosUsuario != null ?  dadosUsuario['biografia'] : "",
+          username: dadosUsuario != null ? dadosUsuario['nome'] : "usuario",
+          sobrenome: dadosUsuario != null ? dadosUsuario['sobrenome'] : "",
+          bio: dadosUsuario != null ? dadosUsuario['biografia'] : "",
         );
         saveUserData(loginUser!);
       }
@@ -133,16 +133,28 @@ abstract class LoginViewModelBase with Store {
   Future insertUsuario({
     required String nome,
     required String sobrenome,
+    String? uuid,
+    String? biografia,
   }) async {
-    return await supabase.from('usuarios').insert(
+    if(uuid != null){
+      emailUser = loginUser!.email;
+    }
+    var res = await supabase.from('usuarios').insert(
       {
         'nome': nome,
         'sobrenome': sobrenome,
         "email": emailUser,
-        "user_id": idNewUser,
+        "user_id": uuid ?? idNewUser,
         "tipo_usuario": "responsavel",
+        'biografia': biografia,
       },
     );
+
+    if(uuid != null){
+      await reloadUser();
+    }
+
+    return true;
   }
 
   Future<bool> updateUsuario({
@@ -152,6 +164,7 @@ abstract class LoginViewModelBase with Store {
     required String biografia,
   }) async {
     try {
+      log(idNewUser.toString());
       final data = {
         'nome': nome,
         'sobrenome': sobrenome,
