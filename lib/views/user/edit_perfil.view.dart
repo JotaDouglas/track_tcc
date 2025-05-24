@@ -135,13 +135,22 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                     try {
                       if (_formKey.currentState?.validate() ?? false) {
                         Dialogs.showLoading(context, null);
+                        bool sucesso = false;
 
-                        final sucesso = await loginVM.updateUsuario(
-                          userId: user!.id!,
-                          nome: nome,
-                          sobrenome: sobrenome,
-                          biografia: bio,
-                        );
+                        if (user!.id == 0) {
+                          sucesso = await loginVM.insertUsuario(
+                            nome: nome,
+                            sobrenome: sobrenome,
+                            uuid: user.uidUsuario,
+                          );
+                        } else {
+                          sucesso = await loginVM.updateUsuario(
+                            userId: user.id!,
+                            nome: nome,
+                            sobrenome: sobrenome,
+                            biografia: bio,
+                          );
+                        }
 
                         Navigator.pop(context); // fecha o loading (importante)
 
@@ -194,11 +203,6 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                         );
                       }
                     }
-
-                    // Exemplo: print no console
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Perfil atualizado!')),
-                    );
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -207,7 +211,8 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                     backgroundColor: corPrincipal,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Atualizar', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text('Atualizar',
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),
             ],
