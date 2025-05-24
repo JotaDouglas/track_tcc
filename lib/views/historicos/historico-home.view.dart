@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:track_tcc_app/helper/DateConversion.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
-import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
+import 'package:track_tcc_app/views/track/historico/historico_map.view.dart';
 
 class RotasPage extends StatefulWidget {
   const RotasPage({super.key});
@@ -49,10 +50,11 @@ class _RotasPageState extends State<RotasPage> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Início: ${rota.latitude}, ${rota.longitude}'),
+                        // Text('Início: ${rota.latitude}, ${rota.longitude}'),
                         // Text('Fim: ${rota.la}, ${rota.longFinal}'),
-                        Text('Data: ${rota.dateTime}'),
-                        Text('Distância: ${rota.id ?? '--'} km'),
+                        Text('Inicio: ${DateConversion.convertDateTimeFromString(rota.dateInicial!)}'),
+                        Text('Fim: ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
+                        // Text('Distância: ${rota.id ?? '--'} km'),
                       ],
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios),
@@ -60,7 +62,7 @@ class _RotasPageState extends State<RotasPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => RotaDetalhePage(rotaId: rota.id!),
+                          builder: (_) => HistoricMapFlutter(IdTrack: rota.id!,),
                         ),
                       );
                     },

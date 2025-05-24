@@ -57,12 +57,29 @@ mixin _$LoginViewModel on LoginViewModelBase, Store {
     });
   }
 
+  late final _$emailUserAtom =
+      Atom(name: 'LoginViewModelBase.emailUser', context: context);
+
+  @override
+  String? get emailUser {
+    _$emailUserAtom.reportRead();
+    return super.emailUser;
+  }
+
+  @override
+  set emailUser(String? value) {
+    _$emailUserAtom.reportWrite(value, super.emailUser, () {
+      super.emailUser = value;
+    });
+  }
+
   @override
   String toString() {
     return '''
 loginUser: ${loginUser},
 errorMessage: ${errorMessage},
-idNewUser: ${idNewUser}
+idNewUser: ${idNewUser},
+emailUser: ${emailUser}
     ''';
   }
 }

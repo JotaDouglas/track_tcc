@@ -29,7 +29,7 @@ class _TrackingMapWidgetState extends State<TrackingMapWidget> {
       mapController: widget.mapController,
       options: MapOptions(
         initialCenter: currentPos, // <-- Isso é pra versão nova (v7+)
-        initialZoom: 14.0,
+        initialZoom: 40.0,
       ),
       children: [
         TileLayer(
