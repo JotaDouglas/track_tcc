@@ -65,7 +65,7 @@ class AuthRepository {
       return data.first;
           
     } catch (e) {
-      return false;
+      return null;
     }
   }
 }

@@ -62,10 +62,10 @@ abstract class LoginViewModelBase with Store {
         loginUser = Login(
           email: usuario.user!.email,
           uidUsuario: usuario.user!.id,
-          id: dadosUsuario['id_usuario'],
-          username: dadosUsuario['nome'] ?? "usuario",
-          sobrenome: dadosUsuario['sobrenome'] ?? "",
-          bio: dadosUsuario['biografia'] ?? "",
+          id: dadosUsuario != null ? dadosUsuario['id_usuario'] : 000,
+          username: dadosUsuario != null ?  dadosUsuario['nome'] : "usuario",
+          sobrenome: dadosUsuario != null ?  dadosUsuario['sobrenome'] : "",
+          bio: dadosUsuario != null ?  dadosUsuario['biografia'] : "",
         );
         saveUserData(loginUser!);
       }
@@ -197,7 +197,7 @@ abstract class LoginViewModelBase with Store {
       var res = await authRepository.loadUsuario(id);
       return res;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 }
