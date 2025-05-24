@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:track_tcc_app/helper/DateConversion.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
-import 'package:track_tcc_app/views/track/historico/historico_map.view.dart';
+import 'package:track_tcc_app/views/historicos/historico_map.view.dart';
 
 class RotasPage extends StatefulWidget {
   const RotasPage({super.key});
@@ -43,26 +43,80 @@ class _RotasPageState extends State<RotasPage> {
               itemBuilder: (context, index) {
                 final rota = rotas[index];
                 return Card(
+                  elevation: 5,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: ListTile(
-                    title: Text(rota.titulo ?? 'Rota sem título'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Text('Início: ${rota.latitude}, ${rota.longitude}'),
-                        // Text('Fim: ${rota.la}, ${rota.longFinal}'),
-                        Text('Inicio: ${DateConversion.convertDateTimeFromString(rota.dateInicial!)}'),
-                        Text('Fim: ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
-                        // Text('Distância: ${rota.id ?? '--'} km'),
-                      ],
+                    title: Text(
+                      rota.titulo ?? 'Rota sem título',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Text('Início: ${rota.latitude}, ${rota.longitude}'),
+                          // Text('Fim: ${rota.la}, ${rota.longFinal}'),
+                          Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.play_arrow,
+                                    color: Colors.green,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            ' ${DateConversion.convertDateTimeFromString(rota.dateInicial!)}'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.stop,
+                                    color: Colors.red,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            ' ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 20,
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => HistoricMapFlutter(IdTrack: rota.id!,),
+                          builder: (_) => HistoricMapFlutter(
+                            IdTrack: rota.id!,
+                          ),
                         ),
                       );
                     },
