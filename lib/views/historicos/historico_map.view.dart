@@ -41,7 +41,7 @@ class _HistoricMapFlutterState extends State<HistoricMapFlutter> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rota no Mapa'),
+        title: const Text('Rota'),
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:track_tcc_app/helper/DateConversion.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
-import 'package:track_tcc_app/views/track/historico/historico_map.view.dart';
+import 'package:track_tcc_app/views/historicos/historico_map.view.dart';
 
 class RotasPage extends StatefulWidget {
   const RotasPage({super.key});
@@ -67,8 +67,16 @@ class _RotasPageState extends State<RotasPage> {
                                     Icons.play_arrow,
                                     color: Colors.green,
                                   ),
-                                  Text(
-                                      ' ${DateConversion.convertDateTimeFromString(rota.dateInicial!)}'),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            ' ${DateConversion.convertDateTimeFromString(rota.dateInicial!)}'),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               )
                             ],
@@ -81,8 +89,16 @@ class _RotasPageState extends State<RotasPage> {
                                     Icons.stop,
                                     color: Colors.red,
                                   ),
-                                  Text(
-                                      ' ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            ' ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               )
                             ],
@@ -90,7 +106,10 @@ class _RotasPageState extends State<RotasPage> {
                         ],
                       ),
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 20,),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 20,
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
