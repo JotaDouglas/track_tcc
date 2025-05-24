@@ -44,8 +44,72 @@ class _UserCadastroViewState extends State<UserCadastroView> {
           key: _formKey,
           child: Column(
             children: [
-              _buildHeader(),
-              _buildForm(),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    colors: [
+                      Colors.orange.shade900,
+                      Colors.orange.shade800,
+                      Colors.orange.shade400,
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 80),
+                      FadeInUp(
+                        duration: Duration(milliseconds: 1000),
+                        child: Text("Usuário",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 40)),
+                      ),
+                      const SizedBox(height: 10),
+                      FadeInUp(
+                        duration: Duration(milliseconds: 1300),
+                        child: Text("Informe seus dados",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(color: Colors.white),
+                child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 40),
+                      FadeInUp(
+                        duration: const Duration(milliseconds: 1400),
+                        child: textFieldModelo("Nome",
+                            controller: nomeController,
+                            validator: _validateNome,
+                            icon: Icons.person),
+                      ),
+                      FadeInUp(
+                        duration: const Duration(milliseconds: 1400),
+                        child: textFieldModelo("Sobrenome",
+                            controller: sobrenomeController,
+                            validator: _validateSobrenome,
+                            icon: Icons.person_outline),
+                      ),
+                      const SizedBox(height: 40),
+                      _btnConfirmar(),
+                      const SizedBox(height: 30),
+                      _buildVoltar(),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -53,77 +117,7 @@ class _UserCadastroViewState extends State<UserCadastroView> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          colors: [
-            Colors.orange.shade900,
-            Colors.orange.shade800,
-            Colors.orange.shade400,
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 80),
-            FadeInUp(
-              duration: Duration(milliseconds: 1000),
-              child: Text("Usuário",
-                  style: TextStyle(color: Colors.white, fontSize: 40)),
-            ),
-            const SizedBox(height: 10),
-            FadeInUp(
-              duration: Duration(milliseconds: 1300),
-              child: Text("Informe seus dados",
-                  style: TextStyle(color: Colors.white, fontSize: 18)),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildForm() {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(color: Colors.white),
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 40),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildTextField("Nome",
-                  controller: nomeController,
-                  validator: _validateNome,
-                  icon: Icons.person),
-            ),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildTextField("Sobrenome",
-                  controller: sobrenomeController,
-                  validator: _validateSobrenome,
-                  icon: Icons.person_outline),
-            ),
-            const SizedBox(height: 40),
-            _buildSubmitButton(),
-            const SizedBox(height: 30),
-            _buildVoltar(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String hint,
+  Widget textFieldModelo(String hint,
       {required TextEditingController controller,
       required String? Function(String?) validator,
       required IconData icon}) {
@@ -144,7 +138,7 @@ class _UserCadastroViewState extends State<UserCadastroView> {
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _btnConfirmar() {
     return FadeInUp(
       duration: const Duration(milliseconds: 1600),
       child: MaterialButton(
