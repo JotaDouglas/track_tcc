@@ -81,8 +81,84 @@ class CadastroViewState extends State<CadastroView> {
           key: _formKey,
           child: Column(
             children: [
-              _buildHeader(),
-              _buildForm(),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    colors: [
+                      Colors.orange.shade900,
+                      Colors.orange.shade800,
+                      Colors.orange.shade400,
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SizedBox(height: 80),
+                      FadeInUp(
+                        duration: const Duration(milliseconds: 1000),
+                        child: const Text("Cadastro",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 40)),
+                      ),
+                      const SizedBox(height: 10),
+                      FadeInUp(
+                        duration: const Duration(milliseconds: 1300),
+                        child: const Text("Crie sua conta",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  // borderRadius:  BorderRadius.only(
+                  //     topLeft: Radius.circular(60), topRight: Radius.circular(60)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 40),
+                      FadeInUp(
+                          duration: const Duration(milliseconds: 1400),
+                          child: textFieldModelo("E-mail",
+                              icon: Icons.email,
+                              controller: emailController,
+                              validator: _validateEmail)),
+                      FadeInUp(
+                        duration: const Duration(milliseconds: 1400),
+                        child: textFieldModelo("Senha",
+                            icon: Icons.lock,
+                            controller: passwordController,
+                            isPassword: true,
+                            validator: _validatePassword),
+                      ),
+                      FadeInUp(
+                        duration: const Duration(milliseconds: 1400),
+                        child: textFieldModelo("Confirme a senha",
+                            icon: Icons.lock,
+                            controller: confirmPasswordController,
+                            isPassword: true,
+                            validator: _validateConfirmPassword),
+                      ),
+                      const SizedBox(height: 40),
+                      _btnCadastrar(),
+                      const SizedBox(height: 50),
+                      _btnTelaLogin(),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -90,89 +166,7 @@ class CadastroViewState extends State<CadastroView> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          colors: [
-            Colors.orange.shade900,
-            Colors.orange.shade800,
-            Colors.orange.shade400,
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const SizedBox(height: 80),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1000),
-              child: const Text("Cadastro",
-                  style: TextStyle(color: Colors.white, fontSize: 40)),
-            ),
-            const SizedBox(height: 10),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1300),
-              child: const Text("Crie sua conta",
-                  style: TextStyle(color: Colors.white, fontSize: 18)),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildForm() {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        // borderRadius:  BorderRadius.only(
-        //     topLeft: Radius.circular(60), topRight: Radius.circular(60)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 40),
-            FadeInUp(
-                duration: const Duration(milliseconds: 1400),
-                child: _buildTextField("E-mail",
-                    icon: Icons.email,
-                    controller: emailController,
-                    validator: _validateEmail)),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildTextField("Senha",
-                  icon: Icons.lock,
-                  controller: passwordController,
-                  isPassword: true,
-                  validator: _validatePassword),
-            ),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildTextField("Confirme a senha",
-                  icon: Icons.lock,
-                  controller: confirmPasswordController,
-                  isPassword: true,
-                  validator: _validateConfirmPassword),
-            ),
-            const SizedBox(height: 40),
-            _buildSubmitButton(),
-            const SizedBox(height: 50),
-            _buildLoginRedirect(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String hint,
+  Widget textFieldModelo(String hint,
       {bool isPassword = false,
       required TextEditingController controller,
       required String? Function(String?) validator,
@@ -196,7 +190,7 @@ class CadastroViewState extends State<CadastroView> {
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _btnCadastrar() {
     return FadeInUp(
       duration: const Duration(milliseconds: 1600),
       child: MaterialButton(
@@ -223,8 +217,7 @@ class CadastroViewState extends State<CadastroView> {
 
               if (mounted) {
                 if (mounted && Navigator.canPop(context)) {
-                  GoRouter.of(context)
-                      .pushReplacement('/login/register/name');
+                  GoRouter.of(context).pushReplacement('/login/register/name');
                 }
               }
             } else {
@@ -267,7 +260,7 @@ class CadastroViewState extends State<CadastroView> {
     );
   }
 
-  Widget _buildLoginRedirect() {
+  Widget _btnTelaLogin() {
     return FadeInUp(
       duration: const Duration(milliseconds: 1500),
       child: Row(
