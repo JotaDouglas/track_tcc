@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
-import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
+import 'package:track_tcc_app/views/track/historico/historico_map.view.dart';
 
 class RotasPage extends StatefulWidget {
   const RotasPage({super.key});
@@ -60,7 +60,7 @@ class _RotasPageState extends State<RotasPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => RotaDetalhePage(rotaId: rota.id!),
+                          builder: (_) => HistoricMapFlutter(IdTrack: rota.id!,),
                         ),
                       );
                     },
