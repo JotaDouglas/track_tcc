@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:track_tcc_app/helper/DateConversion.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/track/historico/historico_map.view.dart';
@@ -51,7 +52,8 @@ class _RotasPageState extends State<RotasPage> {
                       children: [
                         // Text('Início: ${rota.latitude}, ${rota.longitude}'),
                         // Text('Fim: ${rota.la}, ${rota.longFinal}'),
-                        Text('Data: ${rota.dateInicial}'),
+                        Text('Inicio: ${DateConversion.convertDateTimeFromString(rota.dateInicial!)}'),
+                        Text('Fim: ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
                         // Text('Distância: ${rota.id ?? '--'} km'),
                       ],
                     ),
