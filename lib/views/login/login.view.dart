@@ -208,7 +208,7 @@ class _LoginViewState extends State<LoginView> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content:
-                                          Text(authViewModel.errorMessage!),
+                                          Text("Verifique os seus dados e a conexão com a internet."),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
