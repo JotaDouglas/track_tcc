@@ -59,20 +59,19 @@ class DatabaseHelper {
 
   // Migrações de versão
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Exemplo: adicionando uma nova coluna
-      await db.execute('ALTER TABLE rotas ADD COLUMN data_hora TEXT');
-    }
+    // if (oldVersion < 2) {
+    //   // await db.execute('ALTER TABLE rota ADD COLUMN data_hora TEXT');
+    // }
 
-    if (oldVersion < 3) {
-      // Exemplo: criando nova tabela
-      await db.execute('''
-        CREATE TABLE usuarios (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          nome TEXT
-        )
-      ''');
-    }
+    // if (oldVersion < 3) {
+    //   // Exemplo: criando nova tabela
+    //   await db.execute('''
+    //     CREATE TABLE usuarios (
+    //       id INTEGER PRIMARY KEY AUTOINCREMENT,
+    //       nome TEXT
+    //     )
+    //   ''');
+    // }
   }
 
   Future<void> limparBanco() async {
