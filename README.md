@@ -49,8 +49,8 @@ Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário com
 
 3. **Clone o repositório:**
 
-git clone https://github.com/seu-usuario/zelo_app.git
-cd zelo_app
+   git clone https://github.com/seu-usuario/zelo_app.git
+   cd zelo_app
 
 4. Rode o projeto
-flutter run
+   flutter run
