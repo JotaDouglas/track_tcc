@@ -120,8 +120,16 @@ class _LoginViewState extends State<LoginView> {
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
+                                      return 'Digite um e-mail';
+                                    }
+
+                                    final emailRegex = RegExp(
+                                        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+                                    if (!emailRegex.hasMatch(value)) {
                                       return 'Digite um e-mail válido';
                                     }
+
                                     return null;
                                   },
                                 ),
@@ -152,6 +160,11 @@ class _LoginViewState extends State<LoginView> {
                                     if (value == null || value.isEmpty) {
                                       return 'Digite sua senha';
                                     }
+
+                                    if (value.length < 6 || value.length > 12) {
+                                      return 'A senha deve ter entre 6 e 12 caracteres';
+                                    }
+
                                     return null;
                                   },
                                 ),
@@ -207,8 +220,8 @@ class _LoginViewState extends State<LoginView> {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content:
-                                          Text("Verifique os seus dados e a conexão com a internet."),
+                                      content: Text(
+                                          "Verifique os seus dados e a conexão com a internet."),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
