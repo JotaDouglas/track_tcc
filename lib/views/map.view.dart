@@ -6,11 +6,13 @@ import 'package:track_tcc_app/views/widgets/pulseIcon.widget.dart';
 class TrackingMapWidget extends StatefulWidget {
   final List<LatLng> trackList;
   final MapController mapController;
+  final bool modeRoute;
 
   const TrackingMapWidget({
     super.key,
     required this.trackList,
     required this.mapController,
+    this.modeRoute = true,
   });
 
   @override
@@ -45,14 +47,17 @@ class _TrackingMapWidgetState extends State<TrackingMapWidget> {
             ),
           ],
         ),
-        PolylineLayer(
-          polylines: [
-            Polyline(
-              points: widget.trackList,
-              strokeWidth: 4.0,
-              color: Colors.blue,
-            ),
-          ],
+        Visibility(
+          visible: widget.modeRoute,
+          child: PolylineLayer(
+            polylines: [
+              Polyline(
+                points: widget.trackList,
+                strokeWidth: 4.0,
+                color: Colors.blue,
+              ),
+            ],
+          ),
         ),
       ],
     );

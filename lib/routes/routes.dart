@@ -2,6 +2,8 @@ import 'package:go_router/go_router.dart';
 import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home.view.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
+import 'package:track_tcc_app/views/live_locations/live_home.view.dart';
+import 'package:track_tcc_app/views/live_locations/live_location.view.dart';
 import 'package:track_tcc_app/views/login/forgetKey.view.dart';
 import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/views/login/signup.view.dart';
@@ -69,6 +71,14 @@ class AppRouter {
           path: "/user-search",
           name: 'user-search',
           builder: (context, status) => const BuscarAmigosView()),
+      GoRoute(
+          path: "/location-share-home",
+          name: 'location-share-home',
+          builder: (context, status) => const LocalizacoesPage()),
+      GoRoute(
+          path: "/location-share-map",
+          name: 'location-share-map',
+          builder: (context, status) => const LiveTrackingPage()),
     ],
   );
   static GoRouter get router => _router;

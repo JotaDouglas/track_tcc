@@ -151,6 +151,11 @@ class _HomeViewState extends State<HomeView> {
                   label: "Histórico",
                   onTap: () => GoRouter.of(context).push('/historico-home'),
                 ),
+                buildCard(
+                  icon: Icons.emergency_share,
+                  label: "Acompanhar",
+                  onTap: () => GoRouter.of(context).push('/location-share-map'),
+                ),
               ],
             ),
           ),

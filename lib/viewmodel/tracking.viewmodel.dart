@@ -1,4 +1,5 @@
 import 'package:mobx/mobx.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/repository/track.repository.dart';
 
@@ -8,6 +9,7 @@ class TrackingViewModel = TrackingViewModelBase with _$TrackingViewModel;
 
 abstract class TrackingViewModelBase with Store {
   final TrackRepository trackRepository = TrackRepository();
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   int? currentRotaId;
 
@@ -27,6 +29,30 @@ abstract class TrackingViewModelBase with Store {
     if (currentRotaId != null) {
       trackList.insert(0, location);
       await trackRepository.insertRotaPoint(currentRotaId!, location);
+
+      try {
+        final uid = _supabase.auth.currentUser!.id;
+
+        // Linhas que serão inseridas OU mescladas.
+        final row = {
+          'user_id': uid,
+          'data_hora': DateTime.now().toIso8601String(),
+          'latitude': -23.55052000,
+          'longitude': -46.63331000,
+        };
+
+        try {
+          final res = await _supabase
+              .from('localizacoes')
+              .upsert(row, onConflict: 'user_id');
+
+          if (res.error != null) {}
+        } catch (e) {
+          print("erro: $e");
+        }
+      } catch (e) {
+         print("erro: $e");
+      }
     }
   }
 
