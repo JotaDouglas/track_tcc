@@ -37,8 +37,8 @@ abstract class TrackingViewModelBase with Store {
         final row = {
           'user_id': uid,
           'data_hora': DateTime.now().toIso8601String(),
-          'latitude': -23.55052000,
-          'longitude': -46.63331000,
+          'latitude': location.latitude,
+          'longitude': location.longitude,
         };
 
         try {
