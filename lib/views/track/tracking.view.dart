@@ -5,8 +5,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/map.view.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
@@ -22,6 +24,7 @@ class _TrackPageState extends State<TrackPage> {
   final Locationhelper _locationHelper = Locationhelper();
   final TrackingViewModel viewModel = TrackingViewModel();
   final MapController _mapController = MapController();
+  String? nome;
 
   List<PlaceModel> trackList = [];
   bool isLoading = false;
@@ -122,7 +125,7 @@ class _TrackPageState extends State<TrackPage> {
           final newLocal = await _locationHelper.actuallyPosition();
 
           if (newLocal != null) {
-            await viewModel.trackLocation(newLocal); // Insere ponto no banco
+            await viewModel.trackLocation(newLocal, nome!); // Insere ponto no banco
             final pos = LatLng(newLocal.latitude!, newLocal.longitude!);
             listMap.add(pos);
 
@@ -147,6 +150,8 @@ class _TrackPageState extends State<TrackPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<LoginViewModel>(context);
+    nome = authViewModel.loginUser?.username ?? 'user${DateTime.now().microsecond}';
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(

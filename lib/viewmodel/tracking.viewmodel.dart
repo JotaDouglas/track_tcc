@@ -27,7 +27,7 @@ abstract class TrackingViewModelBase with Store {
   }
 
   @action
-  Future<void> trackLocation(PlaceModel location) async {
+  Future<void> trackLocation(PlaceModel location, String name) async {
     if (currentRotaId != null) {
       trackList.insert(0, location);
       await trackRepository.insertRotaPoint(currentRotaId!, location);
@@ -41,18 +41,18 @@ abstract class TrackingViewModelBase with Store {
           'data_hora': DateTime.now().toIso8601String(),
           'latitude': location.latitude,
           'longitude': location.longitude,
+          'user_name': name,
         };
 
         try {
           await _supabase
               .from('localizacoes')
               .upsert(row, onConflict: 'user_id');
-
         } catch (e) {
           log("erro: $e");
         }
       } catch (e) {
-         log("erro: $e");
+        log("erro: $e");
       }
     }
   }
@@ -61,6 +61,19 @@ abstract class TrackingViewModelBase with Store {
   Future<void> stopTracking(PlaceModel finalLocation) async {
     if (currentRotaId != null) {
       await trackRepository.updateRotaFinal(currentRotaId!, finalLocation);
+      try {
+        final uid = _supabase.auth.currentUser!.id;
+
+        try {
+          await _supabase
+              .from('localizacoes')
+              .delete().eq("user_id", uid);
+        } catch (e) {
+          log("erro: $e");
+        }
+      } catch (e) {
+        log("erro: $e");
+      }
       currentRotaId = null;
     }
   }

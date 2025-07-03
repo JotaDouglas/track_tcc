@@ -23,7 +23,7 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
   void _fetchData() async {
     final response = await _supabase
         .from('localizacoes')
-        .select('*, usuarios(nome)')
+        .select()
         .order('data_hora', ascending: false);
 
     setState(() {
@@ -39,9 +39,7 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
         itemCount: localizacoes.length,
         itemBuilder: (context, index) {
           final item = localizacoes[index];
-          final usuario = item['usuarios'];
-          final nomeUsuario =
-              usuario != null ? usuario['nome'] : 'Usuário desconhecido';
+          final nomeUsuario = item['user_name'];
 
           return Card(
             child: ListTile(
@@ -51,7 +49,8 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
                 'Data: ${item['data_hora']}\n Lat: ${item['latitude']}, Lng: ${item['longitude']}',
                 style: TextStyle(fontSize: 12),
               ),
-              onTap: () => GoRouter.of(context).push('/location-share-map/${item['user_id']}'),
+              onTap: () => GoRouter.of(context)
+                  .push('/location-share-map/${item['user_id']}'),
             ),
           );
         },

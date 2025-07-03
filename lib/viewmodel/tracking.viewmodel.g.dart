@@ -38,8 +38,9 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
       AsyncAction('TrackingViewModelBase.trackLocation', context: context);
 
   @override
-  Future<void> trackLocation(PlaceModel location) {
-    return _$trackLocationAsyncAction.run(() => super.trackLocation(location));
+  Future<void> trackLocation(PlaceModel location, String name) {
+    return _$trackLocationAsyncAction
+        .run(() => super.trackLocation(location, name));
   }
 
   late final _$stopTrackingAsyncAction =
