@@ -58,7 +58,9 @@ class AppRouter {
       GoRoute(
           path: "/historico-detalhes",
           name: 'historico-detalhes',
-          builder: (context, status) => const RotaDetalhePage(rotaId: null,)),
+          builder: (context, status) => const RotaDetalhePage(
+                rotaId: null,
+              )),
       GoRoute(
           path: "/user-perfil",
           name: 'user-perfil',
@@ -76,9 +78,13 @@ class AppRouter {
           name: 'location-share-home',
           builder: (context, status) => const LocalizacoesPage()),
       GoRoute(
-          path: "/location-share-map",
-          name: 'location-share-map',
-          builder: (context, status) => const LiveTrackingPage()),
+        path: "/location-share-map/:userId",
+        name: 'location-share-map',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          return LiveTrackingPage(userId: userId);
+        },
+      )
     ],
   );
   static GoRouter get router => _router;

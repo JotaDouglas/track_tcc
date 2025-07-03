@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 
 class LocalizacoesPage extends StatefulWidget {
   const LocalizacoesPage({super.key});
@@ -23,23 +23,11 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
   void _fetchData() async {
     final response = await _supabase
         .from('localizacoes')
-        .select()
+        .select('*, usuarios(nome)')
         .order('data_hora', ascending: false);
 
     setState(() {
       localizacoes = List<Map<String, dynamic>>.from(response);
-    });
-  }
-
-  void _setupRealtime() {
-    _supabase
-        .from('localizacoes')
-        .stream(primaryKey: ['id_localizacao'])
-        .order('data_hora', ascending: false)
-        .listen((List<Map<String, dynamic>> data) {
-      setState(() {
-        localizacoes = data;
-      });
     });
   }
 
@@ -51,16 +39,39 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
         itemCount: localizacoes.length,
         itemBuilder: (context, index) {
           final item = localizacoes[index];
-          return ListTile(
-            leading: Icon(Icons.location_on),
-            title: Text('Lat: ${item['latitude']}, Lng: ${item['longitude']}'),
-            subtitle: Text(
-              'Data: ${item['data_hora']}\nUser: ${item['user_id']}',
-              style: TextStyle(fontSize: 12),
+          final usuario = item['usuarios'];
+          final nomeUsuario =
+              usuario != null ? usuario['nome'] : 'Usuário desconhecido';
+
+          return Card(
+            child: ListTile(
+              leading: Icon(Icons.location_on),
+              title: Text('$nomeUsuario'),
+              subtitle: Text(
+                'Data: ${item['data_hora']}\n Lat: ${item['latitude']}, Lng: ${item['longitude']}',
+                style: TextStyle(fontSize: 12),
+              ),
+              onTap: () => GoRouter.of(context).push('/location-share-map/${item['user_id']}'),
             ),
           );
         },
       ),
     );
+  }
+
+  void _setupRealtime() {
+    _supabase
+        .from('localizacoes')
+        .stream(primaryKey: ['id_localizacao'])
+        .order('data_hora', ascending: false)
+        .listen(
+          (List<Map<String, dynamic>> data) {
+            setState(
+              () {
+                localizacoes = data;
+              },
+            );
+          },
+        );
   }
 }

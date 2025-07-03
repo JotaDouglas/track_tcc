@@ -34,7 +34,7 @@ class _LiveTrackingPageState extends State<LiveTrackingPage> {
 
     _sub = stream.listen((rows) {
       final filteredRows =
-          rows.where((row) => row['user_id'] == "c8dbca7e-c188-4ce8-90d2-518284763a76").toList();
+          rows.where((row) => row['user_id'] == widget.userId).toList();
 
       if (filteredRows.isEmpty) return;
 

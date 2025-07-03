@@ -154,7 +154,7 @@ class _HomeViewState extends State<HomeView> {
                 buildCard(
                   icon: Icons.emergency_share,
                   label: "Acompanhar",
-                  onTap: () => GoRouter.of(context).push('/location-share-map'),
+                  onTap: () => GoRouter.of(context).push('/location-share-home'),
                 ),
               ],
             ),
