@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:mobx/mobx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/place.model.dart';
@@ -42,16 +44,15 @@ abstract class TrackingViewModelBase with Store {
         };
 
         try {
-          final res = await _supabase
+          await _supabase
               .from('localizacoes')
               .upsert(row, onConflict: 'user_id');
 
-          if (res.error != null) {}
         } catch (e) {
-          print("erro: $e");
+          log("erro: $e");
         }
       } catch (e) {
-         print("erro: $e");
+         log("erro: $e");
       }
     }
   }

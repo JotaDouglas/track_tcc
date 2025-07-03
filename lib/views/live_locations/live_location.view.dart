@@ -29,45 +29,47 @@ class _LiveTrackingPageState extends State<LiveTrackingPage> {
   }
 
   void _listenRealtime() {
-    final stream =
-        supabase.from('localizacoes').stream(primaryKey: ['id_localizacao']);
+    if (mounted) {
+      final stream =
+          supabase.from('localizacoes').stream(primaryKey: ['id_localizacao']);
 
-    _sub = stream.listen((rows) {
-      final filteredRows =
-          rows.where((row) => row['user_id'] == widget.userId).toList();
+      _sub = stream.listen((rows) {
+        final filteredRows =
+            rows.where((row) => row['user_id'] == widget.userId).toList();
 
-      if (filteredRows.isEmpty) return;
+        if (filteredRows.isEmpty) return;
 
-      // Use filteredRows[0] ou como preferir
-    });
-
-    _sub = stream.listen((rows) {
-      // Filtra no Dart, porque filtro direto não existe
-      final filteredRows = (widget.userId == null)
-          ? rows
-          : rows.where((row) => row['user_id'] == widget.userId).toList();
-
-      if (filteredRows.isEmpty) return;
-
-      final newPath = filteredRows.map((row) {
-        final lat = (row['latitude'] as num).toDouble();
-        final lon = (row['longitude'] as num).toDouble();
-        return LatLng(lat, lon);
-      }).toList();
-
-      final latestPoint = newPath.last;
-
-      setState(() {
-        _path
-          ..clear();
-          // ..addAll(newPath);
-        _isLoading = false;
+        // Use filteredRows[0] ou como preferir
       });
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _mapController.move(latestPoint, 16.0);
+      _sub = stream.listen((rows) {
+        // Filtra no Dart, porque filtro direto não existe
+        final filteredRows = (widget.userId == null)
+            ? rows
+            : rows.where((row) => row['user_id'] == widget.userId).toList();
+
+        if (filteredRows.isEmpty) return;
+
+        final newPath = filteredRows.map((row) {
+          final lat = (row['latitude'] as num).toDouble();
+          final lon = (row['longitude'] as num).toDouble();
+          return LatLng(lat, lon);
+        }).toList();
+
+        final latestPoint = newPath.last;
+
+        setState(() {
+          _path
+            ..clear()
+            ..addAll(newPath);
+          _isLoading = false;
+        });
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _mapController.move(latestPoint, 16.0);
+        });
       });
-    });
+    }
   }
 
   @override
