@@ -18,10 +18,10 @@ class DateConversion {
   static convertDateTimeFromString(String strDate) {
     if (strDate.contains('/')) strDate = strDate.replaceAll('/', '-');
 
-    DateTime todayDate = DateTime.parse(strDate);
+    DateTime? todayDate = DateTime.tryParse(strDate);
     // print(todayDate);
     var dateFormatted =
-        formatDate(todayDate, [dd, '/', mm, '/', yyyy, ' ', HH, ':', nn]);
+        formatDate(todayDate ?? DateTime.now(), [dd, '/', mm, '/', yyyy, ' ', HH, ':', nn]);
     // print(dateFormatted);
     return dateFormatted;
   }

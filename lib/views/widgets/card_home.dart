@@ -13,7 +13,7 @@ Widget buildCard({
     child: Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: color ?? Colors.white,
+      color: color ?? null,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(12.0),

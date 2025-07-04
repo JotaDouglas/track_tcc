@@ -61,7 +61,6 @@ class _HomeViewState extends State<HomeView> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.grey[100],
       body: Column(
         children: [
           Stack(
@@ -155,6 +154,11 @@ class _HomeViewState extends State<HomeView> {
                   icon: Icons.emergency_share,
                   label: "Acompanhar",
                   onTap: () => GoRouter.of(context).push('/location-share-home'),
+                ),
+                buildCard(
+                  icon: Icons.settings,
+                  label: "Configurações",
+                  onTap: () => GoRouter.of(context).push('/settings-theme'),
                 ),
               ],
             ),

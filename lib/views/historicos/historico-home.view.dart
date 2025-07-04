@@ -95,7 +95,7 @@ class _RotasPageState extends State<RotasPage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                            ' ${DateConversion.convertDateTimeFromString(rota.dateFinal!)}'),
+                                            ' ${DateConversion.convertDateTimeFromString(rota.dateFinal ?? '')}'),
                                       ],
                                     ),
                                   ),
