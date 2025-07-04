@@ -143,7 +143,7 @@ class _TrackPageState extends State<TrackPage>
                         _sharing
                             ? 'Meu endereço atual: $_addressLabel'
                             : 'Comece um novo compartilhamento',
-                        style: TextStyle(color: _sharing ? Colors.white: Colors.black),
+                        style: TextStyle(color: _sharing ? Colors.white: null),
                         textAlign: TextAlign.center,
                       ),
                     ),

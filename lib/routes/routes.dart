@@ -9,7 +9,7 @@ import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/views/login/signup.view.dart';
 import 'package:track_tcc_app/views/login/userDates.view.dart';
 import 'package:track_tcc_app/views/splash.view.dart';
-import 'package:track_tcc_app/views/theme.view.dart';
+import 'package:track_tcc_app/views/settings.view.dart';
 import 'package:track_tcc_app/views/track/historico/historico.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
 import 'package:track_tcc_app/views/user/edit_perfil.view.dart';
