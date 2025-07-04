@@ -110,7 +110,14 @@ class _TrackPageState extends State<TrackPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Compartilhamento'),
+        title: const Text(
+          'Compartilhamento',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
       ),
@@ -143,7 +150,7 @@ class _TrackPageState extends State<TrackPage>
                         _sharing
                             ? 'Meu endereço atual: $_addressLabel'
                             : 'Comece um novo compartilhamento',
-                        style: TextStyle(color: _sharing ? Colors.white: null),
+                        style: TextStyle(color: _sharing ? Colors.white : null, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -153,7 +160,8 @@ class _TrackPageState extends State<TrackPage>
                 if (_sharing) ...[
                   Text(
                     'Distância: ${_distanceMeters.toStringAsFixed(1)} m',
-                    style: TextStyle(color: _sharing ? Colors.white: Colors.black),
+                    style: TextStyle(
+                        color: _sharing ? Colors.white : Colors.black),
                     // style: theme.textTheme.subtitle1,
                   ),
                   const SizedBox(height: 24),
@@ -168,7 +176,7 @@ class _TrackPageState extends State<TrackPage>
                       ),
                       IconButton(
                         icon: const Icon(Icons.notifications_active),
-                        color: _sharing ? Colors.orange[900]: null,
+                        color: _sharing ? Colors.orange[900] : null,
                         iconSize: 32,
                         onPressed: () {},
                       ),
@@ -179,13 +187,11 @@ class _TrackPageState extends State<TrackPage>
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(50),
-                    backgroundColor:  Colors.orange[900],
+                    backgroundColor: Colors.orange[900],
                   ),
                   onPressed: _sharing ? _stopSharing : _startSharing,
                   child: Text(
-                    _sharing
-                        ? 'PARAR'
-                        : 'INICIAR',
+                    _sharing ? 'PARAR' : 'INICIAR',
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),

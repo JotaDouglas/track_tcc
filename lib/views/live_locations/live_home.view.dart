@@ -34,23 +34,47 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Localizações em tempo real')),
+      appBar: AppBar(
+        title: const Text(
+          'Localizações em tempo real',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
+        foregroundColor: Colors.white,
+      ),
       body: ListView.builder(
         itemCount: localizacoes.length,
         itemBuilder: (context, index) {
           final item = localizacoes[index];
           final nomeUsuario = item['user_name'];
 
-          return Card(
-            child: ListTile(
-              leading: Icon(Icons.location_on),
-              title: Text('$nomeUsuario'),
-              subtitle: Text(
-                'Data: ${item['data_hora']}\n Lat: ${item['latitude']}, Lng: ${item['longitude']}',
-                style: TextStyle(fontSize: 12),
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              child: ListTile(
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                ),
+                leading: Icon(
+                  Icons.location_on,
+                  color: Colors.green,
+                ),
+                title: Text(
+                  '$nomeUsuario',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  'Data: ${item['data_hora']}\nLat: ${item['latitude']}, Lng: ${item['longitude']}',
+                  style: TextStyle(fontSize: 12),
+                ),
+                onTap: () => GoRouter.of(context)
+                    .push('/location-share-map/${item['user_id']}'),
               ),
-              onTap: () => GoRouter.of(context)
-                  .push('/location-share-map/${item['user_id']}'),
             ),
           );
         },
@@ -59,18 +83,20 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
   }
 
   void _setupRealtime() {
-    _supabase
-        .from('localizacoes')
-        .stream(primaryKey: ['id_localizacao'])
-        .order('data_hora', ascending: false)
-        .listen(
-          (List<Map<String, dynamic>> data) {
-            setState(
-              () {
-                localizacoes = data;
-              },
-            );
-          },
-        );
+    if (mounted) {
+      _supabase
+          .from('localizacoes')
+          .stream(primaryKey: ['id_localizacao'])
+          .order('data_hora', ascending: false)
+          .listen(
+            (List<Map<String, dynamic>> data) {
+              setState(
+                () {
+                  localizacoes = data;
+                },
+              );
+            },
+          );
+    }
   }
 }

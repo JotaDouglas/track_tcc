@@ -82,10 +82,16 @@ class _LiveTrackingPageState extends State<LiveTrackingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rastreamento em Tempo Real'),
+        title: const Text(
+          'Tempo Real',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
-        centerTitle: true,
       ),
       body: Stack(
         children: [

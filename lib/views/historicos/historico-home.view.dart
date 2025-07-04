@@ -32,7 +32,14 @@ class _RotasPageState extends State<RotasPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Minhas Rotas'),
+        title: const Text(
+          'Minhas Rotas',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
       ),
