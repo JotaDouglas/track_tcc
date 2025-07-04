@@ -26,6 +26,7 @@ class SettingsPage extends StatelessWidget {
       body: ListTile(
         title: const Text('Modo Escuro'),
         trailing: Switch(
+          activeColor: Colors.orange[800],
           value: isDark,
           onChanged: (v) => provider.toggleTheme(v),
         ),
