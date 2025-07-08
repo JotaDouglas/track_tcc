@@ -22,7 +22,6 @@ class TrackRepository {
         'lat_final': location.latitude,
         'long_final': location.longitude,
         'data_hora_fim': DateTime.now().toString(),
-        
       },
       where: 'id = ?',
       whereArgs: [rotaId],
@@ -37,6 +36,24 @@ class TrackRepository {
       'longitude': location.longitude,
       'data_hora': DateTime.now().toString(),
     });
+  }
+
+  Future<void> deleteRota(int rotaId) async {
+    final db = await _dbHelper.database;
+
+    // Deleta os pontos da rota
+    await db.delete(
+      'rotas_points',
+      where: 'id_rota = ?',
+      whereArgs: [rotaId],
+    );
+
+    // Deleta a rota principal
+    await db.delete(
+      'rota',
+      where: 'id = ?',
+      whereArgs: [rotaId],
+    );
   }
 
   // (Opcional) Pegar pontos de uma rota específica

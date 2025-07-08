@@ -32,6 +32,11 @@ abstract class TrackingViewModelBase with Store {
   }
 
   @action
+  Future<void> removeRota(int rotaId) async {
+    await trackRepository.deleteRota(rotaId);
+  }
+
+  @action
   Future<void> trackLocation(PlaceModel location, String name) async {
     if (currentRotaId == null) {
       log('Erro: currentRotaId é nulo. Não foi iniciado insertTracking?');
