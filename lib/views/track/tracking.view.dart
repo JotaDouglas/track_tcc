@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 
 import 'package:track_tcc_app/model/place.model.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -27,6 +30,7 @@ class _TrackPageState extends State<TrackPage>
   Position? _lastPosition;
   PlaceModel? _lastPlace;
   String _addressLabel = '';
+  String userName = '';
 
   late AnimationController _pulseController;
 
@@ -58,43 +62,103 @@ class _TrackPageState extends State<TrackPage>
 
   void _startSharing() async {
     await WakelockPlus.enable();
-    setState(() {
-      _sharing = true;
-      _distanceMeters = 0.0;
-    });
-    _lastPosition = await Geolocator.getCurrentPosition(
-        locationSettings:
-            const LocationSettings(accuracy: LocationAccuracy.best));
-    _lastPlace = await _locationHelper.actuallyPosition();
-    _addressLabel = _lastPlace?.adress ?? '';
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      Position pos = await Geolocator.getCurrentPosition(
-          locationSettings:
-              const LocationSettings(accuracy: LocationAccuracy.best));
-      final newPlace = await _locationHelper.actuallyPosition();
-      if (_lastPosition != null) {
-        _distanceMeters += Geolocator.distanceBetween(
-          _lastPosition!.latitude,
-          _lastPosition!.longitude,
-          pos.latitude,
-          pos.longitude,
-        );
+
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      final newPermission = await Geolocator.requestPermission();
+      if (newPermission == LocationPermission.denied ||
+          newPermission == LocationPermission.deniedForever) {
+        log('Permissão de localização negada');
+        return;
       }
-      _lastPosition = pos;
-      if (newPlace != null) {
+    }
+
+    final initialPos = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
+    );
+
+    final initialPlace = await _locationHelper.actuallyPosition();
+
+    if (initialPlace == null) {
+      log('Falha ao obter localização inicial');
+      return;
+    }
+
+    await _viewModel.insertTracking(initialPlace);
+
+    if (mounted) {
+      setState(() {
+        _sharing = true;
+        _distanceMeters = 0.0;
+        _lastPosition = initialPos;
+        _lastPlace = initialPlace;
+        _addressLabel = initialPlace.adress ?? '';
+      });
+    }
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      try {
+        final pos = await Geolocator.getCurrentPosition(
+          locationSettings:
+              const LocationSettings(accuracy: LocationAccuracy.best),
+        );
+
+        final newPlace = await _locationHelper.actuallyPosition();
+
+        if (newPlace == null) {
+          log('Localização atual é nula');
+          return;
+        }
+
+        if (_lastPosition != null) {
+          _distanceMeters += Geolocator.distanceBetween(
+            _lastPosition!.latitude,
+            _lastPosition!.longitude,
+            pos.latitude,
+            pos.longitude,
+          );
+        }
+
+        _lastPosition = pos;
         _lastPlace = newPlace;
         _addressLabel = newPlace.city ?? '';
-        await _viewModel.trackLocation(newPlace, newPlace.city ?? '');
+
+        print('Compartilhando: ${newPlace.latitude}, ${newPlace.longitude}');
+        await _viewModel.trackLocation(newPlace, userName);
+
+        setState(() {});
+      } catch (e, stack) {
+        log('Erro no rastreamento periódico: $e\n$stack');
       }
-      setState(() {});
     });
   }
 
   void _stopSharing() async {
     _timer?.cancel();
+    _timer = null;
+
     await WakelockPlus.disable();
+
+    try {
+      final finalPlace = await _locationHelper.actuallyPosition();
+
+      if (finalPlace != null) {
+        await _viewModel.stopTracking(finalPlace);
+        log('Rastreamento finalizado com sucesso.');
+      } else {
+        log('Não foi possível obter a localização final.');
+      }
+    } catch (e, stack) {
+      log('Erro ao parar rastreamento: $e\n$stack');
+    }
+
     setState(() {
       _sharing = false;
+      _addressLabel = '';
+      _lastPlace = null;
+      _lastPosition = null;
+      _distanceMeters = 0.0;
     });
   }
 
@@ -108,6 +172,9 @@ class _TrackPageState extends State<TrackPage>
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<LoginViewModel>(context);
+    userName = authViewModel.loginUser?.username ?? 'Usuário';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -150,7 +217,9 @@ class _TrackPageState extends State<TrackPage>
                         _sharing
                             ? 'Meu endereço atual: $_addressLabel'
                             : 'Comece um novo compartilhamento',
-                        style: TextStyle(color: _sharing ? Colors.white : null, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: _sharing ? Colors.white : null,
+                            fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                     ),
