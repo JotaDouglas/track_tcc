@@ -10,6 +10,7 @@ import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class TrackPage extends StatefulWidget {
   const TrackPage({super.key});
@@ -80,6 +81,7 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   Future<void> _startSharing() async {
+    await WakelockPlus.enable();
     if (!loopOn) Dialogs.showLoading(context, GlobalKey());
     toggleTrackingState();
 
@@ -127,7 +129,8 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-  void _startTimer() {
+  void _startTimer() async{
+    await WakelockPlus.disable();
     temp = Timer.periodic(const Duration(seconds: 5), (_) => _trackOnce());
   }
 
