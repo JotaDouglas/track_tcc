@@ -2,183 +2,188 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
-
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
-
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 
 class TrackPage extends StatefulWidget {
-  const TrackPage({Key? key}) : super(key: key);
+  const TrackPage({super.key});
 
   @override
   State<TrackPage> createState() => _TrackPageState();
 }
 
-class _TrackPageState extends State<TrackPage>
-    with SingleTickerProviderStateMixin {
+class _TrackPageState extends State<TrackPage> {
   final Locationhelper _locationHelper = Locationhelper();
-  final TrackingViewModel _viewModel = TrackingViewModel();
+  final TrackingViewModel viewModel = TrackingViewModel();
 
-  Timer? _timer;
+  String? nome;
+
+  List<PlaceModel> trackList = [];
+  bool isLoading = false;
+  Timer? temp;
+  bool loopOn = false;
   bool _sharing = false;
-  double _distanceMeters = 0.0;
-  Position? _lastPosition;
-  PlaceModel? _lastPlace;
-  String _addressLabel = '';
-  String userName = '';
 
-  late AnimationController _pulseController;
+  double _distanceMeters = 0.0;
+  String _addressLabel = '';
+  PlaceModel? _lastPlace;
+  LatLng? _lastPosition;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-      lowerBound: 0.8,
-      upperBound: 1.2,
-    )
-      ..addListener(() => setState(() {}))
-      ..repeat(reverse: true);
-    _requestPermission();
+    requestLocationPermission();
   }
 
-  Future<void> _requestPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) await Geolocator.openLocationSettings();
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.deniedForever) {
-      await Geolocator.openAppSettings();
-    }
-  }
+  Future<void> requestLocationPermission() async {
+    var status = await Permission.location.status;
 
-  void _startSharing() async {
-    await WakelockPlus.enable();
+    if (!status.isGranted) {
+      status = await Permission.location.request();
+    }
 
-    final permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      final newPermission = await Geolocator.requestPermission();
-      if (newPermission == LocationPermission.denied ||
-          newPermission == LocationPermission.deniedForever) {
-        log('Permissão de localização negada');
-        return;
+    if (status.isDenied || status.isPermanentlyDenied) {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Permissão necessária'),
+            content: const Text(
+              'Por favor, ative a permissão de localização nas configurações.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => openAppSettings(),
+                child: const Text('Abrir configurações'),
+              ),
+            ],
+          ),
+        );
       }
     }
+  }
 
-    final initialPos = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
-    );
+  void popWidget() {
+    Navigator.pop(context);
+  }
 
-    final initialPlace = await _locationHelper.actuallyPosition();
+  void toggleTrackingState() {
+    setState(() {
+      loopOn = !loopOn;
+    });
+  }
 
-    if (initialPlace == null) {
-      log('Falha ao obter localização inicial');
-      return;
-    }
+  Future<void> _startSharing() async {
+    if (!loopOn) Dialogs.showLoading(context, GlobalKey());
+    toggleTrackingState();
 
-    await _viewModel.insertTracking(initialPlace);
+    setState(() {
+      _sharing = loopOn;
+      _distanceMeters = 0.0;
+    });
 
-    if (mounted) {
+    if (loopOn) {
+      final newLocal = await _locationHelper.actuallyPosition();
+
+      if (newLocal != null) {
+        await viewModel.insertTracking(newLocal);
+
+        _lastPlace = newLocal;
+        _lastPosition =
+            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
+        _addressLabel = newLocal.adress ?? 'Endereço não encontrado';
+
+        setState(() {
+          trackList.insert(0, newLocal);
+        });
+
+        _trackOnce(); // faz a primeira leitura
+        _startTimer(); // começa o timer para continuar rastreando
+      } else {
+        toggleTrackingState();
+        setState(() => _sharing = false);
+      }
+
+      popWidget(); // fecha o loading
+    } else {
+      if (trackList.isNotEmpty) {
+        await viewModel.stopTracking(trackList.first);
+      }
+
+      _stopSharing();
       setState(() {
-        _sharing = true;
+        trackList.clear();
+        _addressLabel = '';
+        _lastPlace = null;
+        _lastPosition = null;
         _distanceMeters = 0.0;
-        _lastPosition = initialPos;
-        _lastPlace = initialPlace;
-        _addressLabel = initialPlace.adress ?? '';
       });
     }
+  }
 
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      try {
-        final pos = await Geolocator.getCurrentPosition(
-          locationSettings:
-              const LocationSettings(accuracy: LocationAccuracy.best),
-        );
+  void _startTimer() {
+    temp = Timer.periodic(const Duration(seconds: 5), (_) => _trackOnce());
+  }
 
-        final newPlace = await _locationHelper.actuallyPosition();
+  Future<void> _trackOnce() async {
+    try {
+      final newLocal = await _locationHelper.actuallyPosition();
 
-        if (newPlace == null) {
-          log('Localização atual é nula');
-          return;
-        }
-
+      if (newLocal != null) {
+        // Calcular distância
+        final newLatLng =
+            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
         if (_lastPosition != null) {
-          _distanceMeters += Geolocator.distanceBetween(
-            _lastPosition!.latitude,
-            _lastPosition!.longitude,
-            pos.latitude,
-            pos.longitude,
+          _distanceMeters += const Distance().as(
+            LengthUnit.Meter,
+            _lastPosition!,
+            newLatLng,
           );
         }
 
-        _lastPosition = pos;
-        _lastPlace = newPlace;
-        _addressLabel = newPlace.city ?? '';
+        _lastPosition = newLatLng;
+        _lastPlace = newLocal;
+        _addressLabel = newLocal.adress ?? 'Endereço não encontrado';
 
-        print('Compartilhando: ${newPlace.latitude}, ${newPlace.longitude}');
-        await _viewModel.trackLocation(newPlace, userName);
+        await viewModel.trackLocation(newLocal, nome ?? 'Sem nome');
 
-        setState(() {});
-      } catch (e, stack) {
-        log('Erro no rastreamento periódico: $e\n$stack');
-      }
-    });
-  }
+        setState(() {
+          trackList.insert(0, newLocal);
+        });
 
-  void _stopSharing() async {
-    _timer?.cancel();
-    _timer = null;
-
-    await WakelockPlus.disable();
-
-    try {
-      final finalPlace = await _locationHelper.actuallyPosition();
-
-      if (finalPlace != null) {
-        await _viewModel.stopTracking(finalPlace);
-        log('Rastreamento finalizado com sucesso.');
+        log('Localização atualizada: $_addressLabel');
       } else {
-        log('Não foi possível obter a localização final.');
+        log('Localização retornou null.');
       }
-    } catch (e, stack) {
-      log('Erro ao parar rastreamento: $e\n$stack');
+    } catch (e) {
+      log('Erro no rastreamento: $e');
+      _stopSharing();
+      toggleTrackingState();
     }
-
-    setState(() {
-      _sharing = false;
-      _addressLabel = '';
-      _lastPlace = null;
-      _lastPosition = null;
-      _distanceMeters = 0.0;
-    });
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pulseController.dispose();
-    WakelockPlus.disable();
-    super.dispose();
+  void _stopSharing() {
+    temp?.cancel();
+    temp = null;
+    log('Rastreamento finalizado');
+    setState(() => _sharing = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<LoginViewModel>(context);
-    userName = authViewModel.loginUser?.username ?? 'Usuário';
+    nome = authViewModel.loginUser?.username ?? 'user${DateTime.now().microsecond}';
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Compartilhamento',
+          "TRACKING",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -188,7 +193,7 @@ class _TrackPageState extends State<TrackPage>
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
       ),
-      backgroundColor: _sharing ? Colors.black54 : null,
+      backgroundColor: _sharing ? Colors.black87 : null,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -196,42 +201,40 @@ class _TrackPageState extends State<TrackPage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Visibility(
-                  visible: !_sharing,
-                  child: Icon(Icons.assistant_navigation,
-                      size: 100, color: Colors.orange[900]),
+                Icon(
+                  Icons.assistant_navigation,
+                  size: _sharing ? 100 : 80,
+                  color: _sharing ? Colors.orange[900] : Colors.grey,
                 ),
-                Visibility(
-                  visible: _sharing,
-                  child: Transform.scale(
-                    scale: _pulseController.value,
-                    child: Icon(Icons.assistant_navigation,
-                        size: 100, color: _sharing ? Colors.orange[900] : null),
+                const SizedBox(height: 24),
+                Text(
+                  _sharing
+                      ? 'Rastreamento em andamento'
+                      : 'Toque para iniciar o compartilhamento',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: _sharing ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _sharing
-                            ? 'Meu endereço atual: $_addressLabel'
-                            : 'Comece um novo compartilhamento',
-                        style: TextStyle(
-                            color: _sharing ? Colors.white : null,
-                            fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
                 if (_sharing) ...[
                   Text(
                     'Distância: ${_distanceMeters.toStringAsFixed(1)} m',
-                    style: TextStyle(
-                        color: _sharing ? Colors.white : Colors.black),
-                    // style: theme.textTheme.subtitle1,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _addressLabel,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -239,13 +242,13 @@ class _TrackPageState extends State<TrackPage>
                     children: [
                       IconButton(
                         icon: const Icon(Icons.message),
-                        color: _sharing ? Colors.orange[900] : null,
+                        color: Colors.orange[400],
                         iconSize: 32,
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.notifications_active),
-                        color: _sharing ? Colors.orange[900] : null,
+                        color: Colors.orange[400],
                         iconSize: 32,
                         onPressed: () {},
                       ),
@@ -258,7 +261,7 @@ class _TrackPageState extends State<TrackPage>
                     minimumSize: const Size.fromHeight(50),
                     backgroundColor: Colors.orange[900],
                   ),
-                  onPressed: _sharing ? _stopSharing : _startSharing,
+                  onPressed: _startSharing,
                   child: Text(
                     _sharing ? 'PARAR' : 'INICIAR',
                     style: const TextStyle(fontSize: 16, color: Colors.white),
