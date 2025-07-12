@@ -82,6 +82,11 @@ class _TrackPageState extends State<TrackPage> {
 
   Future<void> _startSharing() async {
     await WakelockPlus.enable();
+    var res;
+    if (mounted) {
+      res = await Locationhelper().checkGps(context);
+    }
+    if (res != true) return;
     if (!loopOn) Dialogs.showLoading(context, GlobalKey());
     toggleTrackingState();
 
