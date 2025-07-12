@@ -94,7 +94,9 @@ class _TrackPageState extends State<TrackPage> {
       final newLocal = await _locationHelper.actuallyPosition();
 
       if (newLocal != null) {
-        await viewModel.insertTracking(newLocal);
+        if (viewModel.currentRotaId == null) {
+          await viewModel.insertTracking(newLocal);
+        }
 
         _lastPlace = newLocal;
         _lastPosition =
@@ -129,7 +131,7 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-  void _startTimer() async{
+  void _startTimer() async {
     await WakelockPlus.disable();
     temp = Timer.periodic(const Duration(seconds: 5), (_) => _trackOnce());
   }
@@ -181,7 +183,8 @@ class _TrackPageState extends State<TrackPage> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<LoginViewModel>(context);
-    nome = authViewModel.loginUser?.username ?? 'user${DateTime.now().microsecond}';
+    nome = authViewModel.loginUser?.username ??
+        'user${DateTime.now().microsecond}';
 
     return Scaffold(
       appBar: AppBar(
@@ -217,7 +220,6 @@ class _TrackPageState extends State<TrackPage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: _sharing ? Colors.white : Colors.black87,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
