@@ -36,7 +36,7 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Localizações em tempo real',
+          'ACOMPANHAR',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -46,39 +46,46 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
       ),
-      body: ListView.builder(
-        itemCount: localizacoes.length,
-        itemBuilder: (context, index) {
-          final item = localizacoes[index];
-          final nomeUsuario = item['user_name'];
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: ListTile(
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                ),
-                leading: Icon(
-                  Icons.location_on,
-                  color: Colors.green,
-                ),
-                title: Text(
-                  '$nomeUsuario',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  'Data: ${item['data_hora']}\nLat: ${item['latitude']}, Lng: ${item['longitude']}',
-                  style: TextStyle(fontSize: 12),
-                ),
-                onTap: () => GoRouter.of(context)
-                    .push('/location-share-map/${item['user_id']}'),
+      body: localizacoes.isEmpty
+          ? Center(
+              child: Text(
+                'Nenhuma localização disponível.',
+                style: TextStyle(fontSize: 16),
               ),
+            )
+          : ListView.builder(
+              itemCount: localizacoes.length,
+              itemBuilder: (context, index) {
+                final item = localizacoes[index];
+                final nomeUsuario = item['user_name'];
+
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    child: ListTile(
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                      ),
+                      leading: const Icon(
+                        Icons.location_on,
+                        color: Colors.green,
+                      ),
+                      title: Text(
+                        '$nomeUsuario',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        'Data: ${item['data_hora']}\nLat: ${item['latitude']}, Lng: ${item['longitude']}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      onTap: () => GoRouter.of(context)
+                          .push('/location-share-map/${item['user_id']}'),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 

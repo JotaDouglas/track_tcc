@@ -80,18 +80,19 @@ class _RotasPageState extends State<RotasPage> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: ListTile(
                     title: Text(
-                      rota.titulo ?? 'Rota sem título',
+                      "🚩 Rota ${index + 1}",
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                          fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.flag, color: Colors.green),
+                              const Icon(Icons.play_arrow, color: Colors.green),
                               const SizedBox(width: 4),
                               Text(DateConversion.convertDateTimeFromString(
                                   rota.dateInicial!)),
@@ -100,7 +101,7 @@ class _RotasPageState extends State<RotasPage> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(Icons.flag, color: Colors.red),
+                              const Icon(Icons.stop, color: Colors.red),
                               const SizedBox(width: 4),
                               Text(DateConversion.convertDateTimeFromString(
                                   rota.dateFinal ?? '')),
