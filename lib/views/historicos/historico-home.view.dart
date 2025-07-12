@@ -91,7 +91,7 @@ class _RotasPageState extends State<RotasPage> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.play_arrow, color: Colors.green),
+                              const Icon(Icons.flag, color: Colors.green),
                               const SizedBox(width: 4),
                               Text(DateConversion.convertDateTimeFromString(
                                   rota.dateInicial!)),
@@ -100,7 +100,7 @@ class _RotasPageState extends State<RotasPage> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(Icons.stop, color: Colors.red),
+                              const Icon(Icons.flag, color: Colors.red),
                               const SizedBox(width: 4),
                               Text(DateConversion.convertDateTimeFromString(
                                   rota.dateFinal ?? '')),
