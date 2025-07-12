@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -89,21 +91,19 @@ class _LocalizacoesPageState extends State<LocalizacoesPage> {
     );
   }
 
+  late final StreamSubscription<List<Map<String, dynamic>>> _subscription;
+
   void _setupRealtime() {
-    if (mounted) {
-      _supabase
-          .from('localizacoes')
-          .stream(primaryKey: ['id_localizacao'])
-          .order('data_hora', ascending: false)
-          .listen(
-            (List<Map<String, dynamic>> data) {
-              setState(
-                () {
-                  localizacoes = data;
-                },
-              );
-            },
-          );
-    }
+    _subscription = _supabase
+        .from('localizacoes')
+        .stream(primaryKey: ['id_localizacao'])
+        .order('data_hora', ascending: false)
+        .listen((List<Map<String, dynamic>> data) {
+          if (!mounted) return;
+
+          setState(() {
+            localizacoes = data;
+          });
+        });
   }
 }

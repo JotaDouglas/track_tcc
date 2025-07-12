@@ -137,7 +137,6 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _startTimer() async {
-    await WakelockPlus.disable();
     temp = Timer.periodic(const Duration(seconds: 5), (_) => _trackOnce());
   }
 
@@ -178,7 +177,8 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-  void _stopSharing() {
+  void _stopSharing() async{
+    await WakelockPlus.disable();
     temp?.cancel();
     temp = null;
     log('Rastreamento finalizado');
