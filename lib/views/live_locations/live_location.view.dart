@@ -17,7 +17,8 @@ class LiveTrackingPage extends StatefulWidget {
 class _LiveTrackingPageState extends State<LiveTrackingPage> {
   final SupabaseClient supabase = Supabase.instance.client;
   final MapController _mapController = MapController();
-  final List<LatLng> _path = [];
+  final ValueNotifier<List<LatLng>> _path = ValueNotifier([]);
+  final ValueNotifier<LatLng?> _currentPos = ValueNotifier(null);
 
   StreamSubscription<List<Map<String, dynamic>>>? _sub;
   bool _isLoading = true;
@@ -29,78 +30,70 @@ class _LiveTrackingPageState extends State<LiveTrackingPage> {
   }
 
   void _listenRealtime() {
-    if (mounted) {
-      final stream =
-          supabase.from('localizacoes').stream(primaryKey: ['id_localizacao']);
+  if (!mounted || _sub != null) return;
 
-      _sub = stream.listen((rows) {
-        final filteredRows =
-            rows.where((row) => row['user_id'] == widget.userId).toList();
+  final stream = supabase
+      .from('localizacoes')
+      .stream(primaryKey: ['id_localizacao']);
 
-        if (filteredRows.isEmpty) return;
+  _sub = stream.listen((rows) {
+    final filteredRows = (widget.userId == null)
+        ? rows
+        : rows.where((row) => row['user_id'] == widget.userId).toList();
 
-        // Use filteredRows[0] ou como preferir
-      });
+    if (filteredRows.isEmpty) return;
 
-      _sub = stream.listen((rows) {
-        // Filtra no Dart, porque filtro direto não existe
-        final filteredRows = (widget.userId == null)
-            ? rows
-            : rows.where((row) => row['user_id'] == widget.userId).toList();
+    final newPath = filteredRows.map((row) {
+      final lat = (row['latitude'] as num).toDouble();
+      final lon = (row['longitude'] as num).toDouble();
+      return LatLng(lat, lon);
+    }).toList();
 
-        if (filteredRows.isEmpty) return;
+    final latestPoint = newPath.last;
 
-        final newPath = filteredRows.map((row) {
-          final lat = (row['latitude'] as num).toDouble();
-          final lon = (row['longitude'] as num).toDouble();
-          return LatLng(lat, lon);
-        }).toList();
+    // Atualiza os Notifiers diretamente
+    _path.value = newPath;
+    _currentPos.value = latestPoint;
 
-        final latestPoint = newPath.last;
+    // Move o mapa suavemente até a nova posição
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mapController.move(latestPoint, 16.0);
+    });
+  });
+}
 
-        setState(() {
-          _path
-            ..clear()
-            ..addAll(newPath);
-          _isLoading = false;
-        });
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _mapController.move(latestPoint, 16.0);
-        });
-      });
-    }
-  }
 
   @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
+void dispose() {
+  _sub?.cancel();
+  _path.dispose();
+  _currentPos.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rastreamento em Tempo Real'),
+        title: const Text(
+          'Tempo Real',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
-        centerTitle: true,
       ),
       body: Stack(
         children: [
           TrackingMapWidget(
             trackList: _path,
             mapController: _mapController,
-            modeRoute: false,
+            currentPosNotifier: _currentPos,
+            modeRoute: true,
           ),
-          if (_isLoading)
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: LinearProgressIndicator(minHeight: 3),
-            ),
         ],
       ),
     );

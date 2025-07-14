@@ -20,61 +20,72 @@ abstract class TrackingViewModelBase with Store {
 
   @action
   Future<void> insertTracking(PlaceModel initialLocation) async {
-    final rotaId = await trackRepository.insertRota(initialLocation);
-    currentRotaId = rotaId;
-    trackList.clear();
-    trackList.insert(0, initialLocation);
+    try {
+      final rotaId = await trackRepository.insertRota(initialLocation);
+      currentRotaId = rotaId;
+      trackList.clear();
+      trackList.insert(0, initialLocation);
+      log('Rota iniciada com ID: $rotaId');
+    } catch (e) {
+      log('Erro ao iniciar rota: $e');
+    }
+  }
+
+  @action
+  Future<void> removeRota(int rotaId) async {
+    await trackRepository.deleteRota(rotaId);
   }
 
   @action
   Future<void> trackLocation(PlaceModel location, String name) async {
-    if (currentRotaId != null) {
+    if (currentRotaId == null) {
+      log('Erro: currentRotaId é nulo. Não foi iniciado insertTracking?');
+      return;
+    }
+
+    try {
+      final uid = _supabase.auth.currentUser?.id;
+      if (uid == null) {
+        log('Usuário não autenticado');
+        return;
+      }
+
       trackList.insert(0, location);
       await trackRepository.insertRotaPoint(currentRotaId!, location);
 
-      try {
-        final uid = _supabase.auth.currentUser!.id;
+      final row = {
+        'user_id': uid,
+        'data_hora': DateTime.now().toIso8601String(),
+        'latitude': location.latitude,
+        'longitude': location.longitude,
+        'user_name': name,
+      };
 
-        // Linhas que serão inseridas OU mescladas.
-        final row = {
-          'user_id': uid,
-          'data_hora': DateTime.now().toIso8601String(),
-          'latitude': location.latitude,
-          'longitude': location.longitude,
-          'user_name': name,
-        };
+      await _supabase.from('localizacoes').upsert(row, onConflict: 'user_id');
 
-        try {
-          await _supabase
-              .from('localizacoes')
-              .upsert(row, onConflict: 'user_id');
-        } catch (e) {
-          log("erro: $e");
-        }
-      } catch (e) {
-        log("erro: $e");
-      }
+      log('Localização enviada para Supabase: $row');
+    } catch (e, stack) {
+      log("Erro ao rastrear localização: $e\n$stack");
     }
   }
 
   @action
   Future<void> stopTracking(PlaceModel finalLocation) async {
-    if (currentRotaId != null) {
-      await trackRepository.updateRotaFinal(currentRotaId!, finalLocation);
-      try {
-        final uid = _supabase.auth.currentUser!.id;
+    if (currentRotaId == null) {
+      log('Rastreamento já estava parado.');
+      return;
+    }
 
-        try {
-          await _supabase
-              .from('localizacoes')
-              .delete().eq("user_id", uid);
-        } catch (e) {
-          log("erro: $e");
-        }
-      } catch (e) {
-        log("erro: $e");
+    try {
+      await trackRepository.updateRotaFinal(currentRotaId!, finalLocation);
+      final uid = _supabase.auth.currentUser?.id;
+      if (uid != null) {
+        await _supabase.from('localizacoes').delete().eq("user_id", uid);
+        log('Localização final removida do Supabase');
       }
       currentRotaId = null;
+    } catch (e) {
+      log("Erro ao parar rastreamento: $e");
     }
   }
 

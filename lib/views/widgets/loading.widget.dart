@@ -12,7 +12,6 @@ class Dialogs {
       builder: (BuildContext context) {
         return SimpleDialog(
           // key: key,
-          backgroundColor: Colors.white,
           children: <Widget>[
             Center(
               child: Column(children: [

@@ -72,31 +72,27 @@ class Locationhelper {
     return null;
   }
 
-  Future<void> checkGps(context) async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  Future checkGps(context) async {
+    // 1. Verifica se GPS está ativado
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
-    // Verifica se o GPS está ativado
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // GPS desativado, pede para o usuário ativar
-      await Geolocator.openLocationSettings();
-      return;
-    }
+      // Mostra diálogo e abre configurações para ativar GPS
+      bool gpsEnabledByUser = false;
 
-    // Verifica permissões
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
       await showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Permissão necessária'),
+        builder: (context) => AlertDialog(
+          title: const Text('GPS desativado'),
           content: const Text(
-              'Por favor, ative a permissão de localização nas configurações.'),
+              'Por favor, ative o GPS para continuar usando o aplicativo.'),
           actions: [
             TextButton(
               onPressed: () async {
-                permission = await Geolocator.requestPermission();
+                Navigator.of(context).pop();
+                await Geolocator.openLocationSettings();
+                // Aqui, não tem retorno direto se o usuário ativou ou não o GPS
+                // Pode fazer uma espera ou checar novamente ao voltar
               },
               child: const Text('Abrir configurações'),
             ),
@@ -104,17 +100,51 @@ class Locationhelper {
         ),
       );
 
+      // Após o diálogo, espera um tempo e verifica novamente se o GPS foi ativado
+      await Future.delayed(const Duration(seconds: 2));
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+      if (!serviceEnabled) {
+        // Se ainda não ativou, retorna false para indicar que não pode prosseguir
+        return false;
+      }
+    }
+
+    // 2. Verifica permissão de localização
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissão negada
-        return;
+        // Permissão negada pelo usuário
+        return false;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissão negada permanentemente
-      await Geolocator.openAppSettings();
-      return;
+      // Permissão negada permanentemente, abre configurações do app
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Permissão negada'),
+          content: const Text(
+              'A permissão de localização foi negada permanentemente. Por favor, ative nas configurações do dispositivo.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Geolocator.openAppSettings();
+              },
+              child: const Text('Abrir configurações'),
+            ),
+          ],
+        ),
+      );
+      return false;
     }
+
+    // Tudo ok: GPS ativo e permissão concedida
+    return true;
 
     // GPS ativo e permissões ok, pode prosseguir
     // Position position = await Geolocator.getCurrentPosition();

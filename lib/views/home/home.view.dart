@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/card_home.dart';
 
@@ -15,43 +14,19 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _localizacaoAtiva = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      requestLocationPermission(context);
-    });
+    _verificarPermissaoLocalizacao();
   }
 
-  Future<void> requestLocationPermission(BuildContext context) async {
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
-
-    if (status.isDenied || status.isPermanentlyDenied) {
-      if (mounted) {
-        await showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Permissão necessária'),
-            content: const Text(
-                'Por favor, ative a permissão de localização nas configurações.'),
-            actions: [
-              TextButton(
-                onPressed: () => openAppSettings(),
-                child: const Text('Abrir configurações'),
-              ),
-            ],
-          ),
-        );
-      }
-    } else {
-      if (mounted) {
-        Locationhelper().checkGps(context);
-      }
-    }
+  Future<void> _verificarPermissaoLocalizacao() async {
+    final status = await Permission.location.status;
+    setState(() {
+      _localizacaoAtiva = status.isGranted;
+    });
   }
 
   @override
@@ -61,7 +36,6 @@ class _HomeViewState extends State<HomeView> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.grey[100],
       body: Column(
         children: [
           Stack(
@@ -80,13 +54,34 @@ class _HomeViewState extends State<HomeView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Olá, $nome 👋',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Olá, $nome 👋',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.orange[50],
+                            shape: BoxShape.circle, // deixa o fundo redondo
+                          ),
+                          child: Icon(
+                            _localizacaoAtiva
+                                ? Icons.location_on
+                                : Icons.location_off,
+                            color:
+                                _localizacaoAtiva ? Colors.green : Colors.red,
+                            size: 24,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     const Text(
@@ -105,9 +100,7 @@ class _HomeViewState extends State<HomeView> {
                     GoRouter.of(context).pushReplacement('/login');
                   },
                   style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                      Colors.orange[800],
-                    ),
+                    backgroundColor: WidgetStatePropertyAll(Colors.orange[800]),
                   ),
                   child: const Row(
                     children: [
@@ -154,7 +147,13 @@ class _HomeViewState extends State<HomeView> {
                 buildCard(
                   icon: Icons.emergency_share,
                   label: "Acompanhar",
-                  onTap: () => GoRouter.of(context).push('/location-share-home'),
+                  onTap: () =>
+                      GoRouter.of(context).push('/location-share-home'),
+                ),
+                buildCard(
+                  icon: Icons.settings,
+                  label: "Configurações",
+                  onTap: () => GoRouter.of(context).push('/settings-theme'),
                 ),
               ],
             ),

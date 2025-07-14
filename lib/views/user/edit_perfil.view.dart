@@ -175,7 +175,7 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                               actions: [
                                 TextButton(
                                   onPressed: () =>
-                                      GoRouter.of(context).push('/home'),
+                                      GoRouter.of(context).go('/home'),
                                   child: const Text("OK"),
                                 ),
                               ],
