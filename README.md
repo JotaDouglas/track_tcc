@@ -17,7 +17,7 @@ Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário com
 - ✅ **Armazenamento offline** da localização, com envio posterior quando houver conexão
 - 🚧 (Em desenvolvimento) **Compartilhamento de localização controlado** (por tempo limitado e com contatos escolhidos)
 - 🚧 (Em desenvolvimento) Botões de **alerta rápido** para suporte em caso de emergência
-- 🚧 (Em desenvolvimento) Compartilhamento online em tempo real
+- ✅ (Em desenvolvimento) Compartilhamento online em tempo real
 - 🚧 (Em desenvolvimento) Notificações para contatos chave
 
 ---
