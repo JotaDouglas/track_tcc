@@ -3,7 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:track_tcc_app/helper/DateConversion.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
-import 'package:track_tcc_app/views/historicos/historico_map.view.dart';
+import 'package:track_tcc_app/views/historicos/historico_mapa.view.dart';
 
 class RotasPage extends StatefulWidget {
   const RotasPage({super.key});
@@ -24,8 +24,8 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
   }
 
   Future<void> loadRotas() async {
-    final result = await trackViewModel.getAllRotas();
-    final rotasOnline = await trackViewModel.getRotasOnline();
+    await trackViewModel.getAllRotas();
+    await trackViewModel.getRotasOnline();
   }
 
   Future<void> deletarRota(dynamic id, {bool isLocal = true}) async {

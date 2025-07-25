@@ -2,15 +2,14 @@ import 'package:go_router/go_router.dart';
 import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home.view.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
-import 'package:track_tcc_app/views/live_locations/live_home.view.dart';
-import 'package:track_tcc_app/views/live_locations/live_location.view.dart';
+import 'package:track_tcc_app/views/live/live_home.view.dart';
+import 'package:track_tcc_app/views/live/live_location.view.dart';
 import 'package:track_tcc_app/views/login/forgetKey.view.dart';
 import 'package:track_tcc_app/views/login/login.view.dart';
 import 'package:track_tcc_app/views/login/signup.view.dart';
 import 'package:track_tcc_app/views/login/userDates.view.dart';
 import 'package:track_tcc_app/views/splash.view.dart';
 import 'package:track_tcc_app/views/settings.view.dart';
-import 'package:track_tcc_app/views/track/historico/historico.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
 import 'package:track_tcc_app/views/user/edit_perfil.view.dart';
 import 'package:track_tcc_app/views/user/perfil.view.dart';
@@ -48,10 +47,6 @@ class AppRouter {
           path: "/track",
           name: 'track',
           builder: (context, status) => const TrackPage()),
-      GoRoute(
-          path: "/historic",
-          name: 'historic',
-          builder: (context, status) => const HistoricoView()),
       GoRoute(
           path: "/historico-home",
           name: 'historico-home',
