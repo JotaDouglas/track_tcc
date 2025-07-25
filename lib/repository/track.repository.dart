@@ -143,4 +143,15 @@ class TrackRepository {
       return [];
     }
   }
+  
+  Future deleteRotaOnline(String id) async {
+    try {
+      final response = await _supabase.from('rotas').delete().eq('id_rota', id);
+      log(response.toString());
+      return response;
+    } catch (e) {
+      log("erro ao trazer dados: $e");
+      return [];
+    }
+  }
 }

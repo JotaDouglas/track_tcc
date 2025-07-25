@@ -120,7 +120,7 @@ abstract class TrackingViewModelBase with Store {
 
       bool res = await trackRepository.syncRotas(dados, rota.id!);
 
-      if(res){
+      if (res) {
         await removeRota(rota.id ?? -1);
         getAllRotas();
         getRotasOnline();
@@ -135,7 +135,6 @@ abstract class TrackingViewModelBase with Store {
   Future getAllRotas() async {
     List<PlaceModel> rotasAux = await trackRepository.getAllRotas();
     listRotasLocal = List.from(rotasAux);
-
   }
 
   Future<List<PlaceModel>> getPontosByRota(int rotaId) async {
@@ -161,11 +160,23 @@ abstract class TrackingViewModelBase with Store {
           dateInicial: e['data_inicio'],
           dateFinal: e['data_fim'],
           cordenadas: e['cordenadas'],
+          idSistema: e['id_rota'],
         );
       },
     ).toList();
 
     listRotasOnline = List.from(aux);
+
+    changeLoading(false);
+  }
+
+  Future deleteRotaOnline(String id) async {
+    changeLoading(true);
+
+    final uid = _supabase.auth.currentUser?.id;
+
+    await trackRepository.deleteRotaOnline(id);
+    getRotasOnline();
 
     changeLoading(false);
   }

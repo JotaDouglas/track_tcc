@@ -28,7 +28,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
     final rotasOnline = await trackViewModel.getRotasOnline();
   }
 
-  Future<void> deletarRota(int id) async {
+  Future<void> deletarRota(dynamic id, {bool isLocal = true}) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -47,9 +47,11 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
       ),
     );
 
-    if (confirm == true) {
+    if (confirm == true && isLocal) {
       await trackViewModel.removeRota(id);
       await loadRotas();
+    } else {
+      await trackViewModel.deleteRotaOnline(id ?? '');
     }
   }
 
@@ -98,9 +100,11 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                 ? const Center(
                                     child: Text('Nenhuma rota encontrada.'))
                                 : ListView.builder(
-                                    itemCount: trackViewModel.listRotasLocal.length,
+                                    itemCount:
+                                        trackViewModel.listRotasLocal.length,
                                     itemBuilder: (context, index) {
-                                      final rota = trackViewModel.listRotasLocal[index];
+                                      final rota =
+                                          trackViewModel.listRotasLocal[index];
                                       return Card(
                                         elevation: 3,
                                         margin: const EdgeInsets.symmetric(
@@ -236,8 +240,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                 ? Center(
                                     child: CircularProgressIndicator(),
                                   )
-                                : trackViewModel
-                                            .listRotasOnline.isEmpty
+                                : trackViewModel.listRotasOnline.isEmpty
                                     ? const Center(
                                         child: Text('Nenhuma rota encontrada.'))
                                     : ListView.builder(
@@ -314,7 +317,9 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                       break;
 
                                                     case 'delete':
-                                                      deletarRota(rota.id!);
+                                                      deletarRota(
+                                                          rota.idSistema!,
+                                                          isLocal: false);
                                                       break;
                                                   }
                                                 },
