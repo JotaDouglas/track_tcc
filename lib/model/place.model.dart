@@ -8,6 +8,7 @@ class PlaceModel {
   String? dateFinal;
   int? id;
   String? titulo;
+  String? idSistema;
 
   PlaceModel({
     this.adress,
@@ -19,6 +20,7 @@ class PlaceModel {
     this.dateFinal,
     this.id,
     this.titulo,
+    this.idSistema,
   });
 
   factory PlaceModel.fromMap(Map<String, dynamic> map) {
@@ -30,12 +32,13 @@ class PlaceModel {
       longitude: map['longitude'] != null
           ? double.tryParse(map['longitude'].toString())
           : null,
-      dateInicial: map['data_hora_inicio'],
+      dateInicial: map['data_hora_inicio'] ?? map['data_hora'],
       dateFinal: map['data_hora_fim'],
       titulo: map['titulo'],
       city: null,
       country: null,
       adress: null,
+      idSistema: map['id_sistema'],
     );
   }
 
@@ -48,4 +51,11 @@ class PlaceModel {
       'data_hora_fim': dateFinal,
     };
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'latitude': latitude,
+        'longitude': longitude,
+        'data': dateInicial,
+      };
 }

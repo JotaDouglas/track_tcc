@@ -89,6 +89,31 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
+  @action
+  Future<bool> syncRota(PlaceModel rota) async {
+    try {
+      if(rota.id == null || rota.idSistema != null) return false;
+
+      final uid = _supabase.auth.currentUser?.id;
+      //Criar o json com todos os pontos da rota
+      var trajetoJson = await trackRepository.gerarJsonRotasComPontos(rota.id!);
+
+      //Criar o corpo do arquivo para realizar o insert
+      var dados = {
+        "user_id": uid,
+        "data_inicio": rota.dateInicial,
+        "data_fim": rota.dateFinal,
+        "cordenadas": trajetoJson,
+      };
+
+      bool res = await trackRepository.syncRotas(dados, rota.id!);
+
+      return res;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<List<PlaceModel>> getAllRotas() async {
     return await trackRepository.getAllRotas();
   }

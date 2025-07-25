@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/helper/database.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 
 class TrackRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<int> insertRota(PlaceModel location) async {
     final db = await _dbHelper.database;
@@ -83,4 +88,50 @@ class TrackRepository {
 
     return result.map((row) => PlaceModel.fromMap(row)).toList();
   }
+
+  Future<String> gerarJsonRotasComPontos(int id) async {
+    final List<Map<String, dynamic>> rotasComPontosJson = [];
+
+    final pontos = await getPontosByRotaId(id);
+
+    rotasComPontosJson.add({
+      'rota_id': id,
+      'pontos': pontos.map((p) => p.toJson()).toList(),
+    });
+
+    return jsonEncode(rotasComPontosJson);
+  }
+
+  Future<bool> syncRotas(dynamic dados, int idRota) async {
+    try {
+      final response =
+          await _supabase.from('rotas').insert(dados).select('id_rota');
+
+      var value = response.first['id_rota'];
+
+      // Verifica se houve erro
+      if (value != null) {
+        log('Insert bem-sucedido: $response');
+        await updateIdRota(idRota, value);
+        return true;
+      }
+
+    } catch (e) {
+      log("erro encontrado: $e");
+    }
+    return false;
+  }
+
+  Future<void> updateIdRota(int rotaId, String idSistema) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'rota',
+      {
+        'id_sistema': idSistema,
+      },
+      where: 'id = ?',
+      whereArgs: [rotaId],
+    );
+  }
+
 }

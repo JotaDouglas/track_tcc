@@ -42,7 +42,8 @@ class DatabaseHelper {
         data_hora_inicio TEXT,
         data_hora_fim TEXT,
         distancia TEXT,
-        titulo TEXT
+        titulo TEXT,
+        id_sistema TEXT
         )
     ''');
 

@@ -75,62 +75,103 @@ class _RotasPageState extends State<RotasPage> {
               itemBuilder: (context, index) {
                 final rota = rotas[index];
                 return Card(
-                  elevation: 5,
+                  elevation: 3,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: ListTile(
                     title: Text(
                       "🚩 Rota ${index + 1}",
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 18),
+                          fontWeight: FontWeight.w600, fontSize: 16),
                     ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.play_arrow, color: Colors.green),
-                              const SizedBox(width: 4),
-                              Text(DateConversion.convertDateTimeFromString(
-                                  rota.dateInicial!)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.stop, color: Colors.red),
-                              const SizedBox(width: 4),
-                              Text(DateConversion.convertDateTimeFromString(
-                                  rota.dateFinal ?? '')),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    trailing: Wrap(
-                      spacing: 12,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.map, color: Colors.blue),
-                          onPressed: () {
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.play_arrow,
+                                size: 16, color: Colors.green),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateConversion.convertDateTimeFromString(
+                                  rota.dateInicial!),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.stop, size: 16, color: Colors.red),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateConversion.convertDateTimeFromString(
+                                  rota.dateFinal ?? ''),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    trailing: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      onSelected: (value) async {
+                        switch (value) {
+                          case 'mapa':
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => HistoricMapFlutter(
-                                  IdTrack: rota.id!,
-                                ),
+                                builder: (_) =>
+                                    HistoricMapFlutter(IdTrack: rota.id!),
                               ),
                             );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => deletarRota(rota.id!),
-                        ),
-                      ],
+                            break;
+                          case 'sync':
+                            await viewModel.syncRota(rota);
+                            break;
+                          case 'delete':
+                            deletarRota(rota.id!);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) {
+                        final List<PopupMenuEntry<String>> items = [
+                          const PopupMenuItem(
+                            value: 'mapa',
+                            child: ListTile(
+                              leading: Icon(Icons.map, color: Colors.blue),
+                              title: Text('Ver no mapa'),
+                            ),
+                          ),
+                        ];
+
+                        // Só adiciona a opção de sincronizar se ainda não foi sincronizado
+                        if (rota.idSistema == null) {
+                          items.add(
+                            const PopupMenuItem(
+                              value: 'sync',
+                              child: ListTile(
+                                leading: Icon(Icons.sync, color: Colors.orange),
+                                title: Text('Sincronizar'),
+                              ),
+                            ),
+                          );
+                        }
+
+                        // Sempre mostra excluir
+                        items.add(
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: ListTile(
+                              leading: Icon(Icons.delete, color: Colors.red),
+                              title: Text('Excluir'),
+                            ),
+                          ),
+                        );
+
+                        return items;
+                      },
                     ),
                   ),
                 );
