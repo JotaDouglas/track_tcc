@@ -12,7 +12,7 @@ class RotasPage extends StatefulWidget {
 }
 
 class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
-  final TrackingViewModel viewModel = TrackingViewModel();
+  final TrackingViewModel trackViewModel = TrackingViewModel();
   List<PlaceModel> rotas = [];
   late TabController tabController;
 
@@ -23,7 +23,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
   }
 
   Future<void> loadRotas() async {
-    final result = await viewModel.getAllRotas();
+    final result = await trackViewModel.getAllRotas();
     setState(() {
       rotas = result;
     });
@@ -49,7 +49,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
     );
 
     if (confirm == true) {
-      await viewModel.removeRota(id);
+      await trackViewModel.removeRota(id);
       await loadRotas();
     }
   }
@@ -165,7 +165,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                 );
                                                 break;
                                               case 'sync':
-                                                await viewModel.syncRota(rota);
+                                                await trackViewModel.syncRota(rota);
                                                 break;
                                               case 'delete':
                                                 deletarRota(rota.id!);
