@@ -9,6 +9,7 @@ class PlaceModel {
   int? id;
   String? titulo;
   String? idSistema;
+  String? cordenadas;
 
   PlaceModel({
     this.adress,
@@ -21,6 +22,7 @@ class PlaceModel {
     this.id,
     this.titulo,
     this.idSistema,
+    this.cordenadas,
   });
 
   factory PlaceModel.fromMap(Map<String, dynamic> map) {

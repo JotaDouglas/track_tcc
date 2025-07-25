@@ -19,7 +19,13 @@ abstract class TrackingViewModelBase with Store {
   ObservableList<PlaceModel> trackList = ObservableList<PlaceModel>();
 
   @observable
-  List<PlaceModel> listRotas = [];
+  List<PlaceModel> listRotasOnline = [];
+
+  @observable
+  bool loading = false;
+
+  @action
+  changeLoading(bool value) => loading = value;
 
   @action
   Future<void> insertTracking(PlaceModel initialLocation) async {
@@ -95,7 +101,7 @@ abstract class TrackingViewModelBase with Store {
   @action
   Future<bool> syncRota(PlaceModel rota) async {
     try {
-      if(rota.id == null || rota.idSistema != null) return false;
+      if (rota.id == null || rota.idSistema != null) return false;
 
       final uid = _supabase.auth.currentUser?.id;
       //Criar o json com todos os pontos da rota
@@ -123,5 +129,33 @@ abstract class TrackingViewModelBase with Store {
 
   Future<List<PlaceModel>> getPontosByRota(int rotaId) async {
     return await trackRepository.getPontosByRotaId(rotaId);
+  }
+
+  @action
+  Future getRotasOnline() async {
+    changeLoading(true);
+
+    final uid = _supabase.auth.currentUser?.id;
+    List<Map<String, dynamic>> rotasOnline =
+        await trackRepository.getRotasOnline(uid!);
+
+    int index = -1;
+
+    //converter o response em objeto do tipo placemodel
+    List<PlaceModel> aux = rotasOnline.map(
+      (e) {
+        index++;
+        return PlaceModel(
+          id: index,
+          dateInicial: e['data_inicio'],
+          dateFinal: e['data_fim'],
+          cordenadas: e['cordenadas'],
+        );
+      },
+    ).toList();
+
+    listRotasOnline = List.from(aux);
+
+    changeLoading(false);
   }
 }

@@ -25,6 +25,38 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     });
   }
 
+  late final _$listRotasOnlineAtom =
+      Atom(name: 'TrackingViewModelBase.listRotasOnline', context: context);
+
+  @override
+  List<PlaceModel> get listRotasOnline {
+    _$listRotasOnlineAtom.reportRead();
+    return super.listRotasOnline;
+  }
+
+  @override
+  set listRotasOnline(List<PlaceModel> value) {
+    _$listRotasOnlineAtom.reportWrite(value, super.listRotasOnline, () {
+      super.listRotasOnline = value;
+    });
+  }
+
+  late final _$loadingAtom =
+      Atom(name: 'TrackingViewModelBase.loading', context: context);
+
+  @override
+  bool get loading {
+    _$loadingAtom.reportRead();
+    return super.loading;
+  }
+
+  @override
+  set loading(bool value) {
+    _$loadingAtom.reportWrite(value, super.loading, () {
+      super.loading = value;
+    });
+  }
+
   late final _$insertTrackingAsyncAction =
       AsyncAction('TrackingViewModelBase.insertTracking', context: context);
 
@@ -32,6 +64,14 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
   Future<void> insertTracking(PlaceModel initialLocation) {
     return _$insertTrackingAsyncAction
         .run(() => super.insertTracking(initialLocation));
+  }
+
+  late final _$removeRotaAsyncAction =
+      AsyncAction('TrackingViewModelBase.removeRota', context: context);
+
+  @override
+  Future<void> removeRota(int rotaId) {
+    return _$removeRotaAsyncAction.run(() => super.removeRota(rotaId));
   }
 
   late final _$trackLocationAsyncAction =
@@ -52,10 +92,42 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
         .run(() => super.stopTracking(finalLocation));
   }
 
+  late final _$syncRotaAsyncAction =
+      AsyncAction('TrackingViewModelBase.syncRota', context: context);
+
+  @override
+  Future<bool> syncRota(PlaceModel rota) {
+    return _$syncRotaAsyncAction.run(() => super.syncRota(rota));
+  }
+
+  late final _$getRotasOnlineAsyncAction =
+      AsyncAction('TrackingViewModelBase.getRotasOnline', context: context);
+
+  @override
+  Future<dynamic> getRotasOnline() {
+    return _$getRotasOnlineAsyncAction.run(() => super.getRotasOnline());
+  }
+
+  late final _$TrackingViewModelBaseActionController =
+      ActionController(name: 'TrackingViewModelBase', context: context);
+
+  @override
+  dynamic changeLoading(bool value) {
+    final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
+        name: 'TrackingViewModelBase.changeLoading');
+    try {
+      return super.changeLoading(value);
+    } finally {
+      _$TrackingViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
-trackList: ${trackList}
+trackList: ${trackList},
+listRotasOnline: ${listRotasOnline},
+loading: ${loading}
     ''';
   }
 }

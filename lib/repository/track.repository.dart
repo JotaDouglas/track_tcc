@@ -115,7 +115,6 @@ class TrackRepository {
         await updateIdRota(idRota, value);
         return true;
       }
-
     } catch (e) {
       log("erro encontrado: $e");
     }
@@ -134,4 +133,14 @@ class TrackRepository {
     );
   }
 
+  Future<List<Map<String, dynamic>>> getRotasOnline(String id) async {
+    try {
+      final response = await _supabase.from('rotas').select().eq('user_id', id);
+      log(response.toString());
+      return response;
+    } catch (e) {
+      log("erro ao trazer dados: $e");
+      return [];
+    }
+  }
 }
