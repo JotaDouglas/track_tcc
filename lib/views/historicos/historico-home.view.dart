@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:track_tcc_app/helper/DateConversion.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
@@ -228,117 +229,129 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Expanded(
-                          child: rotas.isEmpty
-                              ? const Center(
-                                  child: Text('Nenhuma rota encontrada.'))
-                              : ListView.builder(
-                                  itemCount:
-                                      trackViewModel.listRotasOnline.length,
-                                  itemBuilder: (context, index) {
-                                    final rota =
-                                        trackViewModel.listRotasOnline[index];
-                                    return Card(
-                                      elevation: 3,
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 8),
-                                      child: ListTile(
-                                        title: Text(
-                                          "🚩 Rota ${index + 1}",
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 8),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.play_arrow,
-                                                    size: 16,
-                                                    color: Colors.green),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  DateConversion
-                                                      .convertDateTimeFromString(
-                                                          rota.dateInicial!),
-                                                  style: const TextStyle(
-                                                      fontSize: 14),
-                                                ),
-                                              ],
-                                            ),
-                                            // const SizedBox(height: 4),
-                                            // Row(
-                                            //   children: [
-                                            //     const Icon(Icons.stop,
-                                            //         size: 16,
-                                            //         color: Colors.red),
-                                            //     const SizedBox(width: 4),
-                                            //     Text(
-                                            //       DateConversion
-                                            //           .convertDateTimeFromString(
-                                            //               rota.dateFinal ?? ''),
-                                            //       style: const TextStyle(
-                                            //           fontSize: 14),
-                                            //     ),
-                                            //   ],
-                                            // ),
-                                          ],
-                                        ),
-                                        trailing: PopupMenuButton<String>(
-                                          icon: const Icon(Icons.more_vert),
-                                          onSelected: (value) async {
-                                            switch (value) {
-                                              case 'mapa':
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        HistoricMapFlutter(
-                                                            IdTrack: rota.id!),
+                        Observer(
+                          builder: (context) => Expanded(
+                            child: trackViewModel.loading
+                                ? Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : rotas.isEmpty
+                                    ? const Center(
+                                        child: Text('Nenhuma rota encontrada.'))
+                                    : ListView.builder(
+                                        itemCount: trackViewModel
+                                            .listRotasOnline.length,
+                                        itemBuilder: (context, index) {
+                                          final rota = trackViewModel
+                                              .listRotasOnline[index];
+                                          return Card(
+                                            elevation: 3,
+                                            margin: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            child: ListTile(
+                                              title: Text(
+                                                "🚩 Rota ${index + 1}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 16),
+                                              ),
+                                              subtitle: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(
+                                                          Icons.play_arrow,
+                                                          size: 16,
+                                                          color: Colors.green),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        DateConversion
+                                                            .convertDateTimeFromString(
+                                                                rota.dateInicial!),
+                                                        style: const TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                    ],
                                                   ),
-                                                );
-                                                break;
-
-                                              case 'delete':
-                                                deletarRota(rota.id!);
-                                                break;
-                                            }
-                                          },
-                                          itemBuilder: (context) {
-                                            final List<PopupMenuEntry<String>>
-                                                items = [
-                                              const PopupMenuItem(
-                                                value: 'mapa',
-                                                child: ListTile(
-                                                  leading: Icon(Icons.map,
-                                                      color: Colors.blue),
-                                                  title: Text('Ver no mapa'),
-                                                ),
+                                                  // const SizedBox(height: 4),
+                                                  // Row(
+                                                  //   children: [
+                                                  //     const Icon(Icons.stop,
+                                                  //         size: 16,
+                                                  //         color: Colors.red),
+                                                  //     const SizedBox(width: 4),
+                                                  //     Text(
+                                                  //       DateConversion
+                                                  //           .convertDateTimeFromString(
+                                                  //               rota.dateFinal ?? ''),
+                                                  //       style: const TextStyle(
+                                                  //           fontSize: 14),
+                                                  //     ),
+                                                  //   ],
+                                                  // ),
+                                                ],
                                               ),
-                                            ];
+                                              trailing: PopupMenuButton<String>(
+                                                icon:
+                                                    const Icon(Icons.more_vert),
+                                                onSelected: (value) async {
+                                                  switch (value) {
+                                                    case 'mapa':
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (_) =>
+                                                              HistoricMapFlutter(
+                                                                  IdTrack:
+                                                                      rota.id!),
+                                                        ),
+                                                      );
+                                                      break;
 
-                                            // Sempre mostra excluir
-                                            items.add(
-                                              const PopupMenuItem(
-                                                value: 'delete',
-                                                child: ListTile(
-                                                  leading: Icon(Icons.delete,
-                                                      color: Colors.red),
-                                                  title: Text('Excluir'),
-                                                ),
+                                                    case 'delete':
+                                                      deletarRota(rota.id!);
+                                                      break;
+                                                  }
+                                                },
+                                                itemBuilder: (context) {
+                                                  final List<
+                                                      PopupMenuEntry<
+                                                          String>> items = [
+                                                    const PopupMenuItem(
+                                                      value: 'mapa',
+                                                      child: ListTile(
+                                                        leading: Icon(Icons.map,
+                                                            color: Colors.blue),
+                                                        title:
+                                                            Text('Ver no mapa'),
+                                                      ),
+                                                    ),
+                                                  ];
+
+                                                  // Sempre mostra excluir
+                                                  items.add(
+                                                    const PopupMenuItem(
+                                                      value: 'delete',
+                                                      child: ListTile(
+                                                        leading: Icon(
+                                                            Icons.delete,
+                                                            color: Colors.red),
+                                                        title: Text('Excluir'),
+                                                      ),
+                                                    ),
+                                                  );
+
+                                                  return items;
+                                                },
                                               ),
-                                            );
-
-                                            return items;
-                                          },
-                                        ),
+                                            ),
+                                          );
+                                        },
                                       ),
-                                    );
-                                  },
-                                ),
+                          ),
                         ),
                       ],
                     ),
