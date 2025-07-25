@@ -18,6 +18,9 @@ abstract class TrackingViewModelBase with Store {
   @observable
   ObservableList<PlaceModel> trackList = ObservableList<PlaceModel>();
 
+  @observable
+  List<PlaceModel> listRotas = [];
+
   @action
   Future<void> insertTracking(PlaceModel initialLocation) async {
     try {

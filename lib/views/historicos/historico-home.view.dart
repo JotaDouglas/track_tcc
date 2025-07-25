@@ -132,22 +132,22 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                 ),
                                               ],
                                             ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.stop,
-                                                    size: 16,
-                                                    color: Colors.red),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  DateConversion
-                                                      .convertDateTimeFromString(
-                                                          rota.dateFinal ?? ''),
-                                                  style: const TextStyle(
-                                                      fontSize: 14),
-                                                ),
-                                              ],
-                                            ),
+                                            // const SizedBox(height: 4),
+                                            // Row(
+                                            //   children: [
+                                            //     const Icon(Icons.stop,
+                                            //         size: 16,
+                                            //         color: Colors.red),
+                                            //     const SizedBox(width: 4),
+                                            //     Text(
+                                            //       DateConversion
+                                            //           .convertDateTimeFromString(
+                                            //               rota.dateFinal ?? ''),
+                                            //       style: const TextStyle(
+                                            //           fontSize: 14),
+                                            //     ),
+                                            //   ],
+                                            // ),
                                           ],
                                         ),
                                         trailing: PopupMenuButton<String>(

@@ -75,10 +75,13 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void toggleTrackingState() {
-    setState(() {
-      loopOn = !loopOn;
-    });
+    if (mounted) {
+      setState(() {
+        loopOn = !loopOn;
+      });
+    }
   }
+
 
   Future<void> _startSharing() async {
     await WakelockPlus.enable();
@@ -177,12 +180,16 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-  void _stopSharing() async{
+  void _stopSharing() async {
     await WakelockPlus.disable();
     temp?.cancel();
     temp = null;
     log('Rastreamento finalizado');
-    setState(() => _sharing = false);
+    if (mounted) {
+      setState(() => _sharing = false);
+    }else{
+      _sharing = false;
+    }
   }
 
   @override

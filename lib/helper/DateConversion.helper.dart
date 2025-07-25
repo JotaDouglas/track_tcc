@@ -16,6 +16,8 @@ class DateConversion {
   }
 
   static convertDateTimeFromString(String strDate) {
+    if(strDate.isEmpty) return '-';
+    
     if (strDate.contains('/')) strDate = strDate.replaceAll('/', '-');
 
     DateTime? todayDate = DateTime.tryParse(strDate);
