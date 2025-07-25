@@ -41,6 +41,22 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     });
   }
 
+  late final _$listRotasLocalAtom =
+      Atom(name: 'TrackingViewModelBase.listRotasLocal', context: context);
+
+  @override
+  List<PlaceModel> get listRotasLocal {
+    _$listRotasLocalAtom.reportRead();
+    return super.listRotasLocal;
+  }
+
+  @override
+  set listRotasLocal(List<PlaceModel> value) {
+    _$listRotasLocalAtom.reportWrite(value, super.listRotasLocal, () {
+      super.listRotasLocal = value;
+    });
+  }
+
   late final _$loadingAtom =
       Atom(name: 'TrackingViewModelBase.loading', context: context);
 
@@ -127,6 +143,7 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     return '''
 trackList: ${trackList},
 listRotasOnline: ${listRotasOnline},
+listRotasLocal: ${listRotasLocal},
 loading: ${loading}
     ''';
   }

@@ -22,6 +22,9 @@ abstract class TrackingViewModelBase with Store {
   List<PlaceModel> listRotasOnline = [];
 
   @observable
+  List<PlaceModel> listRotasLocal = [];
+
+  @observable
   bool loading = false;
 
   @action
@@ -111,11 +114,17 @@ abstract class TrackingViewModelBase with Store {
       var dados = {
         "user_id": uid,
         "data_inicio": rota.dateInicial,
-        "data_fim": rota.dateFinal,
+        "data_fim": rota.dateFinal ?? DateTime.now().toString(),
         "cordenadas": trajetoJson,
       };
 
       bool res = await trackRepository.syncRotas(dados, rota.id!);
+
+      if(res){
+        await removeRota(rota.id ?? -1);
+        getAllRotas();
+        getRotasOnline();
+      }
 
       return res;
     } catch (e) {
@@ -123,8 +132,10 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  Future<List<PlaceModel>> getAllRotas() async {
-    return await trackRepository.getAllRotas();
+  Future getAllRotas() async {
+    List<PlaceModel> rotasAux = await trackRepository.getAllRotas();
+    listRotasLocal = List.from(rotasAux);
+
   }
 
   Future<List<PlaceModel>> getPontosByRota(int rotaId) async {
