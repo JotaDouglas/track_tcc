@@ -111,7 +111,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                             horizontal: 16, vertical: 8),
                                         child: ListTile(
                                           title: Text(
-                                            "🚩 Rota ${index + 1}",
+                                            "🚩 Trajeto ${index + 1}",
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 16),
@@ -164,7 +164,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                     MaterialPageRoute(
                                                       builder: (_) =>
                                                           HistoricMapFlutter(
-                                                              IdTrack:
+                                                              idTrack:
                                                                   rota.id!),
                                                     ),
                                                   );
@@ -255,7 +255,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                 horizontal: 16, vertical: 8),
                                             child: ListTile(
                                               title: Text(
-                                                "🚩 Rota ${index + 1}",
+                                                "🚩 Trajeto ${rota.id! + 1}",
                                                 style: const TextStyle(
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 16),
@@ -310,8 +310,10 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                         MaterialPageRoute(
                                                           builder: (_) =>
                                                               HistoricMapFlutter(
-                                                                  IdTrack:
-                                                                      rota.id!),
+                                                            idTrack: rota.id!,
+                                                            cordenadas: rota.cordenadas,
+                                                            isFromSystem: true,
+                                                          ),
                                                         ),
                                                       );
                                                       break;

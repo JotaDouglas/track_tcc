@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 
 class HistoricMapFlutter extends StatefulWidget {
-  final int IdTrack;
-  const HistoricMapFlutter({super.key, required this.IdTrack});
+  final int idTrack;
+  final bool isFromSystem;
+  final String? cordenadas;
+  const HistoricMapFlutter({super.key, required this.idTrack, this.isFromSystem = false, this.cordenadas});
 
   @override
   State<HistoricMapFlutter> createState() => _HistoricMapFlutterState();
 }
 
 class _HistoricMapFlutterState extends State<HistoricMapFlutter> {
-  final TrackingViewModel viewModel = TrackingViewModel();
+  final TrackingViewModel trackViewModel = TrackingViewModel();
 
   List<LatLng> route = [];
   bool isReady = false;
@@ -24,7 +27,15 @@ class _HistoricMapFlutterState extends State<HistoricMapFlutter> {
   }
 
   Future<void> readRoute() async {
-    final result = await viewModel.getPontosByRota(widget.IdTrack);
+    List<PlaceModel> result = [];
+
+    if(widget.isFromSystem){
+      //convertendo as cordenadas e adicionar na lista de result       
+      result = await trackViewModel.readCordenadas(widget.cordenadas ?? '');
+
+    } else{
+      result = await trackViewModel.getPontosByRota(widget.idTrack);
+    }
 
     List<LatLng> listaAuxiliar = result
         .where((place) => place.latitude != null && place.longitude != null)

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:mobx/mobx.dart';
@@ -165,9 +166,43 @@ abstract class TrackingViewModelBase with Store {
       },
     ).toList();
 
+    //reordenar a lista
+
     listRotasOnline = List.from(aux);
+    
+    if (listRotasOnline.isNotEmpty) {
+      listRotasOnline.sort(
+        (a, b) => b.id!.compareTo(a.id!),
+      );
+    }
 
     changeLoading(false);
+  }
+
+  Future<List<PlaceModel>> readCordenadas(String cordenadas) async {
+    List<PlaceModel> trajeto = [];
+
+    if (cordenadas.isEmpty) return trajeto;
+
+    try {
+      var decoded = jsonDecode(cordenadas);
+
+      //criar variavel auxiliar para converter os pontos
+      var posicoes = decoded[0]['pontos'];
+
+      for (var p in posicoes) {
+        trajeto.add(PlaceModel(
+          id: p['id'],
+          latitude: p['latitude'],
+          longitude: p['longitude'],
+          dateInicial: p['data'],
+        ));
+      }
+    } catch (e) {
+      log("Erro ao converter as cordenadas");
+    }
+
+    return trajeto;
   }
 
   Future deleteRotaOnline(String id) async {
