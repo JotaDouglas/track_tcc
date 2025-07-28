@@ -96,6 +96,21 @@ abstract class TrackingViewModelBase with Store {
         await _supabase.from('localizacoes').delete().eq("user_id", uid);
         log('Localização final removida do Supabase');
       }
+
+      //Processo de sincronizar a rota online após finalizar o trajeto
+      try {
+        await getAllRotas();
+        PlaceModel rotaAuxiliar = listRotasLocal.firstWhere(
+          (element) {
+            return element.id == currentRotaId;
+          },
+        );
+
+        syncRota(rotaAuxiliar);
+      } catch (e) {
+        log("erro ao sincronizar automaticamente");
+      }
+      
       currentRotaId = null;
     } catch (e) {
       log("Erro ao parar rastreamento: $e");
@@ -169,7 +184,7 @@ abstract class TrackingViewModelBase with Store {
     //reordenar a lista
 
     listRotasOnline = List.from(aux);
-    
+
     if (listRotasOnline.isNotEmpty) {
       listRotasOnline.sort(
         (a, b) => b.id!.compareTo(a.id!),
@@ -207,8 +222,6 @@ abstract class TrackingViewModelBase with Store {
 
   Future deleteRotaOnline(String id) async {
     changeLoading(true);
-
-    final uid = _supabase.auth.currentUser?.id;
 
     await trackRepository.deleteRotaOnline(id);
     getRotasOnline();
