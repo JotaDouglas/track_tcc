@@ -30,7 +30,6 @@ void main() async {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -42,20 +41,58 @@ class MyApp extends StatelessWidget {
       title: 'Track TCC App',
       debugShowCheckedModeBanner: false,
       routerConfig: AppRouter.router,
-      themeMode: themeProvider.mode,            // usa o provider
+      themeMode: themeProvider.mode, // usa o provider
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
           brightness: Brightness.light,
         ),
         useMaterial3: true,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[100],
+          hintStyle: TextStyle(color: Colors.grey[800]),
+          prefixIconColor: Colors.grey[800],
+          suffixIconColor: Colors.grey[800],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[800]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[800]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[800]!, width: 2),
+          ),
+        ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+          seedColor: Colors.deepOrange,
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[800],
+          hintStyle: TextStyle(color: Colors.deepOrange[100]),
+          prefixIconColor: Colors.deepOrange[100],
+          suffixIconColor: Colors.deepOrange[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.deepOrange[100]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.deepOrange[100]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.deepOrange[100]!, width: 2),
+          ),
+        ),
       ),
     );
   }

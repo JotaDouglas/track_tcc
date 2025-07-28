@@ -26,7 +26,7 @@ class _LoginViewState extends State<LoginView> {
     final authViewModel = Provider.of<LoginViewModel>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -93,81 +93,63 @@ class _LoginViewState extends State<LoginView> {
                         key: _formKey,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            // color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Column(
                             children: <Widget>[
-                              Container(
-                                // padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey.shade200),
-                                  ),
+                              TextFormField(
+                                controller: _emailController,
+                                decoration: InputDecoration(
+                                  hintText: "E-mail",
+                                  prefixIcon: const Icon(Icons.email),
+                                  // hintStyle:
+                                  //      TextStyle(color: Colors.grey[600]),
+                                  // border: InputBorder.none,
+                                  // border: OutlineInputBorder(
+                                  //   borderRadius: BorderRadius.circular(10),
+                                  // ),
                                 ),
-                                child: TextFormField(
-                                  controller: _emailController,
-                                  decoration: InputDecoration(
-                                    hintText: "E-mail",
-                                    prefixIcon: const Icon(Icons.email),
-                                    hintStyle:
-                                        const TextStyle(color: Colors.grey),
-                                    // border: InputBorder.none,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Digite um e-mail';
-                                    }
-
-                                    final emailRegex = RegExp(
-                                        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-
-                                    if (!emailRegex.hasMatch(value)) {
-                                      return 'Digite um e-mail válido';
-                                    }
-
-                                    return null;
-                                  },
-                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Digite um e-mail';
+                                  }
+                              
+                                  final emailRegex = RegExp(
+                                      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                              
+                                  if (!emailRegex.hasMatch(value)) {
+                                    return 'Digite um e-mail válido';
+                                  }
+                              
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 10),
-                              Container(
-                                // padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey.shade200),
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  hintText: "Senha",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.grey),
+                                  // border: InputBorder.none,
+                                  prefixIcon: const Icon(Icons.lock),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                child: TextFormField(
-                                  controller: _passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    hintText: "Senha",
-                                    hintStyle:
-                                        const TextStyle(color: Colors.grey),
-                                    // border: InputBorder.none,
-                                    prefixIcon: const Icon(Icons.lock),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Digite sua senha';
-                                    }
-
-                                    if (value.length < 6 || value.length > 12) {
-                                      return 'A senha deve ter entre 6 e 12 caracteres';
-                                    }
-
-                                    return null;
-                                  },
-                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Digite sua senha';
+                                  }
+                              
+                                  if (value.length < 6 || value.length > 12) {
+                                    return 'A senha deve ter entre 6 e 12 caracteres';
+                                  }
+                              
+                                  return null;
+                                },
                               ),
                             ],
                           ),
