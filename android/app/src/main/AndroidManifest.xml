@@ -8,6 +8,7 @@
     <application
         android:label="Zelo App"
         android:name="${applicationName}"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher">
 
 

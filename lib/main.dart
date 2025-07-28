@@ -9,20 +9,27 @@ import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Supabase.initialize(
     url: SupabaseLogin().supabaseUrl,
     anonKey: SupabaseLogin().supabaseKey,
   );
+
+  // Inicializa e carrega o ThemeProvider antes do runApp
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),    // adicionado
+        ChangeNotifierProvider.value(value: themeProvider),
         Provider<LoginViewModel>(create: (_) => LoginViewModel()),
       ],
       child: const MyApp(),
     ),
   );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
