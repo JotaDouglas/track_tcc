@@ -222,7 +222,7 @@ class _TrackPageState extends State<TrackPage> {
                 Icon(
                   Icons.assistant_navigation,
                   size: _sharing ? 100 : 80,
-                  color: _sharing ? Colors.orange[900] : Colors.grey,
+                  color: Colors.orange[900],
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -231,6 +231,7 @@ class _TrackPageState extends State<TrackPage> {
                       : 'Toque para iniciar o compartilhamento',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    color: Colors.orange[900],
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
