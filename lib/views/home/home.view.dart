@@ -66,21 +66,21 @@ class _HomeViewState extends State<HomeView> {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.orange[50],
-                            shape: BoxShape.circle, // deixa o fundo redondo
-                          ),
-                          child: Icon(
-                            _localizacaoAtiva
-                                ? Icons.location_on
-                                : Icons.location_off,
-                            color:
-                                _localizacaoAtiva ? Colors.green : Colors.red,
-                            size: 24,
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.all(6),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.orange[50],
+                        //     shape: BoxShape.circle, // deixa o fundo redondo
+                        //   ),
+                        //   child: Icon(
+                        //     _localizacaoAtiva
+                        //         ? Icons.location_on
+                        //         : Icons.location_off,
+                        //     color:
+                        //         _localizacaoAtiva ? Colors.green : Colors.red,
+                        //     size: 24,
+                        //   ),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 4),
