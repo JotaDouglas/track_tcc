@@ -131,8 +131,8 @@ class _LoginViewState extends State<LoginView> {
                                 obscureText: true,
                                 decoration: InputDecoration(
                                   hintText: "Senha",
-                                  hintStyle:
-                                      const TextStyle(color: Colors.grey),
+                                  // hintStyle:
+                                      // const TextStyle(color: Colors.grey),
                                   // border: InputBorder.none,
                                   prefixIcon: const Icon(Icons.lock),
                                   border: OutlineInputBorder(
