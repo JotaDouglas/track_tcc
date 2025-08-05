@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
@@ -20,9 +23,17 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _verificarPermissaoLocalizacao();
+    _loginMessagem();
+  }
+
+  Future<void> _loginMessagem() async {
+    await Future.delayed(Duration(seconds: 1)); 
+    var playerId = OneSignal.User.pushSubscription.id;
+    log("💡 $playerId");
   }
 
   Future<void> _verificarPermissaoLocalizacao() async {
+    
     final status = await Permission.location.status;
     setState(() {
       _localizacaoAtiva = status.isGranted;

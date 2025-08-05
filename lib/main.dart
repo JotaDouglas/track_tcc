@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/configs/theme_settings.dart';
@@ -18,6 +19,14 @@ void main() async {
   // Inicializa e carrega o ThemeProvider antes do runApp
   final themeProvider = ThemeProvider();
   await themeProvider.loadTheme();
+
+  // // Enable verbose logging for debugging (remove in production)
+  // OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+  // Initialize with your OneSignal App ID
+  OneSignal.initialize(SupabaseLogin().messageKey);
+  // Use this method to prompt for push notifications.
+  // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
+  OneSignal.Notifications.requestPermission(false);
 
   runApp(
     MultiProvider(

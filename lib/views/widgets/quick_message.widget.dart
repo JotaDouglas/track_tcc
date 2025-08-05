@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:track_tcc_app/utils/message.util.dart';
 
 void showQuickMessageBottomSheet(BuildContext context) {
   final List<Map<String, dynamic>> quickMessages = [
@@ -71,6 +72,7 @@ void showQuickMessageBottomSheet(BuildContext context) {
 }
 
 void _handleQuickMessage(BuildContext context, String message) {
+  enviarNotificacaoOneSignal(playerId: ['5bfc641b-3ed1-4a41-83f3-46e5b38d2195'], titulo: message, mensagem: "Validando o envio");
   print("Mensagem rápida selecionada: $message");
 
   ScaffoldMessenger.of(context).showSnackBar(
