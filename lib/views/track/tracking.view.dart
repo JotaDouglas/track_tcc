@@ -9,6 +9,7 @@ import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
+import 'package:track_tcc_app/views/widgets/alert_message.widget.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/views/widgets/quick_message.widget.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -256,40 +257,55 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                   const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[400],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[400],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 10),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
+                          icon: const Icon(Icons.message, color: Colors.white),
+                          label: const FittedBox(
+                            // para o texto não estourar
+                            child: Text(
+                              "Mensagem rápida",
+                              style: TextStyle(color: Colors.white),
+                              maxLines: 1,
+                            ),
+                          ),
+                          onPressed: () {
+                            showQuickMessageBottomSheet(context);
+                          },
                         ),
-                        icon: const Icon(Icons.message, color: Colors.white),
-                        label: const Text("Mensagem rápida",
-                            style: TextStyle(color: Colors.white)),
-                        onPressed: () {
-                          showQuickMessageBottomSheet(context);
-                        },
                       ),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[600],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[600],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 10),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
+                          icon: const Icon(Icons.warning_amber_rounded,
+                              color: Colors.white),
+                          label: const FittedBox(
+                            child: Text(
+                              "Situação de Perigo",
+                              style: TextStyle(color: Colors.white),
+                              maxLines: 1,
+                            ),
+                          ),
+                          onPressed: () {
+                            showEmergencyConfirmationDialog(context);
+                          },
                         ),
-                        icon: const Icon(Icons.warning_amber_rounded,
-                            color: Colors.white),
-                        label: const Text("Emergência",
-                            style: TextStyle(color: Colors.white)),
-                        onPressed: () {
-                          // ação de emergência
-                        },
                       ),
                     ],
                   ),
