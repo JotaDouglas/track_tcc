@@ -83,7 +83,6 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-
   Future<void> _startSharing() async {
     await WakelockPlus.enable();
     var res;
@@ -188,7 +187,7 @@ class _TrackPageState extends State<TrackPage> {
     log('Rastreamento finalizado');
     if (mounted) {
       setState(() => _sharing = false);
-    }else{
+    } else {
       _sharing = false;
     }
   }
@@ -259,19 +258,38 @@ class _TrackPageState extends State<TrackPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.message),
-                        color: Colors.orange[400],
-                        iconSize: 32,
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[400],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                        ),
+                        icon: const Icon(Icons.message, color: Colors.white),
+                        label: const Text("Mensagem rápida",
+                            style: TextStyle(color: Colors.white)),
                         onPressed: () {
                           showQuickMessageBottomSheet(context);
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_active),
-                        color: Colors.orange[400],
-                        iconSize: 32,
-                        onPressed: () {},
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[600],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                        ),
+                        icon: const Icon(Icons.warning_amber_rounded,
+                            color: Colors.white),
+                        label: const Text("Emergência",
+                            style: TextStyle(color: Colors.white)),
+                        onPressed: () {
+                          // ação de emergência
+                        },
                       ),
                     ],
                   ),
