@@ -10,6 +10,7 @@ import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
+import 'package:track_tcc_app/views/widgets/quick_message.widget.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class TrackPage extends StatefulWidget {
@@ -237,7 +238,7 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (_sharing) ...[
+                if (!_sharing) ...[
                   Text(
                     'Distância: ${_distanceMeters.toStringAsFixed(1)} m',
                     style: const TextStyle(
@@ -262,7 +263,9 @@ class _TrackPageState extends State<TrackPage> {
                         icon: const Icon(Icons.message),
                         color: Colors.orange[400],
                         iconSize: 32,
-                        onPressed: () {},
+                        onPressed: () {
+                          showQuickMessageBottomSheet(context);
+                        },
                       ),
                       IconButton(
                         icon: const Icon(Icons.notifications_active),
