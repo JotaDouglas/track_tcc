@@ -238,7 +238,7 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (!_sharing) ...[
+                if (_sharing) ...[
                   Text(
                     'Distância: ${_distanceMeters.toStringAsFixed(1)} m',
                     style: const TextStyle(
