@@ -170,7 +170,6 @@ class _TrackPageState extends State<TrackPage> {
           trackList.insert(0, newLocal);
         });
 
-        log('Localização atualizada: $_addressLabel');
       } else {
         log('Localização retornou null.');
       }

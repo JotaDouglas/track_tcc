@@ -111,7 +111,6 @@ class TrackRepository {
 
       // Verifica se houve erro
       if (value != null) {
-        log('Insert bem-sucedido: $response');
         await updateIdRota(idRota, value);
         return true;
       }
@@ -136,7 +135,6 @@ class TrackRepository {
   Future<List<Map<String, dynamic>>> getRotasOnline(String id) async {
     try {
       final response = await _supabase.from('rotas').select().eq('user_id', id);
-      log(response.toString());
       return response;
     } catch (e) {
       log("erro ao trazer dados: $e");
@@ -147,7 +145,6 @@ class TrackRepository {
   Future deleteRotaOnline(String id) async {
     try {
       final response = await _supabase.from('rotas').delete().eq('id_rota', id);
-      log(response.toString());
       return response;
     } catch (e) {
       log("erro ao trazer dados: $e");
