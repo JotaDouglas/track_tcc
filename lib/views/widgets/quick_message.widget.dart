@@ -72,7 +72,7 @@ void showQuickMessageBottomSheet(BuildContext context) {
 }
 
 void _handleQuickMessage(BuildContext context, String message) {
-  enviarNotificacaoOneSignal(playerId: ['5bfc641b-3ed1-4a41-83f3-46e5b38d2195'], titulo: message, mensagem: "Validando o envio");
+  enviarNotificacaoOneSignal(playerId: ['d24c5238-5e49-4641-aeaa-c2b567361298'], titulo: message, mensagem: "De: João Douglas");
   print("Mensagem rápida selecionada: $message");
 
   ScaffoldMessenger.of(context).showSnackBar(

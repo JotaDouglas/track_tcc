@@ -27,6 +27,7 @@ Future<void> enviarNotificacaoOneSignal({
         'include_player_ids': playerId,
         'headings': {'en': titulo},
         'contents': {'en': mensagem},
+        'android_accent_color': 'FFE65100',
       },
     );
 
