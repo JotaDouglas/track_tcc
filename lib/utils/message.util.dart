@@ -1,15 +1,15 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> enviarNotificacaoOneSignal({
   required List<String> playerId,
   required String titulo,
   required String mensagem,
 }) async {
-  const String appId = '5eb8b243-0349-434e-a940-ba558fd0663c';
-  const String restApiKey =
-      'os_v2_app_l24leqydjfbu5kkaxjky7udghqfbn6r7znaejkf52l6tjcw662p4qy5ko3rpcdm4pppqzohssxw7vwfnl3u2zmilesp6iv4cqq2sq2i';
+  String appId = dotenv.env['OPEN_SIGNAL_APP_ID']!;
+  String restApiKey = dotenv.env['OPEN_SIGNAL_REST_API_KEY']!;
 
   final Dio dio = Dio();
 
