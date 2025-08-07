@@ -17,7 +17,7 @@ abstract class AmizadeViewModelBase with Store {
   List<Map<String, dynamic>> friends = [];
 
   @action
-  changeFriends(List<Map<String,dynamic>> f) async => friends = List.from(f);
+  changeFriends(List<Map<String, dynamic>> f) async => friends = List.from(f);
 
   @action
   readMyFriends() async {
@@ -28,9 +28,34 @@ abstract class AmizadeViewModelBase with Store {
 
   Future enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
     try {
-      bool sendSolicitacao = await _amizadesRepository.enviarSolicitacaoAmizade(meuId, idAmigo);
+      bool sendSolicitacao =
+          await _amizadesRepository.enviarSolicitacaoAmizade(meuId, idAmigo);
 
       return sendSolicitacao;
+    } catch (e) {
+      log("erro ao enviar a solicitação: $e");
+      return false;
+    }
+  }
+
+  Future cancelarSolicitacaoAmizade(String idAmigo) async {
+    try {
+      var amigo = friends.firstWhere(
+        (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo,
+        orElse: () => {},
+      );
+
+      if (amigo.isEmpty) return false;
+
+      bool delete = await _amizadesRepository.desfazerAmizade(
+          amigo['id'] is int ? amigo['id'] : int.tryParse(amigo['id']) ?? -1);
+
+      if (delete) {
+        friends.removeWhere(
+            (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo);
+      }
+
+      return delete;
     } catch (e) {
       log("erro ao enviar a solicitação: $e");
       return false;

@@ -93,6 +93,15 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
     });
   }
 
+  Future _cancelarSolicitacao(String amigoId, String termo) async {
+    final meuId = supabase.auth.currentUser?.id;
+    if (meuId == null) return;
+
+    await amizadeVM.cancelarSolicitacaoAmizade(amigoId);
+
+    _buscarUsuarios(termo);
+  }
+
   Future<void> _enviarSolicitacao(String amigoId, String termo) async {
     final meuId = supabase.auth.currentUser?.id;
     if (meuId == null) return;
@@ -159,9 +168,14 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
                   title: Text(nome),
                   subtitle: Text(uid, overflow: TextOverflow.ellipsis),
                   trailing: ElevatedButton(
-                    onPressed:
-                        status == 'pendente' ? null : () => _enviarSolicitacao(uid, _searchController.text),
-                    child: Text(status == 'pendente' ? 'Solicitado' : status == 'aceito' ? "Amigos" :'Adicionar'),
+                    onPressed: status == 'pendente'
+                        ? () => _cancelarSolicitacao(uid, _searchController.text)
+                        : () => _enviarSolicitacao(uid, _searchController.text),
+                    child: Text(status == 'pendente'
+                        ? 'Solicitado'
+                        : status == 'aceito'
+                            ? "Amigos"
+                            : 'Adicionar'),
                   ),
                 );
               },

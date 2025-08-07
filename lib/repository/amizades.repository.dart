@@ -64,6 +64,20 @@ class AmizadesRepository {
     }
   }
 
+  Future<bool> desfazerAmizade(int amizadeId) async {
+    try {
+      await Supabase.instance.client
+          .from('amizades')
+          .delete()
+          .eq('id', amizadeId);
+
+      return true;
+    } catch (e) {
+      log("Erro ao desfazer amizade: $e");
+      return false;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getAmigos(String meuUserId) async {
     try {
       final data = await Supabase.instance.client
