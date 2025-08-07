@@ -25,6 +25,17 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+
+    // Delay para garantir que o contexto esteja disponível
+    Future.microtask(() {
+      amizadeVM = Provider.of<AmizadeViewModel>(context, listen: false);
+
+      readUsers();
+    });
+  }
+
+  readUsers() async {
+    await amizadeVM.readMyFriends();
   }
 
   @override
@@ -43,31 +54,64 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   }
 
   Future<void> _buscarUsuarios(String termo) async {
-    final data = await amizadeVM.buscarAmigos(termo);
+    setState(() => _isLoading = true);
+
+    final data = await amizadeVM.buscarAmigos(termo); // sua busca de usuários
+
+    // Sua lista de amizades já carregada (amizadeVM.friends)
+    final amizades = amizadeVM.friends;
+
+    // ID do usuário logado
+    final meuId = supabase.auth.currentUser!.id;
+
+    // Cria um mapa para lookup rápido: key = id do usuário buscado, value = status da amizade
+    final Map<String, String> statusPorUsuario = {};
+
+    for (final amizade in amizades) {
+      final outroId = amizade['usuario_id'] == meuId
+          ? amizade['amigo_id']
+          : amizade['usuario_id'];
+
+      statusPorUsuario[outroId] = amizade['status'];
+    }
+
+    final List<Map<String, dynamic>> usuariosAtualizados = data.map((user) {
+      final userId = user['user_id']; // ou 'id_usuario', conforme seu retorno
+
+      final statusAmizade = statusPorUsuario[userId] ?? 'nenhum';
+
+      return {
+        ...user,
+        'statusAmizade': statusAmizade,
+        'ja_solicitado': statusAmizade, // booleano pra facilitar
+      };
+    }).toList();
 
     setState(() {
-      _usuarios = data;
+      _usuarios = usuariosAtualizados;
       _isLoading = false;
     });
   }
 
-  Future<void> _enviarSolicitacao(String receiverId) async {
-    // final senderId = supabase.auth.currentUser?.id;
-    // if (senderId == null) return;
+  Future<void> _enviarSolicitacao(String amigoId, String termo) async {
+    final meuId = supabase.auth.currentUser?.id;
+    if (meuId == null) return;
 
-    // await supabase.from('friend_requests').insert({
-    //   'sender_id': senderId,
-    //   'receiver_id': receiverId,
-    //   'status': 'pending',
-    // });
-    // setState(() {
-    //   _usuarios = _usuarios.map((user) {
-    //     if (user['id'] == receiverId) {
-    //       return {...user, 'ja_solicitado': true};
-    //     }
-    //     return user;
-    //   }).toList();
-    // });
+    bool data = await amizadeVM.enviarSolicitacaoAmizade(meuId, amigoId);
+
+    if (data) {
+      await amizadeVM.readMyFriends();
+      setState(() {
+        _usuarios = _usuarios.map((user) {
+          if (user['id'] == amigoId) {
+            return {...user, 'ja_solicitado': true};
+          }
+          return user;
+        }).toList();
+      });
+
+      _buscarUsuarios(termo);
+    }
   }
 
   @override
@@ -108,20 +152,16 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
                 final usuario = _usuarios[index];
                 final nome = '${usuario['nome']} ${usuario['sobrenome']}';
                 final uid = usuario['user_id'];
-                final jaSolicitado = usuario['ja_solicitado'] ?? false;
+                final status = usuario['ja_solicitado'] ?? false;
 
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
                   title: Text(nome),
-                  subtitle: Text(
-                    uid,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  subtitle: Text(uid, overflow: TextOverflow.ellipsis),
                   trailing: ElevatedButton(
-                    onPressed: jaSolicitado
-                        ? null
-                        : () => _enviarSolicitacao(usuario['id_usuario']),
-                    child: Text(jaSolicitado ? 'Solicitado' : 'Adicionar'),
+                    onPressed:
+                        status == 'pendente' ? null : () => _enviarSolicitacao(uid, _searchController.text),
+                    child: Text(status == 'pendente' ? 'Solicitado' : status == 'aceito' ? "Amigos" :'Adicionar'),
                   ),
                 );
               },

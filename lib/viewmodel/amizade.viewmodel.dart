@@ -13,15 +13,31 @@ abstract class AmizadeViewModelBase with Store {
 
   final supabase = Supabase.instance.client;
 
+  @observable
+  List<Map<String, dynamic>> friends = [];
+
+  @action
+  changeFriends(List<Map<String,dynamic>> f) async => friends = List.from(f);
+
+  @action
+  readMyFriends() async {
+    final currentUserId = supabase.auth.currentUser?.id;
+    var dados = await _amizadesRepository.getAllAmigos(currentUserId!);
+    await changeFriends(dados);
+  }
+
   Future enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
     try {
-      await _amizadesRepository.enviarSolicitacaoAmizade(meuId, idAmigo);
+      bool sendSolicitacao = await _amizadesRepository.enviarSolicitacaoAmizade(meuId, idAmigo);
+
+      return sendSolicitacao;
     } catch (e) {
       log("erro ao enviar a solicitação: $e");
+      return false;
     }
   }
 
-  Future buscarAmigos(String termo) async {
+  Future<List<Map<String, dynamic>>> buscarAmigos(String termo) async {
     final currentUserId = supabase.auth.currentUser?.id;
     List<Map<String, dynamic>> response = [];
 

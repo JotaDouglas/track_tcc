@@ -5,17 +5,21 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AmizadesRepository {
   final supabase = Supabase.instance.client;
 
-  Future<void> enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
-    final response = await Supabase.instance.client.from('amizades').insert({
-      'usuario_id': meuId,
-      'amigo_id': idAmigo,
-      'status': 'pendente',
-    });
-
-    if (response.error != null) {
-      log('Erro ao enviar solicitação: ${response.error!.message}');
-    } else {
-      log('Solicitação enviada!');
+  Future enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
+    try {
+      await supabase
+          .from('amizades')
+          .insert({
+            'usuario_id': meuId,
+            'amigo_id': idAmigo,
+            'status': 'pendente',
+          })
+          .select()
+          .single();
+      return true;
+    } catch (e) {
+      log("erro $e");
+      return false;
     }
   }
 
@@ -67,6 +71,21 @@ class AmizadesRepository {
           .select(
               'id, usuario_id, amigo_id, usuarios!amizades_usuario_id_fkey(nome, sobrenome), usuarios!amizades_amigo_id_fkey(nome, sobrenome)')
           .eq('status', 'aceito')
+          .or('usuario_id.eq.$meuUserId,amigo_id.eq.$meuUserId');
+
+      return List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      log('Erro ao buscar amizades bilaterais: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllAmigos(String meuUserId) async {
+    try {
+      final data = await Supabase.instance.client
+          .from('amizades')
+          .select(
+              'id, usuario_id, amigo_id, remetente:usuarios!amizades_usuario_id_fkey(nome, sobrenome), destinatario:usuarios!amizades_amigo_id_fkey(nome, sobrenome), status')
           .or('usuario_id.eq.$meuUserId,amigo_id.eq.$meuUserId');
 
       return List<Map<String, dynamic>>.from(data);

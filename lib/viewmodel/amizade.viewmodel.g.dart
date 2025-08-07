@@ -9,10 +9,42 @@ part of 'amizade.viewmodel.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AmizadeViewModel on AmizadeViewModelBase, Store {
+  late final _$friendsAtom =
+      Atom(name: 'AmizadeViewModelBase.friends', context: context);
+
+  @override
+  List<Map<String, dynamic>> get friends {
+    _$friendsAtom.reportRead();
+    return super.friends;
+  }
+
+  @override
+  set friends(List<Map<String, dynamic>> value) {
+    _$friendsAtom.reportWrite(value, super.friends, () {
+      super.friends = value;
+    });
+  }
+
+  late final _$changeFriendsAsyncAction =
+      AsyncAction('AmizadeViewModelBase.changeFriends', context: context);
+
+  @override
+  Future changeFriends(List<Map<String, dynamic>> f) {
+    return _$changeFriendsAsyncAction.run(() => super.changeFriends(f));
+  }
+
+  late final _$readMyFriendsAsyncAction =
+      AsyncAction('AmizadeViewModelBase.readMyFriends', context: context);
+
+  @override
+  Future readMyFriends() {
+    return _$readMyFriendsAsyncAction.run(() => super.readMyFriends());
+  }
+
   @override
   String toString() {
     return '''
-
+friends: ${friends}
     ''';
   }
 }
