@@ -20,9 +20,16 @@ abstract class AmizadeViewModelBase with Store {
   changeFriends(List<Map<String, dynamic>> f) async => friends = List.from(f);
 
   @action
-  readMyFriends() async {
+  readMyFriends({bool onlyFriends = false, bool solicitations = false}) async {
     final currentUserId = supabase.auth.currentUser?.id;
     var dados = await _amizadesRepository.getAllAmigos(currentUserId!);
+
+    if (onlyFriends) {
+      dados.removeWhere((element) => element['status'] == 'pendente');
+    } else if (solicitations) {
+      dados.removeWhere((element) => element['status'] == 'aceito');
+    }
+
     await changeFriends(dados);
   }
 

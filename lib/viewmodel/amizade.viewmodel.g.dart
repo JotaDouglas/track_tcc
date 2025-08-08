@@ -37,8 +37,9 @@ mixin _$AmizadeViewModel on AmizadeViewModelBase, Store {
       AsyncAction('AmizadeViewModelBase.readMyFriends', context: context);
 
   @override
-  Future readMyFriends() {
-    return _$readMyFriendsAsyncAction.run(() => super.readMyFriends());
+  Future readMyFriends({bool onlyFriends = false, bool solicitations = false}) {
+    return _$readMyFriendsAsyncAction.run(() => super
+        .readMyFriends(onlyFriends: onlyFriends, solicitations: solicitations));
   }
 
   @override

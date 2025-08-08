@@ -28,7 +28,9 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
 
     // Delay para garantir que o contexto esteja disponível
     Future.microtask(() {
-      amizadeVM = Provider.of<AmizadeViewModel>(context, listen: false);
+      if (mounted) {
+        amizadeVM = Provider.of<AmizadeViewModel>(context, listen: false);
+      }
 
       readUsers();
     });
@@ -169,7 +171,8 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
                   subtitle: Text(uid, overflow: TextOverflow.ellipsis),
                   trailing: ElevatedButton(
                     onPressed: status == 'pendente'
-                        ? () => _cancelarSolicitacao(uid, _searchController.text)
+                        ? () =>
+                            _cancelarSolicitacao(uid, _searchController.text)
                         : () => _enviarSolicitacao(uid, _searchController.text),
                     child: Text(status == 'pendente'
                         ? 'Solicitado'

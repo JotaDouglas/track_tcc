@@ -99,7 +99,7 @@ class AmizadesRepository {
       final data = await Supabase.instance.client
           .from('amizades')
           .select(
-              'id, usuario_id, amigo_id, remetente:usuarios!amizades_usuario_id_fkey(nome, sobrenome), destinatario:usuarios!amizades_amigo_id_fkey(nome, sobrenome), status')
+              'id, usuario_id, amigo_id, remetente:usuarios!amizades_usuario_id_fkey(nome, sobrenome, message_id, email), destinatario:usuarios!amizades_amigo_id_fkey(nome, sobrenome, message_id, email), status')
           .or('usuario_id.eq.$meuUserId,amigo_id.eq.$meuUserId');
 
       return List<Map<String, dynamic>>.from(data);

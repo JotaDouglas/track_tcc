@@ -146,9 +146,9 @@ class _HomeViewState extends State<HomeView> {
                   onTap: () => GoRouter.of(context).push('/user-perfil'),
                 ),
                 buildCard(
-                  icon: Icons.person_search,
-                  label: "Buscar\n Amigos",
-                  onTap: () => GoRouter.of(context).push('/user-search'),
+                  icon: Icons.people,
+                  label: "Amigos",
+                  onTap: () => GoRouter.of(context).push('/user-friends'),
                 ),
                 buildCard(
                   icon: Icons.history,
