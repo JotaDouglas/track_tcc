@@ -69,6 +69,20 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
+  Future aceitarAmizade(int idSolicitacao) async {
+    try {
+      //enviar o id no repository
+      bool aceite = await _amizadesRepository.aceitarAmizade(idSolicitacao);
+
+      return aceite;
+
+      //retornar true ou false
+    } catch (e) {
+      log("erro ao enviar a solicitação: $e");
+      return false;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> buscarAmigos(String termo) async {
     final currentUserId = supabase.auth.currentUser?.id;
     List<Map<String, dynamic>> response = [];

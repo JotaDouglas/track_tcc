@@ -40,15 +40,17 @@ class AmizadesRepository {
     }
   }
 
-  Future<void> aceitarAmizade(int amizadeId) async {
-    final response = await Supabase.instance.client
-        .from('amizades')
-        .update({'status': 'aceito'}).eq('id', amizadeId);
+  Future<bool> aceitarAmizade(int amizadeId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('amizades')
+          .update({'status': 'aceito'}).eq('id', amizadeId);
 
-    if (response.error != null) {
-      log('Erro ao aceitar amizade: ${response.error!.message}');
-    } else {
-      log('Amizade aceita com sucesso!');
+      return true;
+    } catch (e) {
+      log('Erro ao aceitar amizade: $e');
+
+      return false;
     }
   }
 

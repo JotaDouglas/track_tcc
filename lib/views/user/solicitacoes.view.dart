@@ -26,7 +26,7 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
   }
 
   readRequests() async {
-    await amizadeVM.readMyFriends(onlyFriends: false); // Aqui busca solicitações
+    await amizadeVM.readMyFriends(onlyFriends: false, solicitations: true); // Aqui busca solicitações
   }
 
   @override
@@ -56,8 +56,8 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
                   final solicitacao = amizadeVM.friends[index];
                   final usuario = solicitacao['remetente']['user_id'] ==
                           authViewModel.loginUser!.uidUsuario
-                      ? solicitacao['destinatario']
-                      : solicitacao['remetente'];
+                      ? solicitacao['remetente']
+                      : solicitacao['destinatario'];
 
                   return Card(
                     shape: RoundedRectangleBorder(
@@ -77,7 +77,7 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
                               ),
                             ),
                             title: Text(
-                              usuario['nome']!,
+                              '${usuario['nome']!} ${usuario['sobrenome']!}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold),
                             ),
@@ -100,14 +100,17 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
                                   "Aceitar",
                                   style: TextStyle(color: Colors.white),
                                 ),
-                                onPressed: () {
-                                  // amizadeVM.aceitarSolicitacao(
-                                  //     solicitacao['id']);
+                                onPressed: () async {
+                                 bool aceite = await amizadeVM.aceitarAmizade(solicitacao['id']);
+
+                                  if(aceite){
+                                    readRequests();
+                                  }
                                 },
                               ),
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey[400],
+                                  backgroundColor: Colors.red[700],
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),
@@ -118,9 +121,7 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
                                   "Recusar",
                                   style: TextStyle(color: Colors.white),
                                 ),
-                                onPressed: () {
-                                  // amizadeVM.recusarSolicitacao(
-                                  //     solicitacao['id']);
+                                onPressed: () async{
                                 },
                               ),
                             ],
