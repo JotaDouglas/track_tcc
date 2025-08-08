@@ -25,12 +25,36 @@ mixin _$AmizadeViewModel on AmizadeViewModelBase, Store {
     });
   }
 
+  late final _$requestsAtom =
+      Atom(name: 'AmizadeViewModelBase.requests', context: context);
+
+  @override
+  List<Map<String, dynamic>> get requests {
+    _$requestsAtom.reportRead();
+    return super.requests;
+  }
+
+  @override
+  set requests(List<Map<String, dynamic>> value) {
+    _$requestsAtom.reportWrite(value, super.requests, () {
+      super.requests = value;
+    });
+  }
+
   late final _$changeFriendsAsyncAction =
       AsyncAction('AmizadeViewModelBase.changeFriends', context: context);
 
   @override
   Future changeFriends(List<Map<String, dynamic>> f) {
     return _$changeFriendsAsyncAction.run(() => super.changeFriends(f));
+  }
+
+  late final _$changeRequestsAsyncAction =
+      AsyncAction('AmizadeViewModelBase.changeRequests', context: context);
+
+  @override
+  Future changeRequests(List<Map<String, dynamic>> r) {
+    return _$changeRequestsAsyncAction.run(() => super.changeRequests(r));
   }
 
   late final _$readMyFriendsAsyncAction =
@@ -45,7 +69,8 @@ mixin _$AmizadeViewModel on AmizadeViewModelBase, Store {
   @override
   String toString() {
     return '''
-friends: ${friends}
+friends: ${friends},
+requests: ${requests}
     ''';
   }
 }

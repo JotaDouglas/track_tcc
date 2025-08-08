@@ -48,12 +48,12 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Observer(
-        builder: (context) => amizadeVM.friends.isNotEmpty
+        builder: (context) => amizadeVM.requests.isNotEmpty
             ? ListView.builder(
                 padding: const EdgeInsets.all(12),
-                itemCount: amizadeVM.friends.length,
+                itemCount: amizadeVM.requests.length,
                 itemBuilder: (context, index) {
-                  final solicitacao = amizadeVM.friends[index];
+                  final solicitacao = amizadeVM.requests[index];
                   final usuario = solicitacao['remetente']['user_id'] ==
                           authViewModel.loginUser!.uidUsuario
                       ? solicitacao['remetente']

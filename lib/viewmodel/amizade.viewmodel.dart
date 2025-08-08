@@ -16,21 +16,32 @@ abstract class AmizadeViewModelBase with Store {
   @observable
   List<Map<String, dynamic>> friends = [];
 
+  @observable
+  List<Map<String, dynamic>> requests = [];
+
   @action
   changeFriends(List<Map<String, dynamic>> f) async => friends = List.from(f);
+
+  @action
+  changeRequests(List<Map<String, dynamic>> r) async => requests = List.from(r);
 
   @action
   readMyFriends({bool onlyFriends = false, bool solicitations = false}) async {
     final currentUserId = supabase.auth.currentUser?.id;
     var dados = await _amizadesRepository.getAllAmigos(currentUserId!);
 
-    if (onlyFriends) {
-      dados.removeWhere((element) => element['status'] == 'pendente');
-    } else if (solicitations) {
-      dados.removeWhere((element) => element['status'] == 'aceito');
-    }
+    List<Map<String, dynamic>> aux = dados
+        .where((e) => e['status'] == 'aceito')
+        .cast<Map<String, dynamic>>()
+        .toList();
 
-    await changeFriends(dados);
+    changeFriends(aux);
+    List<Map<String, dynamic>> auxRequest = dados
+        .where((e) => e['status'] == 'pendente')
+        .cast<Map<String, dynamic>>()
+        .toList();
+
+    changeRequests(auxRequest);
   }
 
   Future enviarSolicitacaoAmizade(String meuId, String idAmigo) async {

@@ -88,7 +88,7 @@ class _FriendsViewState extends State<FriendsView> {
           const Divider(),
           Observer(
             builder: (context) => Expanded(
-              child: (amizadeVM.friends.length > 0) ? ListView.builder(
+              child: (amizadeVM.friends.isNotEmpty) ? ListView.builder(
                 itemCount: amizadeVM.friends.length,
                 itemBuilder: (context, index) {
                   final friend = amizadeVM.friends[index]['remetente']['user_id'] == authViewModel.loginUser!.uidUsuario ?amizadeVM.friends[index]['remetente'] :amizadeVM.friends[index]['destinatario'];
