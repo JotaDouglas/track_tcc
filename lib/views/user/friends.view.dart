@@ -101,7 +101,7 @@ class _FriendsViewState extends State<FriendsView> {
                           child: Text(friend['nome']![0],
                               style: TextStyle(color: Colors.white)),
                         ),
-                        title: Text(friend['nome']!, style: TextStyle(fontWeight: FontWeight.bold),),
+                        title: Text("${friend['nome']!} ${friend['sobrenome']!}", style: TextStyle(fontWeight: FontWeight.bold),),
                         subtitle: Text(friend['email']!),
                         onTap: () {
                           // Ação ao clicar no amigo
