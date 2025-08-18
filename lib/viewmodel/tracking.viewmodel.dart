@@ -175,7 +175,7 @@ abstract class TrackingViewModelBase with Store {
           id: index,
           dateInicial: e['data_inicio'],
           dateFinal: e['data_fim'],
-          cordenadas: e['cordenadas'],
+          coordenadas: e['cordenadas'],
           idSistema: e['id_rota'],
         );
       },
@@ -214,7 +214,7 @@ abstract class TrackingViewModelBase with Store {
         ));
       }
     } catch (e) {
-      log("Erro ao converter as cordenadas");
+      log("Erro ao converter as coordenadas");
     }
 
     return trajeto;

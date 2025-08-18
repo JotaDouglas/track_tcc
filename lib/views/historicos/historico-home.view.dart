@@ -311,7 +311,7 @@ class _RotasPageState extends State<RotasPage> with TickerProviderStateMixin {
                                                           builder: (_) =>
                                                               HistoricMapFlutter(
                                                             idTrack: rota.id!,
-                                                            cordenadas: rota.cordenadas,
+                                                            cordenadas: rota.coordenadas,
                                                             isFromSystem: true,
                                                           ),
                                                         ),

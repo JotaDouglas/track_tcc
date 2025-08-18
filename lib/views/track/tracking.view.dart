@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
+import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/alert_message.widget.dart';
@@ -169,7 +170,6 @@ class _TrackPageState extends State<TrackPage> {
         setState(() {
           trackList.insert(0, newLocal);
         });
-
       } else {
         log('Localização retornou null.');
       }
@@ -197,6 +197,15 @@ class _TrackPageState extends State<TrackPage> {
     final authViewModel = Provider.of<LoginViewModel>(context);
     nome = authViewModel.loginUser?.username ??
         'user${DateTime.now().microsecond}';
+        
+    final amizadeVM = Provider.of<AmizadeViewModel>(context);
+    amizadeVM.readMyFriends();
+
+    List<String> amigos = [];
+    // supondo que amizadeVM.friends seja uma lista de maps
+    for (var amigo in amizadeVM.friends) {
+      amigos.add(amigo['usuario_id']);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -277,7 +286,7 @@ class _TrackPageState extends State<TrackPage> {
                             ),
                           ),
                           onPressed: () {
-                            showQuickMessageBottomSheet(context);
+                            showQuickMessageBottomSheet(context, amigos);
                           },
                         ),
                       ),

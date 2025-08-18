@@ -9,7 +9,7 @@ class PlaceModel {
   int? id;
   String? titulo;
   String? idSistema;
-  String? cordenadas;
+  String? coordenadas;
 
   PlaceModel({
     this.adress,
@@ -22,7 +22,7 @@ class PlaceModel {
     this.id,
     this.titulo,
     this.idSistema,
-    this.cordenadas,
+    this.coordenadas,
   });
 
   factory PlaceModel.fromMap(Map<String, dynamic> map) {
