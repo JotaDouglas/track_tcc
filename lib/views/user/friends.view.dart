@@ -91,7 +91,7 @@ class _FriendsViewState extends State<FriendsView> {
               child: (amizadeVM.friends.isNotEmpty) ? ListView.builder(
                 itemCount: amizadeVM.friends.length,
                 itemBuilder: (context, index) {
-                  final friend = amizadeVM.friends[index]['remetente']['user_id'] == authViewModel.loginUser!.uidUsuario ?amizadeVM.friends[index]['remetente'] :amizadeVM.friends[index]['destinatario'];
+                  final friend = amizadeVM.friends[index]['remetente']['user_id'] != authViewModel.loginUser!.uidUsuario ?amizadeVM.friends[index]['remetente'] :amizadeVM.friends[index]['destinatario'];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Card(

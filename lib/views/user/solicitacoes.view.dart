@@ -54,7 +54,7 @@ class _FriendRequestsViewState extends State<FriendRequestsView> {
                 itemCount: amizadeVM.requests.length,
                 itemBuilder: (context, index) {
                   final solicitacao = amizadeVM.requests[index];
-                  final usuario = solicitacao['remetente']['user_id'] ==
+                  final usuario = solicitacao['remetente']['user_id'] !=
                           authViewModel.loginUser!.uidUsuario
                       ? solicitacao['remetente']
                       : solicitacao['destinatario'];

@@ -204,7 +204,9 @@ class _TrackPageState extends State<TrackPage> {
     List<String> amigos = [];
     // supondo que amizadeVM.friends seja uma lista de maps
     for (var amigo in amizadeVM.friends) {
-      amigos.add(amigo['usuario_id']);
+      String messageid = amigo['remetente']['user_id'] != authViewModel.loginUser!.uidUsuario ?amigo['remetente']['message_id'] :amigo['destinatario']['message_id'];
+      
+      amigos.add(messageid);
     }
 
     return Scaffold(
