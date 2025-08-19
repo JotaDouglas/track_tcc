@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:go_router/go_router.dart';
@@ -65,7 +67,8 @@ class _FriendsViewState extends State<FriendsView> {
                       'Solicitações',
                       style: TextStyle(color: Colors.orange[800]),
                     ),
-                    onPressed: () => GoRouter.of(context).push('/user-friends-requests'),
+                    onPressed: () =>
+                        GoRouter.of(context).push('/user-friends-requests'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -88,30 +91,79 @@ class _FriendsViewState extends State<FriendsView> {
           const Divider(),
           Observer(
             builder: (context) => Expanded(
-              child: (amizadeVM.friends.isNotEmpty) ? ListView.builder(
-                itemCount: amizadeVM.friends.length,
-                itemBuilder: (context, index) {
-                  final friend = amizadeVM.friends[index]['remetente']['user_id'] != authViewModel.loginUser!.uidUsuario ?amizadeVM.friends[index]['remetente'] :amizadeVM.friends[index]['destinatario'];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Card(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.orange[800],
-                          child: Text(friend['nome']![0],
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                        title: Text("${friend['nome']!} ${friend['sobrenome']!}", style: TextStyle(fontWeight: FontWeight.bold),),
-                        subtitle: Text(friend['email']!),
-                        onTap: () {
-                          // Ação ao clicar no amigo
+                child: (amizadeVM.friends.isNotEmpty)
+                    ? ListView.builder(
+                        itemCount: amizadeVM.friends.length,
+                        itemBuilder: (context, index) {
+                          final friend = amizadeVM.friends[index]['remetente']
+                                      ['email'] !=
+                                  authViewModel.loginUser!.email
+                              ? amizadeVM.friends[index]['remetente']
+                              : amizadeVM.friends[index]['destinatario'];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Card(
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.orange[800],
+                                  child: Text(
+                                    friend['nome']![0],
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                title: Text(
+                                  "${friend['nome']!} ${friend['sobrenome']!}",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Text(friend['email']!),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Detalhes do Amigo'),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Nome: ${friend['nome']!}'),
+                                          Text(
+                                              'Sobrenome: ${friend['sobrenome']!}'),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () async {
+                                            await amizadeVM
+                                                .cancelarSolicitacaoAmizade(
+                                                    amizadeVM.friends[index]['id']);
+
+                                            Navigator.of(context).pop();
+                                          },  
+                                          child: Text(
+                                            'Excluir amizade',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            Navigator.of(context)
+                                                .pop(); // fecha o dialog
+                                          },
+                                          child: Text('Voltar'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
                         },
-                      ),
-                    ),
-                  );
-                },
-              ): Center(child: Text("Ainda não possui amizades"),)
-            ),
+                      )
+                    : Center(
+                        child: Text("Ainda não possui amizades"),
+                      )),
           ),
         ],
       ),
