@@ -197,15 +197,19 @@ class _TrackPageState extends State<TrackPage> {
     final authViewModel = Provider.of<LoginViewModel>(context);
     nome = authViewModel.loginUser?.username ??
         'user${DateTime.now().microsecond}';
-        
+    String nomeCompleto = "${authViewModel.loginUser?.username}${authViewModel.loginUser?.sobrenome ?? 'username'}";
+
     final amizadeVM = Provider.of<AmizadeViewModel>(context);
     amizadeVM.readMyFriends();
 
     List<String> amigos = [];
     // supondo que amizadeVM.friends seja uma lista de maps
     for (var amigo in amizadeVM.friends) {
-      String messageid = amigo['remetente']['user_id'] != authViewModel.loginUser!.uidUsuario ?amigo['remetente']['message_id'] :amigo['destinatario']['message_id'];
-      
+      String messageid =
+          amigo['remetente']['email'] != authViewModel.loginUser!.email
+              ? amigo['remetente']['message_id']
+              : amigo['destinatario']['message_id'];
+
       amigos.add(messageid);
     }
 
@@ -288,7 +292,7 @@ class _TrackPageState extends State<TrackPage> {
                             ),
                           ),
                           onPressed: () {
-                            showQuickMessageBottomSheet(context, amigos);
+                            showQuickMessageBottomSheet(context, amigos, nomeCompleto);
                           },
                         ),
                       ),
