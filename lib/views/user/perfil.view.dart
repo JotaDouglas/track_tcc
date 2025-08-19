@@ -146,7 +146,9 @@ class _PerfilViewState extends State<PerfilView> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            GoRouter.of(context).push('/user-friends');
+                          },
                           icon: const Icon(Icons.person_add_alt_1, size: 18),
                           label: const Text("Adicionar amigo"),
                           style: OutlinedButton.styleFrom(
