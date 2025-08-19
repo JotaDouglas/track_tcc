@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,7 +30,6 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
       if (mounted) {
         amizadeVM = Provider.of<AmizadeViewModel>(context, listen: false);
       }
-
       readUsers();
     });
   }
@@ -58,34 +56,29 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   Future<void> _buscarUsuarios(String termo) async {
     setState(() => _isLoading = true);
 
-    final data = await amizadeVM.buscarAmigos(termo); // sua busca de usuários
+    final data = await amizadeVM.buscarAmigos(termo);
 
-    // Sua lista de amizades já carregada (amizadeVM.friends)
+    // Lista de amizades já carregada
     final amizades = amizadeVM.friends;
-
-    // ID do usuário logado
     final meuId = supabase.auth.currentUser!.id;
 
-    // Cria um mapa para lookup rápido: key = id do usuário buscado, value = status da amizade
+    // Mapeia status das amizades
     final Map<String, String> statusPorUsuario = {};
-
     for (final amizade in amizades) {
       final outroId = amizade['usuario_id'] == meuId
           ? amizade['amigo_id']
           : amizade['usuario_id'];
-
       statusPorUsuario[outroId] = amizade['status'];
     }
 
+    // Atualiza usuários encontrados com status
     final List<Map<String, dynamic>> usuariosAtualizados = data.map((user) {
-      final userId = user['user_id']; // ou 'id_usuario', conforme seu retorno
-
+      final userId = user['user_id'];
       final statusAmizade = statusPorUsuario[userId] ?? 'nenhum';
 
       return {
         ...user,
         'statusAmizade': statusAmizade,
-        'ja_solicitado': statusAmizade, // booleano pra facilitar
       };
     }).toList();
 
@@ -95,33 +88,39 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
     });
   }
 
-  Future _cancelarSolicitacao(String amigoId, String termo) async {
+  Future<void> _cancelarSolicitacao(String amigoId, String termo) async {
     final meuId = supabase.auth.currentUser?.id;
     if (meuId == null) return;
 
-    await amizadeVM.cancelarSolicitacaoAmizade(amigoId);
+    await amizadeVM.cancelarSolicitacaoAmizade(int.parse(amigoId));
+    await amizadeVM.readMyFriends();
 
-    _buscarUsuarios(termo);
+    setState(() {
+      _usuarios = _usuarios.map((user) {
+        if (user['user_id'] == amigoId) {
+          return {...user, 'statusAmizade': 'nenhum'};
+        }
+        return user;
+      }).toList();
+    });
   }
 
   Future<void> _enviarSolicitacao(String amigoId, String termo) async {
     final meuId = supabase.auth.currentUser?.id;
     if (meuId == null) return;
 
-    bool data = await amizadeVM.enviarSolicitacaoAmizade(meuId, amigoId);
+    bool enviado = await amizadeVM.enviarSolicitacaoAmizade(meuId, amigoId);
 
-    if (data) {
+    if (enviado) {
       await amizadeVM.readMyFriends();
       setState(() {
         _usuarios = _usuarios.map((user) {
-          if (user['id'] == amigoId) {
-            return {...user, 'ja_solicitado': true};
+          if (user['user_id'] == amigoId) {
+            return {...user, 'statusAmizade': 'pendente'};
           }
           return user;
         }).toList();
       });
-
-      _buscarUsuarios(termo);
     }
   }
 
@@ -139,7 +138,7 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
         ),
         centerTitle: true,
         backgroundColor: Colors.orange[900],
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -150,8 +149,9 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
               decoration: InputDecoration(
                 hintText: 'Digite o nome ou sobrenome...',
                 prefixIcon: const Icon(Icons.search),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -163,7 +163,7 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
                 final usuario = _usuarios[index];
                 final nome = '${usuario['nome']} ${usuario['sobrenome']}';
                 final uid = usuario['user_id'];
-                final status = usuario['ja_solicitado'] ?? false;
+                final status = usuario['statusAmizade'];
 
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
@@ -171,14 +171,17 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
                   subtitle: Text(uid, overflow: TextOverflow.ellipsis),
                   trailing: ElevatedButton(
                     onPressed: status == 'pendente'
-                        ? () =>
-                            _cancelarSolicitacao(uid, _searchController.text)
-                        : () => _enviarSolicitacao(uid, _searchController.text),
-                    child: Text(status == 'pendente'
-                        ? 'Solicitado'
-                        : status == 'aceito'
-                            ? "Amigos"
-                            : 'Adicionar'),
+                        ? () => _cancelarSolicitacao(uid, _searchController.text)
+                        : status == 'nenhum'
+                            ? () => _enviarSolicitacao(uid, _searchController.text)
+                            : null,
+                    child: Text(
+                      status == 'pendente'
+                          ? 'Solicitado'
+                          : status == 'aceito'
+                              ? "Amigos"
+                              : 'Adicionar',
+                    ),
                   ),
                 );
               },
