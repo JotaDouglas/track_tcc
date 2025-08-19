@@ -56,21 +56,21 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
-  Future cancelarSolicitacaoAmizade(String idAmigo) async {
+  Future cancelarSolicitacaoAmizade(int idAmigo) async {
     try {
       var amigo = friends.firstWhere(
         (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo,
         orElse: () => {},
       );
 
-      if (amigo.isEmpty) return false;
+      // if (amigo.isEmpty) return false;
 
-      bool delete = await _amizadesRepository.desfazerAmizade(
-          amigo['id'] is int ? amigo['id'] : int.tryParse(amigo['id']) ?? -1);
+      bool delete = await _amizadesRepository.desfazerAmizade(idAmigo);
 
       if (delete) {
         friends.removeWhere(
             (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo);
+        readMyFriends();
       }
 
       return delete;
