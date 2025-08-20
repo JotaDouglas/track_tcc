@@ -52,6 +52,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp.router(
       title: 'Track TCC App',
+      
       debugShowCheckedModeBanner: false,
       routerConfig: AppRouter.router,
       themeMode: themeProvider.mode, // usa o provider

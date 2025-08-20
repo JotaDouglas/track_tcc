@@ -89,7 +89,7 @@ class _TrackPageState extends State<TrackPage> {
     await WakelockPlus.enable();
     var res;
     if (mounted) {
-      res = await Locationhelper().checkGps(context);
+      res = await Locationhelper().checkGps();
     }
     if (res != true) return;
 

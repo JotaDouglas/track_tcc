@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:track_tcc_app/model/place.model.dart';
+import 'package:track_tcc_app/routes/routes.dart';
 
 class Locationhelper {
   Future<PlaceModel?> actuallyPosition() async {
@@ -71,7 +72,9 @@ class Locationhelper {
     return null;
   }
 
-  Future checkGps(context) async {
+  Future checkGps() async {
+    final context = navigatorKey.currentContext!;
+
     // 1. Verifica se GPS está ativado
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 

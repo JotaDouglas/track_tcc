@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:track_tcc_app/main.dart';
 import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home.view.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
@@ -17,9 +19,12 @@ import 'package:track_tcc_app/views/user/perfil.view.dart';
 import 'package:track_tcc_app/views/user/search_users.view.dart';
 import 'package:track_tcc_app/views/user/solicitacoes.view.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class AppRouter {
   static final _router = GoRouter(
     initialLocation: '/',
+    navigatorKey: navigatorKey,
     routes: [
       GoRoute(
           path: "/",

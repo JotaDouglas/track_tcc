@@ -274,7 +274,7 @@ abstract class TrackingViewModelBase with Store {
   Future<void> _startSharing() async {
     //Sinal GPS
     bool gpsOn;
-    gpsOn = await Locationhelper().checkGps(context);
+    gpsOn = await Locationhelper().checkGps();
     if (gpsOn != true) return;
 
     toggleTrackingState();
