@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:mobx/mobx.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/login.model.dart';
@@ -68,11 +69,24 @@ abstract class LoginViewModelBase with Store {
           bio: dadosUsuario != null ? dadosUsuario['biografia'] : "",
         );
         saveUserData(loginUser!);
+        await userIdMessage();
       }
       errorMessage = null;
     } catch (e) {
       errorMessage = e.toString();
     }
+  }
+
+  Future<void> userIdMessage() async {
+    await Future.delayed(Duration(seconds: 1));
+    final userId = supabase.auth.currentUser?.id;
+    final playerId = OneSignal.User.pushSubscription.id;
+
+    if (playerId != null && userId != null) {
+      await supabase.from('usuarios').update(
+        {'message_id': playerId},
+      ).eq('user_id', userId);
+    }    
   }
 
   Future<void> reloadUser() async {
@@ -136,7 +150,7 @@ abstract class LoginViewModelBase with Store {
     String? uuid,
     String? biografia,
   }) async {
-    if(uuid != null){
+    if (uuid != null) {
       emailUser = loginUser!.email;
     }
     var res = await supabase.from('usuarios').insert(
@@ -150,7 +164,7 @@ abstract class LoginViewModelBase with Store {
       },
     );
 
-    if(uuid != null){
+    if (uuid != null) {
       await reloadUser();
     }
 

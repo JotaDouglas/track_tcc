@@ -1,7 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 
 class BuscarAmigosView extends StatefulWidget {
   const BuscarAmigosView({super.key});
@@ -15,6 +16,7 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   Timer? _debounce;
   bool _isLoading = false;
   List<Map<String, dynamic>> _usuarios = [];
+  AmizadeViewModel amizadeVM = AmizadeViewModel();
 
   final supabase = Supabase.instance.client;
 
@@ -22,6 +24,18 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+
+    // Delay para garantir que o contexto esteja disponível
+    Future.microtask(() {
+      if (mounted) {
+        amizadeVM = Provider.of<AmizadeViewModel>(context, listen: false);
+      }
+      readUsers();
+    });
+  }
+
+  readUsers() async {
+    await amizadeVM.readMyFriends();
   }
 
   @override
@@ -40,62 +54,79 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
   }
 
   Future<void> _buscarUsuarios(String termo) async {
-    final currentUserId = supabase.auth.currentUser?.id;
-
-    if (termo.isEmpty || currentUserId == null) {
-      setState(() => _usuarios = []);
-      return;
-    }
-
     setState(() => _isLoading = true);
 
-    final response = await supabase
-        .from('usuarios')
-        .select('id_usuario, nome, sobrenome, biografia')
-        .or('nome.ilike.%$termo%,sobrenome.ilike.%$termo%')
-        .neq('user_id', currentUserId);
+    final data = await amizadeVM.buscarAmigos(termo);
 
-    final data = List<Map<String, dynamic>>.from(response);
+    // Lista de amizades já carregada
+    final amizades = amizadeVM.friends;
+    final meuId = supabase.auth.currentUser!.id;
 
-    // for (final usuario in data) {
-    //   final check = await supabase
-    //       .from('friend_requests')
-    //       .select()
-    //       .eq('sender_id', currentUserId)
-    //       .eq('receiver_id', usuario['id_usuario'])
-    //       .eq('status', 'pending')
-    //       .maybeSingle();
+    // Mapeia status das amizades
+    final Map<String, String> statusPorUsuario = {};
+    for (final amizade in amizades) {
+      final outroId = amizade['usuario_id'] == meuId
+          ? amizade['amigo_id']
+          : amizade['usuario_id'];
+      statusPorUsuario[outroId] = amizade['status'];
+    }
 
-    //   usuario['ja_solicitado'] = check != null;
-    // }
+    // Atualiza usuários encontrados com status
+    final List<Map<String, dynamic>> usuariosAtualizados = data.map((user) {
+      final userId = user['user_id'];
+      final statusAmizade = statusPorUsuario[userId] ?? 'nenhum';
+
+      return {
+        ...user,
+        'statusAmizade': statusAmizade,
+      };
+    }).toList();
 
     setState(() {
-      _usuarios = data;
+      _usuarios = usuariosAtualizados;
       _isLoading = false;
     });
   }
 
-  Future<void> _enviarSolicitacao(String receiverId) async {
-    final senderId = supabase.auth.currentUser?.id;
-    if (senderId == null) return;
+  Future<void> _cancelarSolicitacao(String amigoId, String termo) async {
+    final meuId = supabase.auth.currentUser?.id;
+    if (meuId == null) return;
 
-    await supabase.from('friend_requests').insert({
-      'sender_id': senderId,
-      'receiver_id': receiverId,
-      'status': 'pending',
-    });
+    await amizadeVM.cancelarSolicitacaoAmizade(int.parse(amigoId));
+    await amizadeVM.readMyFriends();
+
     setState(() {
       _usuarios = _usuarios.map((user) {
-        if (user['id'] == receiverId) {
-          return {...user, 'ja_solicitado': true};
+        if (user['user_id'] == amigoId) {
+          return {...user, 'statusAmizade': 'nenhum'};
         }
         return user;
       }).toList();
     });
   }
 
+  Future<void> _enviarSolicitacao(String amigoId, String termo) async {
+    final meuId = supabase.auth.currentUser?.id;
+    if (meuId == null) return;
+
+    bool enviado = await amizadeVM.enviarSolicitacaoAmizade(meuId, amigoId);
+
+    if (enviado) {
+      await amizadeVM.readMyFriends();
+      setState(() {
+        _usuarios = _usuarios.map((user) {
+          if (user['user_id'] == amigoId) {
+            return {...user, 'statusAmizade': 'pendente'};
+          }
+          return user;
+        }).toList();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    amizadeVM = Provider.of<AmizadeViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -107,7 +138,7 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
         ),
         centerTitle: true,
         backgroundColor: Colors.orange[900],
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -118,8 +149,9 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
               decoration: InputDecoration(
                 hintText: 'Digite o nome ou sobrenome...',
                 prefixIcon: const Icon(Icons.search),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -130,21 +162,26 @@ class _BuscarAmigosViewState extends State<BuscarAmigosView> {
               itemBuilder: (context, index) {
                 final usuario = _usuarios[index];
                 final nome = '${usuario['nome']} ${usuario['sobrenome']}';
-                final bio = usuario['biografia'] ?? '';
-                final jaSolicitado = usuario['ja_solicitado'] ?? false;
+                final uid = usuario['user_id'];
+                final status = usuario['statusAmizade'];
 
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
                   title: Text(nome),
-                  subtitle: Text(
-                    bio,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  subtitle: Text(uid, overflow: TextOverflow.ellipsis),
                   trailing: ElevatedButton(
-                    onPressed: jaSolicitado
-                        ? null
-                        : () => _enviarSolicitacao(usuario['id_usuario']),
-                    child: Text(jaSolicitado ? 'Solicitado' : 'Adicionar'),
+                    onPressed: status == 'pendente'
+                        ? () => _cancelarSolicitacao(uid, _searchController.text)
+                        : status == 'nenhum'
+                            ? () => _enviarSolicitacao(uid, _searchController.text)
+                            : null,
+                    child: Text(
+                      status == 'pendente'
+                          ? 'Solicitado'
+                          : status == 'aceito'
+                              ? "Amigos"
+                              : 'Adicionar',
+                    ),
                   ),
                 );
               },

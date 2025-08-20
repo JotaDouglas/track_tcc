@@ -12,8 +12,10 @@ import 'package:track_tcc_app/views/splash.view.dart';
 import 'package:track_tcc_app/views/settings.view.dart';
 import 'package:track_tcc_app/views/track/tracking.view.dart';
 import 'package:track_tcc_app/views/user/edit_perfil.view.dart';
+import 'package:track_tcc_app/views/user/friends.view.dart';
 import 'package:track_tcc_app/views/user/perfil.view.dart';
 import 'package:track_tcc_app/views/user/search_users.view.dart';
+import 'package:track_tcc_app/views/user/solicitacoes.view.dart';
 
 class AppRouter {
   static final _router = GoRouter(
@@ -65,6 +67,14 @@ class AppRouter {
           path: "/user-perfil-edit",
           name: 'user-perfil-edit',
           builder: (context, status) => const EditarPerfilView()),
+      GoRoute(
+          path: "/user-friends",
+          name: 'user-friends',
+          builder: (context, status) => const FriendsView()),
+      GoRoute(
+          path: "/user-friends-requests",
+          name: 'user-friends-requests',
+          builder: (context, status) => const FriendRequestsView()),
       GoRoute(
           path: "/user-search",
           name: 'user-search',

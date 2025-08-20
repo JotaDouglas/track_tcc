@@ -7,9 +7,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
+import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
+import 'package:track_tcc_app/views/widgets/alert_message.widget.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
+import 'package:track_tcc_app/views/widgets/quick_message.widget.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class TrackPage extends StatefulWidget {
@@ -82,7 +85,6 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-
   Future<void> _startSharing() async {
     await WakelockPlus.enable();
     var res;
@@ -90,6 +92,8 @@ class _TrackPageState extends State<TrackPage> {
       res = await Locationhelper().checkGps(context);
     }
     if (res != true) return;
+
+    //Adicionar trackingLoop do viewmodel
     if (!loopOn) Dialogs.showLoading(context, GlobalKey());
     toggleTrackingState();
 
@@ -168,8 +172,6 @@ class _TrackPageState extends State<TrackPage> {
         setState(() {
           trackList.insert(0, newLocal);
         });
-
-        log('Localização atualizada: $_addressLabel');
       } else {
         log('Localização retornou null.');
       }
@@ -187,7 +189,7 @@ class _TrackPageState extends State<TrackPage> {
     log('Rastreamento finalizado');
     if (mounted) {
       setState(() => _sharing = false);
-    }else{
+    } else {
       _sharing = false;
     }
   }
@@ -197,6 +199,21 @@ class _TrackPageState extends State<TrackPage> {
     final authViewModel = Provider.of<LoginViewModel>(context);
     nome = authViewModel.loginUser?.username ??
         'user${DateTime.now().microsecond}';
+    String nomeCompleto = "${authViewModel.loginUser?.username}${authViewModel.loginUser?.sobrenome ?? 'username'}";
+
+    final amizadeVM = Provider.of<AmizadeViewModel>(context);
+    amizadeVM.readMyFriends();
+
+    List<String> amigos = [];
+    // supondo que amizadeVM.friends seja uma lista de maps
+    for (var amigo in amizadeVM.friends) {
+      String messageid =
+          amigo['remetente']['email'] != authViewModel.loginUser!.email
+              ? amigo['remetente']['message_id']
+              : amigo['destinatario']['message_id'];
+
+      amigos.add(messageid);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -222,7 +239,7 @@ class _TrackPageState extends State<TrackPage> {
                 Icon(
                   Icons.assistant_navigation,
                   size: _sharing ? 100 : 80,
-                  color: _sharing ? Colors.orange[900] : Colors.grey,
+                  color: Colors.orange[900],
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -231,6 +248,7 @@ class _TrackPageState extends State<TrackPage> {
                       : 'Toque para iniciar o compartilhamento',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    color: Colors.orange[900],
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -255,19 +273,55 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                   const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.message),
-                        color: Colors.orange[400],
-                        iconSize: 32,
-                        onPressed: () {},
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[400],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 10),
+                          ),
+                          icon: const Icon(Icons.message, color: Colors.white),
+                          label: const FittedBox(
+                            // para o texto não estourar
+                            child: Text(
+                              "Mensagem rápida",
+                              style: TextStyle(color: Colors.white),
+                              maxLines: 1,
+                            ),
+                          ),
+                          onPressed: () {
+                            showQuickMessageBottomSheet(context, amigos, nomeCompleto);
+                          },
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_active),
-                        color: Colors.orange[400],
-                        iconSize: 32,
-                        onPressed: () {},
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[600],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 10),
+                          ),
+                          icon: const Icon(Icons.warning_amber_rounded,
+                              color: Colors.white),
+                          label: const FittedBox(
+                            child: Text(
+                              "Situação de Perigo",
+                              style: TextStyle(color: Colors.white),
+                              maxLines: 1,
+                            ),
+                          ),
+                          onPressed: () {
+                            showEmergencyConfirmationDialog(context);
+                          },
+                        ),
                       ),
                     ],
                   ),

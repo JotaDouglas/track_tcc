@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/card_home.dart';
 
@@ -20,9 +24,17 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _verificarPermissaoLocalizacao();
+    _loginMessagem();
+  }
+
+  Future<void> _loginMessagem() async {
+    await Future.delayed(Duration(seconds: 1)); 
+    var playerId = OneSignal.User.pushSubscription.id;
+    log("💡 $playerId");
   }
 
   Future<void> _verificarPermissaoLocalizacao() async {
+    
     final status = await Permission.location.status;
     setState(() {
       _localizacaoAtiva = status.isGranted;
@@ -33,6 +45,8 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<LoginViewModel>(context);
     final String nome = authViewModel.loginUser?.username ?? 'Usuário';
+    final amizadeVM = Provider.of<AmizadeViewModel>(context);
+    amizadeVM.readMyFriends();
 
     return Scaffold(
       key: _scaffoldKey,
@@ -66,21 +80,21 @@ class _HomeViewState extends State<HomeView> {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.orange[50],
-                            shape: BoxShape.circle, // deixa o fundo redondo
-                          ),
-                          child: Icon(
-                            _localizacaoAtiva
-                                ? Icons.location_on
-                                : Icons.location_off,
-                            color:
-                                _localizacaoAtiva ? Colors.green : Colors.red,
-                            size: 24,
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.all(6),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.orange[50],
+                        //     shape: BoxShape.circle, // deixa o fundo redondo
+                        //   ),
+                        //   child: Icon(
+                        //     _localizacaoAtiva
+                        //         ? Icons.location_on
+                        //         : Icons.location_off,
+                        //     color:
+                        //         _localizacaoAtiva ? Colors.green : Colors.red,
+                        //     size: 24,
+                        //   ),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -135,9 +149,9 @@ class _HomeViewState extends State<HomeView> {
                   onTap: () => GoRouter.of(context).push('/user-perfil'),
                 ),
                 buildCard(
-                  icon: Icons.person_search,
-                  label: "Buscar\n Amigos",
-                  onTap: () => GoRouter.of(context).push('/user-search'),
+                  icon: Icons.people,
+                  label: "Amigos",
+                  onTap: () => GoRouter.of(context).push('/user-friends'),
                 ),
                 buildCard(
                   icon: Icons.history,

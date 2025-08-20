@@ -49,7 +49,6 @@ class Locationhelper {
             '${agora.hour.toString().padLeft(2, '0')}:'
             '${agora.minute.toString().padLeft(2, '0')}';
 
-        log(placemarks[0].toString());
         Placemark place = placemarks[0];
         return PlaceModel(
           city: place.locality == ''
