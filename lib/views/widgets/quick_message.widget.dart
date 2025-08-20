@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:track_tcc_app/utils/message.util.dart';
 
-void showQuickMessageBottomSheet(BuildContext context) {
+void showQuickMessageBottomSheet(BuildContext context, List<String> amigos, String nome) {
   final List<Map<String, dynamic>> quickMessages = [
     {'icon': Icons.build, 'label': "Pneu furado", 'color': Colors.deepOrange},
     {
@@ -59,7 +60,7 @@ void showQuickMessageBottomSheet(BuildContext context) {
                   title: Text(item['label']),
                   onTap: () {
                     Navigator.pop(context);
-                    _handleQuickMessage(context, item['label']);
+                    _handleQuickMessage(context, item['label'], amigos, nome);
                   },
                 );
               }).toList(),
@@ -71,9 +72,11 @@ void showQuickMessageBottomSheet(BuildContext context) {
   );
 }
 
-void _handleQuickMessage(BuildContext context, String message) {
-  enviarNotificacaoOneSignal(playerId: ['d24c5238-5e49-4641-aeaa-c2b567361298'], titulo: message, mensagem: "De: João Douglas");
-  print("Mensagem rápida selecionada: $message");
+void _handleQuickMessage(BuildContext context, String message, List<String> amigos, String nome) {
+  enviarNotificacaoOneSignal(
+      playerId: amigos,
+      titulo: message,
+      mensagem: "De: $nome");
 
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text("Mensagem enviada: $message")),

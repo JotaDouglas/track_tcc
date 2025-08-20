@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class PerfilView extends StatefulWidget {
@@ -13,12 +14,15 @@ class PerfilView extends StatefulWidget {
 class _PerfilViewState extends State<PerfilView> {
   @override
   Widget build(BuildContext context) {
-    final int amigos = 120;
+    int amigos = 120;
     final int rotasCompartilhadas = 45;
     final double totalKm = 327.8;
 
     final authViewModel = Provider.of<LoginViewModel>(context);
+    final amizadeVM = Provider.of<AmizadeViewModel>(context);
     var user = authViewModel.loginUser;
+
+    amigos = amizadeVM.friends.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -142,7 +146,9 @@ class _PerfilViewState extends State<PerfilView> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            GoRouter.of(context).push('/user-friends');
+                          },
                           icon: const Icon(Icons.person_add_alt_1, size: 18),
                           label: const Text("Adicionar amigo"),
                           style: OutlinedButton.styleFrom(

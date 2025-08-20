@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/card_home.dart';
 
@@ -44,6 +45,8 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<LoginViewModel>(context);
     final String nome = authViewModel.loginUser?.username ?? 'Usuário';
+    final amizadeVM = Provider.of<AmizadeViewModel>(context);
+    amizadeVM.readMyFriends();
 
     return Scaffold(
       key: _scaffoldKey,
@@ -146,9 +149,9 @@ class _HomeViewState extends State<HomeView> {
                   onTap: () => GoRouter.of(context).push('/user-perfil'),
                 ),
                 buildCard(
-                  icon: Icons.person_search,
-                  label: "Buscar\n Amigos",
-                  onTap: () => GoRouter.of(context).push('/user-search'),
+                  icon: Icons.people,
+                  label: "Amigos",
+                  onTap: () => GoRouter.of(context).push('/user-friends'),
                 ),
                 buildCard(
                   icon: Icons.history,
