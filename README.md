@@ -15,10 +15,10 @@ Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário com
 - ✅ Histórico de rotas realizadas (com visualização via mapa)
 - ✅ Visualização de trajetos com **polylines**
 - ✅ **Armazenamento offline** da localização, com envio posterior quando houver conexão
-- 🚧 (Em desenvolvimento) **Compartilhamento de localização controlado** (por tempo limitado e com contatos escolhidos)
-- 🚧 (Em desenvolvimento) Botões de **alerta rápido** para suporte em caso de emergência
-- ✅ (Em desenvolvimento) Compartilhamento online em tempo real
-- 🚧 (Em desenvolvimento) Notificações para contatos chave
+- ✅ **Compartilhamento de localização controlado** com os amigos
+- ✅ Botões de **alerta rápido** para suporte em caso de emergência
+- ✅ Compartilhamento online em tempo real
+- ✅ Notificações para contatos chave
 
 ---
 
