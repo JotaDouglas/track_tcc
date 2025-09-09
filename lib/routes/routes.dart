@@ -1,4 +1,6 @@
 import 'package:go_router/go_router.dart';
+import 'package:track_tcc_app/viewmodel/geofence.viewmodel.dart';
+import 'package:track_tcc_app/views/geofencing/cerca.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home.view.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
@@ -18,6 +20,7 @@ import 'package:track_tcc_app/views/user/search_users.view.dart';
 import 'package:track_tcc_app/views/user/solicitacoes.view.dart';
 
 class AppRouter {
+  static final geofenceStore = GeofenceStore();
   static final _router = GoRouter(
     initialLocation: '/',
     routes: [
@@ -95,6 +98,10 @@ class AppRouter {
           path: "/settings-theme",
           name: 'settings-theme',
           builder: (context, status) => const SettingsPage()),
+      GoRoute(
+          path: "/geofencing",
+          name: 'geofencing',
+          builder: (context, status) =>  GeofenceMapView(store: geofenceStore) )
     ],
   );
   static GoRouter get router => _router;
