@@ -51,6 +51,17 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
   }
 
   @override
+  void removerQuadrado(int index) {
+    final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
+        name: '_GeofenceStoreBase.removerQuadrado');
+    try {
+      return super.removerQuadrado(index);
+    } finally {
+      _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 quadrados: ${quadrados}

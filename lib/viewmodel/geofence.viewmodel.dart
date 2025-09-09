@@ -6,7 +6,7 @@ part 'geofence.viewmodel.g.dart';
 class GeofenceStore = _GeofenceStoreBase with _$GeofenceStore;
 
 abstract class _GeofenceStoreBase with Store {
-   @observable
+  @observable
   ObservableList<List<LatLng>> quadrados = ObservableList<List<LatLng>>();
 
   @action
@@ -23,5 +23,12 @@ abstract class _GeofenceStoreBase with Store {
   @action
   void limparQuadrados() {
     quadrados.clear();
+  }
+
+  @action
+  void removerQuadrado(int index) {
+    if (index >= 0 && index < quadrados.length) {
+      quadrados.removeAt(index);
+    }
   }
 }
