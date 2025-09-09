@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -28,13 +29,12 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _loginMessagem() async {
-    await Future.delayed(Duration(seconds: 1)); 
+    await Future.delayed(Duration(seconds: 1));
     var playerId = OneSignal.User.pushSubscription.id;
     log("💡 $playerId");
   }
 
   Future<void> _verificarPermissaoLocalizacao() async {
-    
     final status = await Permission.location.status;
     setState(() {
       _localizacaoAtiva = status.isGranted;
@@ -44,7 +44,6 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<LoginViewModel>(context);
-    final String nome = authViewModel.loginUser?.username ?? 'Usuário';
     final amizadeVM = Provider.of<AmizadeViewModel>(context);
     amizadeVM.readMyFriends();
 
@@ -71,13 +70,19 @@ class _HomeViewState extends State<HomeView> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            'Olá, $nome 👋',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Observer(
+                            builder: (context) {
+                              String nome = authViewModel.loginUser?.username ??
+                                  'Usuário';
+                              return Text(
+                                'Olá, $nome 👋',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
                           ),
                         ),
                         // Container(
