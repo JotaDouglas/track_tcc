@@ -174,6 +174,11 @@ class _HomeViewState extends State<HomeView> {
                   label: "Configurações",
                   onTap: () => GoRouter.of(context).push('/settings-theme'),
                 ),
+                buildCard(
+                  icon: Icons.crop_square_outlined,
+                  label: "Cerca",
+                  onTap: () => GoRouter.of(context).push('/geofencing'),
+                ),
               ],
             ),
           ),

@@ -51,6 +51,17 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
   }
 
   @override
+  void removerPonto(int index) {
+    final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
+        name: '_GeofenceStoreBase.removerPonto');
+    try {
+      return super.removerPonto(index);
+    } finally {
+      _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 pontos: ${pontos}

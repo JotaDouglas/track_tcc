@@ -101,7 +101,7 @@ class AppRouter {
       GoRoute(
           path: "/geofencing",
           name: 'geofencing',
-          builder: (context, status) =>  GeofenceMapView(store: geofenceStore) )
+          builder: (context, status) =>  GeofenceMapView() )
     ],
   );
   static GoRouter get router => _router;

@@ -18,4 +18,11 @@ abstract class _GeofenceStoreBase with Store {
   void limparPontos() {
     pontos.clear();
   }
+
+  @action
+  void removerPonto(int index) {
+    if (index >= 0 && index < pontos.length) {
+      pontos.removeAt(index);
+    }
+  }
 }
