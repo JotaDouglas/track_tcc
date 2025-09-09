@@ -9,19 +9,19 @@ part of 'geofence.viewmodel.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$GeofenceStore on _GeofenceStoreBase, Store {
-  late final _$pontosAtom =
-      Atom(name: '_GeofenceStoreBase.pontos', context: context);
+  late final _$quadradosAtom =
+      Atom(name: '_GeofenceStoreBase.quadrados', context: context);
 
   @override
-  ObservableList<LatLng> get pontos {
-    _$pontosAtom.reportRead();
-    return super.pontos;
+  ObservableList<List<LatLng>> get quadrados {
+    _$quadradosAtom.reportRead();
+    return super.quadrados;
   }
 
   @override
-  set pontos(ObservableList<LatLng> value) {
-    _$pontosAtom.reportWrite(value, super.pontos, () {
-      super.pontos = value;
+  set quadrados(ObservableList<List<LatLng>> value) {
+    _$quadradosAtom.reportWrite(value, super.quadrados, () {
+      super.quadrados = value;
     });
   }
 
@@ -29,33 +29,22 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
       ActionController(name: '_GeofenceStoreBase', context: context);
 
   @override
-  void adicionarPonto(LatLng ponto) {
+  void adicionarQuadrado(LatLng center, {double delta = 0.001}) {
     final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
-        name: '_GeofenceStoreBase.adicionarPonto');
+        name: '_GeofenceStoreBase.adicionarQuadrado');
     try {
-      return super.adicionarPonto(ponto);
+      return super.adicionarQuadrado(center, delta: delta);
     } finally {
       _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
     }
   }
 
   @override
-  void limparPontos() {
+  void limparQuadrados() {
     final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
-        name: '_GeofenceStoreBase.limparPontos');
+        name: '_GeofenceStoreBase.limparQuadrados');
     try {
-      return super.limparPontos();
-    } finally {
-      _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void removerPonto(int index) {
-    final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
-        name: '_GeofenceStoreBase.removerPonto');
-    try {
-      return super.removerPonto(index);
+      return super.limparQuadrados();
     } finally {
       _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
     }
@@ -64,7 +53,7 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
   @override
   String toString() {
     return '''
-pontos: ${pontos}
+quadrados: ${quadrados}
     ''';
   }
 }

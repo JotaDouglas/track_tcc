@@ -6,23 +6,22 @@ part 'geofence.viewmodel.g.dart';
 class GeofenceStore = _GeofenceStoreBase with _$GeofenceStore;
 
 abstract class _GeofenceStoreBase with Store {
-  @observable
-  ObservableList<LatLng> pontos = ObservableList<LatLng>();
+   @observable
+  ObservableList<List<LatLng>> quadrados = ObservableList<List<LatLng>>();
 
   @action
-  void adicionarPonto(LatLng ponto) {
-    pontos.add(ponto);
+  void adicionarQuadrado(LatLng center, {double delta = 0.001}) {
+    final quadrado = [
+      LatLng(center.latitude - delta, center.longitude - delta),
+      LatLng(center.latitude - delta, center.longitude + delta),
+      LatLng(center.latitude + delta, center.longitude + delta),
+      LatLng(center.latitude + delta, center.longitude - delta),
+    ];
+    quadrados.add(quadrado);
   }
 
   @action
-  void limparPontos() {
-    pontos.clear();
-  }
-
-  @action
-  void removerPonto(int index) {
-    if (index >= 0 && index < pontos.length) {
-      pontos.removeAt(index);
-    }
+  void limparQuadrados() {
+    quadrados.clear();
   }
 }
