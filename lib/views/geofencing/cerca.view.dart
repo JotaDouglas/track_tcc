@@ -13,7 +13,21 @@ class GeofenceMapView extends StatelessWidget {
     final store = Provider.of<GeofenceStore>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Geofence")),
+      appBar: AppBar(
+        title: const Text("Geofence"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () {
+              final nome = "Cerca ${store.cercas.length + 1}";
+              store.salvarCerca(nome);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("$nome salva!")),
+              );
+            },
+          ),
+        ],
+      ),
       body: Observer(
         builder: (_) => FlutterMap(
           options: MapOptions(
@@ -35,8 +49,8 @@ class GeofenceMapView extends StatelessWidget {
                 polygons: store.quadrados
                     .map((q) => Polygon(
                           points: q,
-                          color: Colors.blue.withOpacity(0.3),
-                          borderColor: Colors.blue,
+                          color: Colors.blue.withOpacity(0.4),
+                          borderColor: Colors.blue.withOpacity(0.2),
                           borderStrokeWidth: 2,
                         ))
                     .toList(),
@@ -60,6 +74,32 @@ class GeofenceMapView extends StatelessWidget {
                     strokeWidth: 3,
                   ),
                 ],
+              ),
+
+            // Quadrados temporários (em edição)
+            if (store.quadrados.isNotEmpty)
+              PolygonLayer(
+                polygons: store.quadrados
+                    .map((q) => Polygon(
+                          points: q,
+                          color: Colors.blue.withOpacity(0.3),
+                          borderColor: Colors.blue,
+                          borderStrokeWidth: 2,
+                        ))
+                    .toList(),
+              ),
+
+// Cercas salvas (fixas no mapa)
+            if (store.cercas.isNotEmpty)
+              PolygonLayer(
+                polygons: store.cercas.expand<Polygon>((cerca) {
+                  return cerca.geofenceList!.map((q) => Polygon(
+                        points: q,
+                        color: Colors.green.withOpacity(0.3),
+                        borderColor: Colors.green.withOpacity(0.3),
+                        borderStrokeWidth: 2,
+                      ));
+                }).toList(),
               ),
 
             // Marcadores centrais invisíveis para excluir

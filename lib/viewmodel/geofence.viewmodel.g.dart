@@ -25,6 +25,22 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
     });
   }
 
+  late final _$cercasAtom =
+      Atom(name: '_GeofenceStoreBase.cercas', context: context);
+
+  @override
+  ObservableList<CercaModel> get cercas {
+    _$cercasAtom.reportRead();
+    return super.cercas;
+  }
+
+  @override
+  set cercas(ObservableList<CercaModel> value) {
+    _$cercasAtom.reportWrite(value, super.cercas, () {
+      super.cercas = value;
+    });
+  }
+
   late final _$_GeofenceStoreBaseActionController =
       ActionController(name: '_GeofenceStoreBase', context: context);
 
@@ -34,17 +50,6 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
         name: '_GeofenceStoreBase.adicionarQuadrado');
     try {
       return super.adicionarQuadrado(center, delta: delta);
-    } finally {
-      _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void limparQuadrados() {
-    final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
-        name: '_GeofenceStoreBase.limparQuadrados');
-    try {
-      return super.limparQuadrados();
     } finally {
       _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
     }
@@ -62,9 +67,32 @@ mixin _$GeofenceStore on _GeofenceStoreBase, Store {
   }
 
   @override
+  void limparQuadrados() {
+    final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
+        name: '_GeofenceStoreBase.limparQuadrados');
+    try {
+      return super.limparQuadrados();
+    } finally {
+      _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void salvarCerca(String nome) {
+    final _$actionInfo = _$_GeofenceStoreBaseActionController.startAction(
+        name: '_GeofenceStoreBase.salvarCerca');
+    try {
+      return super.salvarCerca(nome);
+    } finally {
+      _$_GeofenceStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
-quadrados: ${quadrados}
+quadrados: ${quadrados},
+cercas: ${cercas}
     ''';
   }
 }
