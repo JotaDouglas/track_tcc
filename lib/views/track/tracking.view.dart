@@ -319,7 +319,7 @@ class _TrackPageState extends State<TrackPage> {
                             ),
                           ),
                           onPressed: () {
-                            showEmergencyConfirmationDialog(context);
+                            showEmergencyConfirmationDialog(context, amigos, nomeCompleto);
                           },
                         ),
                       ),
