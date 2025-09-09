@@ -1,18 +1,31 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:track_tcc_app/utils/message.util.dart';
 
-void showEmergencyConfirmationDialog(BuildContext context) {
+void showEmergencyConfirmationDialog(
+    BuildContext context, List<String> amigos, String nome) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return _EmergencyDialog();
+      return _EmergencyDialog(
+        amigos: amigos,
+        nome: nome,
+      );
     },
   );
 }
 
 class _EmergencyDialog extends StatefulWidget {
+  final List<String> amigos;
+  final String nome;
+
+  const _EmergencyDialog({
+    required this.amigos,
+    required this.nome,
+  });
   @override
   State<_EmergencyDialog> createState() => _EmergencyDialogState();
 }
@@ -32,7 +45,7 @@ class _EmergencyDialogState extends State<_EmergencyDialog> {
         if (secondsRemaining == 0) {
           t.cancel();
           Navigator.of(context).pop();
-          sendEmergencyAlert(context);
+          sendEmergencyAlert(context, widget.amigos, widget.nome);
         }
       } else {
         t.cancel();
@@ -72,7 +85,8 @@ class _EmergencyDialogState extends State<_EmergencyDialog> {
               ),
               Text(
                 '$secondsRemaining',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -91,11 +105,23 @@ class _EmergencyDialogState extends State<_EmergencyDialog> {
   }
 }
 
-void sendEmergencyAlert(BuildContext context) {
-  print("🚨 Alerta de perigo enviado!");
+void sendEmergencyAlert(
+  BuildContext context,
+  List<String> amigos,
+  String nome,
+) {
+  log("🚨 Alerta de perigo enviado!");
+  enviarNotificacaoOneSignal(
+      playerId: amigos,
+      titulo: "⚠️EMERGÊNCIA⚠️",
+      mensagem: "Preciso de ajuda! ($nome)");
+
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(
-      content: Text("Alerta de perigo enviado!", style: TextStyle(color: Colors.white),),
+      content: Text(
+        "Alerta de perigo enviado!",
+        style: TextStyle(color: Colors.white),
+      ),
       backgroundColor: Colors.red,
     ),
   );
