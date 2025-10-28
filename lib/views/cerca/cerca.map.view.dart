@@ -14,7 +14,7 @@ class CercaMapView extends StatefulWidget {
 
 class _CercaMapViewState extends State<CercaMapView> {
   final TextEditingController _nomeController = TextEditingController();
-  CercaViewModel cercaVM = CercaViewModel();
+  late CercaViewModel cercaVM;
 
   @override
   void initState() {
@@ -25,35 +25,72 @@ class _CercaMapViewState extends State<CercaMapView> {
 
   @override
   Widget build(BuildContext context) {
-    cercaVM = Provider.of<CercaViewModel>(context);
+    final vm = Provider.of<CercaViewModel>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Definir Cerca"),
+        title: Observer(
+          builder: (_) => Text(
+            vm.cercaAtual != null
+                ? "Editando cerca: ${vm.cercaAtual}"
+                : "Nova Cerca",
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () async {
               if (_nomeController.text.isEmpty) {
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                       content: Text("Dê um nome à cerca antes de salvar")),
                 );
                 return;
               }
-              await cercaVM.salvarCerca(_nomeController.text);
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   const SnackBar(content: Text("Cerca salva com sucesso!")),
-              // );
+
+              await vm.salvarCerca(_nomeController.text);
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Cerca salva com sucesso!")),
+              );
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: cercaVM.limparPontos,
+            icon: const Icon(Icons.delete_forever),
+            onPressed: () async {
+              if (vm.cercaAtual != null) {
+                await vm.deletarCerca(vm.cercaAtual!);
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Cerca excluída")),
+                );
+              } else {
+                vm.limparPontos();
+              }
+            },
           ),
         ],
       ),
       body: Column(
         children: [
+          // Indicador de modo atual
+          Observer(
+            builder: (_) => Container(
+              color: switch (vm.modo) {
+                'editar' => Colors.blue.withOpacity(0.1),
+                'visualizar' => Colors.green.withOpacity(0.1),
+                _ => Colors.orange.withOpacity(0.1),
+              },
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                "Modo: ${vm.modo.toUpperCase()}",
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -66,87 +103,187 @@ class _CercaMapViewState extends State<CercaMapView> {
           ),
           Expanded(
             child: Observer(
-              builder: (_) => Observer(
-                builder: (_) => FlutterMap(
-                  options: MapOptions(
-                    initialCenter: LatLng(
-                        -23.5505, -46.6333), // ponto inicial (SP só de exemplo)
-                    initialZoom: 14,
-                    onTap: (tapPos, latlng) => cercaVM.adicionarPonto(latlng),
+              builder: (_) => FlutterMap(
+                options: MapOptions(
+                  initialCenter: LatLng(-23.5505, -46.6333),
+                  initialZoom: 14,
+                  onTap: (tapPos, latlng) {
+                    if (vm.modo == 'visualizar') return;
+                    vm.adicionarPonto(latlng);
+                  },
+                  onLongPress: (tapPos, latlng) {
+                    if (vm.modo == 'visualizar') return;
+                    final index = _pontoMaisProximo(vm.pontos, latlng);
+                    if (index != null) vm.removerPonto(index);
+                  },
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.pinchZoom |
+                        InteractiveFlag.drag |
+                        InteractiveFlag.doubleTapZoom,
                   ),
-                  children: [
-                    // seu mapa base
-                    TileLayer(
-                      urlTemplate:
-                          'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                      subdomains: ['a', 'b', 'c'],
-                    ),
-
-                    // marcadores dos pontos clicados
-                    MarkerLayer(
-                      markers: cercaVM.pontos
-                          .map(
-                            (p) => Marker(
-                              point: p,
-                              width: 30,
-                              height: 30,
-                              child: const Icon(Icons.location_on,
-                                  color: Colors.red),
-                            ),
-                          )
-                          .toList(),
-                    ),
-
-                    // polígono da cerca (quando houver pontos)
-                    if (cercaVM.pontos.isNotEmpty)
-                      PolygonLayer(
-                        polygons: [
-                          Polygon(
-                            points: cercaVM.pontos.toList(),
-                            color: Colors.blue.withOpacity(0.3),
-                            borderColor: Colors.blue,
-                            borderStrokeWidth: 2,
-                          ),
-                        ],
-                      ),
-                  ],
                 ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                    subdomains: const ['a', 'b', 'c'],
+                  ),
+                  MarkerLayer(
+                    markers: vm.pontos
+                        .map(
+                          (p) => Marker(
+                            point: p,
+                            width: 30,
+                            height: 30,
+                            child: const Icon(Icons.location_on,
+                                color: Colors.red),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  if (vm.pontos.isNotEmpty)
+                    PolygonLayer(
+                      polygons: [
+                        Polygon(
+                          points: [...vm.pontos, vm.pontos.first],
+                          color: Colors.blue.withOpacity(0.3),
+                          borderColor: Colors.blue,
+                          borderStrokeWidth: 2,
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          showModalBottomSheet(
-            context: context,
-            builder: (_) => Observer(
-              builder: (_) => ListView(
-                children: cercaVM.cercasSalvas
-                    .map(
-                      (nome) => ListTile(
-                        title: Text(nome),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            await cercaVM.deletarCerca(nome);
-                            Navigator.pop(context);
-                          },
-                        ),
-                        onTap: () async {
-                          await cercaVM.carregarCerca(nome);
-                          _nomeController.text = nome;
-                          Navigator.pop(context);
-                        },
-                      ),
-                    )
-                    .toList(),
-              ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Observer(
+        builder: (_) => Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FloatingActionButton.extended(
+              heroTag: "nova",
+              icon: const Icon(Icons.add_location_alt),
+              label: const Text("Nova"),
+              onPressed: vm.iniciarNovaCerca,
             ),
-          );
-        },
-        label: const Text("Cercas salvas"),
-        icon: const Icon(Icons.list),
+            const SizedBox(width: 12),
+            FloatingActionButton.extended(
+              heroTag: "listar",
+              icon: const Icon(Icons.list),
+              label: const Text("Cercas"),
+              onPressed: () async {
+                await vm.listarCercas();
+                if (!mounted) return;
+                _mostrarCercas(context, vm);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  int? _pontoMaisProximo(List<LatLng> pontos, LatLng pos) {
+    if (pontos.isEmpty) return null;
+    double minDist = double.infinity;
+    int? minIndex;
+
+    for (int i = 0; i < pontos.length; i++) {
+      final d = Distance().as(LengthUnit.Meter, pontos[i], pos);
+      if (d < minDist && d < 20) {
+        minDist = d;
+        minIndex = i;
+      }
+    }
+    return minIndex;
+  }
+
+  void _mostrarCercas(BuildContext context, CercaViewModel vm) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        builder: (context, scrollController) => Observer(
+          builder: (_) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              const Text(
+                'Minhas Cercas',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: vm.cercasSalvas.length,
+                  itemBuilder: (_, i) {
+                    final nome = vm.cercasSalvas[i];
+                    return ListTile(
+                      title: Text(nome),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () async {
+                              await vm.carregarCerca(nome);
+                              vm.modo = 'editar';
+                              _nomeController.text = nome;
+                              if (!context.mounted) return;
+                              Navigator.pop(context);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              await vm.deletarCerca(nome);
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text('Cerca "$nome" deletada')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      onTap: () async {
+                        await vm.carregarCerca(nome);
+                        vm.modo = 'visualizar';
+                        _nomeController.text = nome;
+                        if (!context.mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Cerca "$nome" carregada')),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add_location_alt),
+                  label: const Text('Nova Cerca'),
+                  onPressed: () {
+                    vm.iniciarNovaCerca();
+                    _nomeController.clear();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Modo de criação iniciado')),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

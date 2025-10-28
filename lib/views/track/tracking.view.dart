@@ -131,6 +131,8 @@ class _TrackPageState extends State<TrackPage> {
       }
 
       _stopSharing();
+      
+      if (!mounted) return;
       setState(() {
         trackList.clear();
         _addressLabel = '';

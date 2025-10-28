@@ -15,8 +15,21 @@ abstract class CercaViewModelBase with Store {
   @observable
   ObservableList<String> cercasSalvas = ObservableList<String>();
 
+  @observable
+  String? cercaAtual;
+
+  @observable
+  String modo = 'visualizar'; // 'criar', 'editar', 'visualizar'
+
   @action
   void adicionarPonto(LatLng ponto) => pontos.add(ponto);
+
+  @action
+  void removerPonto(int index) {
+    if (index >= 0 && index < pontos.length) {
+      pontos.removeAt(index);
+    }
+  }
 
   @action
   void limparPontos() => pontos.clear();
@@ -24,6 +37,7 @@ abstract class CercaViewModelBase with Store {
   @action
   Future<void> salvarCerca(String nome) async {
     await _cercaRepository.salvarCerca(nome, pontos.toList());
+    cercaAtual = nome;
     await listarCercas();
   }
 
@@ -31,6 +45,7 @@ abstract class CercaViewModelBase with Store {
   Future<void> carregarCerca(String nome) async {
     final carregados = await _cercaRepository.carregarCerca(nome);
     if (carregados != null) {
+      cercaAtual = nome;
       pontos
         ..clear()
         ..addAll(carregados);
@@ -48,6 +63,28 @@ abstract class CercaViewModelBase with Store {
   @action
   Future<void> deletarCerca(String nome) async {
     await _cercaRepository.deletarCerca(nome);
+    if (cercaAtual == nome) {
+      limparPontos();
+      cercaAtual = null;
+    }
     await listarCercas();
+  }
+
+  @action
+  void iniciarNovaCerca() {
+    limparPontos();
+    cercaAtual = null;
+    modo = 'criar';
+  }
+
+  @action
+  void editarCerca(String nome) async {
+    await carregarCerca(nome);
+    modo = 'editar';
+  }
+
+  @action
+  void finalizarEdicao() {
+    modo = 'visualizar';
   }
 }
