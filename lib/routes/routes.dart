@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:track_tcc_app/views/cerca/cerca.map.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home.view.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
@@ -83,6 +84,10 @@ class AppRouter {
           path: "/location-share-home",
           name: 'location-share-home',
           builder: (context, status) => const LocalizacoesPage()),
+      GoRoute(
+          path: "/cerca-map",
+          name: 'cerca-map',
+          builder: (context, status) => const CercaMapView()),
       GoRoute(
         path: "/location-share-map/:userId",
         name: 'location-share-map',
