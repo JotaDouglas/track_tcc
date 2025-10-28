@@ -112,7 +112,6 @@ class _CercaMapViewState extends State<CercaMapView> {
                     vm.adicionarPonto(latlng);
                   },
                   onLongPress: (tapPos, latlng) {
-                    if (vm.modo == 'visualizar') return;
                     final index = _pontoMaisProximo(vm.pontos, latlng);
                     if (index != null) vm.removerPonto(index);
                   },
@@ -129,17 +128,32 @@ class _CercaMapViewState extends State<CercaMapView> {
                     subdomains: const ['a', 'b', 'c'],
                   ),
                   MarkerLayer(
-                    markers: vm.pontos
-                        .map(
-                          (p) => Marker(
-                            point: p,
-                            width: 30,
-                            height: 30,
-                            child: const Icon(Icons.location_on,
-                                color: Colors.red),
+                    markers: vm.pontos.map((p) {
+                      return Marker(
+                        point: p,
+                        width: 40,
+                        height: 40,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (vm.modo == 'editar') {
+                              final index = _pontoMaisProximo(vm.pontos, p);
+                              if (index != null) {
+                                vm.removerPonto(index);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Ponto removido")),
+                                );
+                              }
+                            }
+                          },
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.red,
+                            size: 32,
                           ),
-                        )
-                        .toList(),
+                        ),
+                      );
+                    }).toList(),
                   ),
                   if (vm.pontos.isNotEmpty)
                     PolygonLayer(
