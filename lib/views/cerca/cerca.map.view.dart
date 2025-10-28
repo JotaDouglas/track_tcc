@@ -5,7 +5,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 
-
 class CercaMapView extends StatefulWidget {
   const CercaMapView({super.key});
 
@@ -36,7 +35,8 @@ class _CercaMapViewState extends State<CercaMapView> {
             onPressed: () async {
               if (_nomeController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Dê um nome à cerca antes de salvar")),
+                  const SnackBar(
+                      content: Text("Dê um nome à cerca antes de salvar")),
                 );
                 return;
               }
@@ -66,43 +66,51 @@ class _CercaMapViewState extends State<CercaMapView> {
           ),
           Expanded(
             child: Observer(
-              builder: (_) => FlutterMap(
-                options: MapOptions(
-                  initialCenter: LatLng(-23.5505, -46.6333),
-                  initialZoom: 14,
-                  onTap: (tapPos, latlng) => cercaVM.adicionarPonto(latlng),
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-                    additionalOptions: {
-                      'accessToken': 'SEU_TOKEN_MAPBOX',
-                      'id': 'mapbox/streets-v12',
-                    },
+              builder: (_) => Observer(
+                builder: (_) => FlutterMap(
+                  options: MapOptions(
+                    initialCenter: LatLng(
+                        -23.5505, -46.6333), // ponto inicial (SP só de exemplo)
+                    initialZoom: 14,
+                    onTap: (tapPos, latlng) => cercaVM.adicionarPonto(latlng),
                   ),
-                  MarkerLayer(
-                    markers: cercaVM.pontos
-                        .map((p) => Marker(
+                  children: [
+                    // seu mapa base
+                    TileLayer(
+                      urlTemplate:
+                          'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                      subdomains: ['a', 'b', 'c'],
+                    ),
+
+                    // marcadores dos pontos clicados
+                    MarkerLayer(
+                      markers: cercaVM.pontos
+                          .map(
+                            (p) => Marker(
                               point: p,
                               width: 30,
                               height: 30,
-                              child: const Icon(Icons.location_on, color: Colors.red),
-                            ))
-                        .toList(),
-                  ),
-                  if (cercaVM.pontos.isNotEmpty)
-                    PolygonLayer(
-                      polygons: [
-                        Polygon(
-                          points: cercaVM.pontos.toList(),
-                          color: Colors.blue.withOpacity(0.3),
-                          borderColor: Colors.blue,
-                          borderStrokeWidth: 2,
-                        ),
-                      ],
+                              child: const Icon(Icons.location_on,
+                                  color: Colors.red),
+                            ),
+                          )
+                          .toList(),
                     ),
-                ],
+
+                    // polígono da cerca (quando houver pontos)
+                    if (cercaVM.pontos.isNotEmpty)
+                      PolygonLayer(
+                        polygons: [
+                          Polygon(
+                            points: cercaVM.pontos.toList(),
+                            color: Colors.blue.withOpacity(0.3),
+                            borderColor: Colors.blue,
+                            borderStrokeWidth: 2,
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
