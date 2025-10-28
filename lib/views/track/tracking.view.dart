@@ -92,8 +92,6 @@ class _TrackPageState extends State<TrackPage> {
       res = await Locationhelper().checkGps(context);
     }
     if (res != true) return;
-
-    //Adicionar trackingLoop do viewmodel
     if (!loopOn) Dialogs.showLoading(context, GlobalKey());
     toggleTrackingState();
 
