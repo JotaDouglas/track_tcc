@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/repository/track.repository.dart';
+import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 part 'tracking.viewmodel.g.dart';
@@ -19,6 +20,7 @@ abstract class TrackingViewModelBase with Store {
   final SupabaseClient _supabase = Supabase.instance.client;
   final Locationhelper _locationHelper = Locationhelper();
   final LoginViewModel authViewModel = LoginViewModel();
+  final CercaViewModel cercaViewModel = CercaViewModel();
 
   int? currentRotaId;
 
@@ -59,6 +61,14 @@ abstract class TrackingViewModelBase with Store {
 
   @observable
   Timer? temp;
+
+  @observable
+  int trackingInterval = 20; // valor padrão (Eficiente)
+
+  @action
+  void setTrackingInterval(int seconds) {
+    trackingInterval = seconds;
+  }
 
   @action
   changeDistance(double value, {bool reset = false}) {
@@ -271,14 +281,14 @@ abstract class TrackingViewModelBase with Store {
   }
 
   //Sistema de tracking
-  Future<void> _startSharing() async {
-    //Sinal GPS
-    bool gpsOn;
-    gpsOn = await Locationhelper().checkGps(context);
+
+  // tracking.viewmodel.dart
+  @action
+  Future<void> startTracking(String userName) async {
+    final gpsOn = await _locationHelper.checkGps(null);
     if (gpsOn != true) return;
 
     toggleTrackingState();
-
     trackingMode = trackingLoop;
     changeDistance(0, reset: true);
 
@@ -297,8 +307,8 @@ abstract class TrackingViewModelBase with Store {
 
         trackListLoop.insert(0, newLocal);
 
-        primeiroTrack(); // faz a primeira leitura
-        _startTimer(); // começa o timer para continuar rastreando
+        await _trackOnce(userName); // primeira leitura
+        _startTimer(userName); // inicia o loop
       } else {
         toggleTrackingState();
         trackingLoop = false;
@@ -316,6 +326,82 @@ abstract class TrackingViewModelBase with Store {
       distanceMeters = 0.0;
     }
   }
+
+  void _startTimer(String userName) {
+    temp?.cancel();
+    temp = Timer.periodic(
+      Duration(seconds: trackingInterval),
+      (_) => _trackOnce(userName),
+    );
+  }
+
+  @action
+  Future<void> _trackOnce(String userName) async {
+    try {
+      final newLocal = await _locationHelper.actuallyPosition();
+      if (newLocal != null) {
+        final newLatLng =
+            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
+
+        if (lastPosition != null) {
+          distanceMeters +=
+              const Distance().as(LengthUnit.Meter, lastPosition!, newLatLng);
+        }
+
+        lastPosition = newLatLng;
+        lastPlace = newLocal;
+        addressLabel = newLocal.adress ?? 'Endereço não encontrado';
+        await trackLocation(newLocal, userName);
+
+        trackListLoop.insert(0, newLocal);
+        validarDentroCercas(newLatLng);
+      } else {
+        log('Localização retornou null.');
+      }
+    } catch (e) {
+      log('Erro no rastreamento: $e');
+      _stopSharing();
+      toggleTrackingState();
+    }
+  }
+
+  //Verificar a cerca
+
+  Future<void> validarDentroCercas(LatLng ponto) async {
+    final vm = cercaViewModel;
+
+    // Se o map ainda estiver vazio, carrega todas as cercas
+    if (vm.cercasMap.isEmpty) {
+      await vm.listarCercas();
+      await vm.carregarTodasCercas();
+    }
+
+    vm.cercasMap.forEach((nome, poligono) {
+      if (pontoDentroDaCerca(ponto, poligono)) {
+        log('Usuário está DENTRO da cerca "$nome"');
+      }
+    });
+  }
+
+  bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
+    int intersectCount = 0;
+    for (int j = 0; j < poligono.length; j++) {
+      LatLng a = poligono[j];
+      LatLng b = poligono[(j + 1) % poligono.length];
+
+      if (((a.latitude > ponto.latitude) != (b.latitude > ponto.latitude)) &&
+          (ponto.longitude <
+              (b.longitude - a.longitude) *
+                      (ponto.latitude - a.latitude) /
+                      (b.latitude - a.latitude) +
+                  a.longitude)) {
+        intersectCount++;
+      }
+    }
+    return (intersectCount % 2) == 1;
+  }
+
+  //novo
 
   toggleTrackingState() {
     trackingLoop = !trackingLoop;
@@ -341,7 +427,8 @@ abstract class TrackingViewModelBase with Store {
         lastPlace = newLocal;
         addressLabel = newLocal.adress ?? 'Endereço não encontrado';
 
-        await trackLocation(newLocal, authViewModel.loginUser?.username  ?? 'Sem nome');
+        await trackLocation(
+            newLocal, authViewModel.loginUser?.username ?? 'Sem nome');
 
         trackListLoop.insert(0, newLocal);
       } else {
@@ -352,10 +439,6 @@ abstract class TrackingViewModelBase with Store {
       _stopSharing();
       toggleTrackingState();
     }
-  }
-
-  void _startTimer() async {
-    temp = Timer.periodic(const Duration(seconds: 5), (_) => primeiroTrack());
   }
 
   void _stopSharing() async {
