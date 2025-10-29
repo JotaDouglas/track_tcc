@@ -62,6 +62,14 @@ abstract class TrackingViewModelBase with Store {
   @observable
   Timer? temp;
 
+  @observable
+  int trackingInterval = 20; // valor padrão (Eficiente)
+
+  @action
+  void setTrackingInterval(int seconds) {
+    trackingInterval = seconds;
+  }
+
   @action
   changeDistance(double value, {bool reset = false}) {
     distanceMeters += value;
@@ -322,7 +330,7 @@ abstract class TrackingViewModelBase with Store {
   void _startTimer(String userName) {
     temp?.cancel();
     temp = Timer.periodic(
-      const Duration(seconds: 7),
+      Duration(seconds: trackingInterval),
       (_) => _trackOnce(userName),
     );
   }
@@ -371,7 +379,7 @@ abstract class TrackingViewModelBase with Store {
     vm.cercasMap.forEach((nome, poligono) {
       if (pontoDentroDaCerca(ponto, poligono)) {
         log('Usuário está DENTRO da cerca "$nome"');
-      } 
+      }
     });
   }
 

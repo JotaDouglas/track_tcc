@@ -201,6 +201,22 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     });
   }
 
+  late final _$trackingIntervalAtom =
+      Atom(name: 'TrackingViewModelBase.trackingInterval', context: context);
+
+  @override
+  int get trackingInterval {
+    _$trackingIntervalAtom.reportRead();
+    return super.trackingInterval;
+  }
+
+  @override
+  set trackingInterval(int value) {
+    _$trackingIntervalAtom.reportWrite(value, super.trackingInterval, () {
+      super.trackingInterval = value;
+    });
+  }
+
   late final _$insertTrackingAsyncAction =
       AsyncAction('TrackingViewModelBase.insertTracking', context: context);
 
@@ -272,6 +288,17 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
       ActionController(name: 'TrackingViewModelBase', context: context);
 
   @override
+  void setTrackingInterval(int seconds) {
+    final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
+        name: 'TrackingViewModelBase.setTrackingInterval');
+    try {
+      return super.setTrackingInterval(seconds);
+    } finally {
+      _$TrackingViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic changeDistance(double value, {bool reset = false}) {
     final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
         name: 'TrackingViewModelBase.changeDistance');
@@ -307,7 +334,8 @@ lastPlace: ${lastPlace},
 lastPosition: ${lastPosition},
 addressLabel: ${addressLabel},
 trackListLoop: ${trackListLoop},
-temp: ${temp}
+temp: ${temp},
+trackingInterval: ${trackingInterval}
     ''';
   }
 }

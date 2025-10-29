@@ -63,11 +63,19 @@ class _TrackPageState extends State<TrackPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("TRACKING", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Tracking",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         backgroundColor: Colors.orange[900],
+        elevation: 0,
         centerTitle: true,
       ),
-      backgroundColor: Colors.black87,
+      backgroundColor: const Color(0xFF1E1E1E),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -75,24 +83,62 @@ class _TrackPageState extends State<TrackPage> {
             builder: (_) => Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.assistant_navigation,
-                  size: trackVM.trackingMode ? 100 : 80,
-                  color: Colors.orange[900],
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  trackVM.trackingMode
-                      ? 'Rastreamento em andamento'
-                      : 'Toque para iniciar o compartilhamento',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.orange[900]?.withOpacity(0.1),
+                  ),
+                  child: Icon(
+                    Icons.assistant_navigation,
+                    size: trackVM.trackingMode ? 80 : 60,
                     color: Colors.orange[900],
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+                if (!trackVM.trackingMode) ...[
+                  Text(
+                    'Modo de Rastreamento',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildModeButton(
+                        context,
+                        label: 'Econômico',
+                        color: Colors.green,
+                        isSelected: trackVM.trackingInterval == 40,
+                        onTap: () =>
+                            setState(() => trackVM.setTrackingInterval(40)),
+                      ),
+                      _buildModeButton(
+                        context,
+                        label: 'Eficiente',
+                        color: Colors.orange,
+                        isSelected: trackVM.trackingInterval == 20,
+                        onTap: () =>
+                            setState(() => trackVM.setTrackingInterval(20)),
+                      ),
+                      _buildModeButton(
+                        context,
+                        label: 'Preciso',
+                        color: Colors.red,
+                        isSelected: trackVM.trackingInterval == 7,
+                        onTap: () =>
+                            setState(() => trackVM.setTrackingInterval(7)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _getModeDescription(trackVM.trackingInterval),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+                ],
                 if (trackVM.trackingMode) ...[
                   Text(
                     'Distância: ${trackVM.distanceMeters.toStringAsFixed(1)} m',
@@ -117,9 +163,11 @@ class _TrackPageState extends State<TrackPage> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[400],
+                            backgroundColor: Colors.blue[700]?.withOpacity(0.9),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
+                                borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           icon: const Icon(Icons.message, color: Colors.white),
                           label: const Text("Mensagem rápida",
@@ -132,9 +180,11 @@ class _TrackPageState extends State<TrackPage> {
                           onPressed: () =>
                               showEmergencyConfirmationDialog(context),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red[600],
+                            backgroundColor: Colors.red[700]?.withOpacity(0.9),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
+                                borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           icon: const Icon(Icons.warning_amber_rounded,
                               color: Colors.white),
@@ -146,18 +196,51 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                 ],
                 const SizedBox(height: 32),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    backgroundColor: Colors.orange[900],
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.orange[900]!,
+                        Colors.orange[600]!,
+                      ],
+                    ),
                   ),
-                  onPressed: () async {
-                    await _requestLocationPermission(context);
-                    await trackVM.startTracking(nome);
-                  },
-                  child: Text(
-                    trackVM.trackingMode ? 'PARAR' : 'INICIAR',
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () async {
+                      await _requestLocationPermission(context);
+                      await trackVM.startTracking(nome);
+                    },
+                    child: Text(
+                      trackVM.trackingMode ? 'Parar' : 'Iniciar',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  trackVM.trackingMode
+                      ? 'Rastreamento em andamento'
+                      : 'Toque para iniciar o compartilhamento',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.orange[900],
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -166,5 +249,56 @@ class _TrackPageState extends State<TrackPage> {
         ),
       ),
     );
+  }
+}
+
+Widget _buildModeButton(
+  BuildContext context, {
+  required String label,
+  required Color color,
+  required bool isSelected,
+  required VoidCallback onTap,
+}) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? color : color.withOpacity(0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+String _getModeDescription(int interval) {
+  switch (interval) {
+    case 40:
+      return 'Atualiza a cada 40 segundos — maior economia de bateria.';
+    case 20:
+      return 'Atualiza a cada 20 segundos — equilíbrio entre precisão e bateria.';
+    case 7:
+      return 'Atualiza a cada 7 segundos — localização em tempo real e maior consumo de bateria.';
+    default:
+      return '';
   }
 }
