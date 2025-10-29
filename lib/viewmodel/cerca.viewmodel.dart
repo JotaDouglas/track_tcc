@@ -78,7 +78,7 @@ abstract class CercaViewModelBase with Store {
   }
 
   @action
-  void editarCerca(String nome) async {
+  Future<void> editarCerca(String nome) async {
     await carregarCerca(nome);
     modo = 'editar';
   }

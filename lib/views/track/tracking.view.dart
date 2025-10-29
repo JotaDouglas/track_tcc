@@ -1,19 +1,14 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:track_tcc_app/helper/location.helper.dart';
-import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/alert_message.widget.dart';
-import 'package:track_tcc_app/views/widgets/loading.widget.dart';
 import 'package:track_tcc_app/views/widgets/quick_message.widget.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 class TrackPage extends StatefulWidget {
   const TrackPage({super.key});
@@ -23,186 +18,37 @@ class TrackPage extends StatefulWidget {
 }
 
 class _TrackPageState extends State<TrackPage> {
-  final Locationhelper _locationHelper = Locationhelper();
-  final TrackingViewModel viewModel = TrackingViewModel();
-
-  String? nome;
-
-  List<PlaceModel> trackList = [];
-  bool isLoading = false;
-  Timer? temp;
-  bool loopOn = false;
-  bool _sharing = false;
-
-  double _distanceMeters = 0.0;
-  String _addressLabel = '';
-  PlaceModel? _lastPlace;
-  LatLng? _lastPosition;
-
-  @override
-  void initState() {
-    super.initState();
-    requestLocationPermission();
-  }
-
-  Future<void> requestLocationPermission() async {
+  Future<void> _requestLocationPermission(BuildContext context) async {
     var status = await Permission.location.status;
-
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
+    if (!status.isGranted) status = await Permission.location.request();
 
     if (status.isDenied || status.isPermanentlyDenied) {
-      if (mounted) {
-        await showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Permissão necessária'),
-            content: const Text(
-              'Por favor, ative a permissão de localização nas configurações.',
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Permissão necessária'),
+          content:
+              const Text('Ative a permissão de localização nas configurações.'),
+          actions: [
+            TextButton(
+              onPressed: () => openAppSettings(),
+              child: const Text('Abrir configurações'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => openAppSettings(),
-                child: const Text('Abrir configurações'),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
-
-  void popWidget() {
-    Navigator.pop(context);
-  }
-
-  void toggleTrackingState() {
-    if (mounted) {
-      setState(() {
-        loopOn = !loopOn;
-      });
-    }
-  }
-
-  Future<void> _startSharing() async {
-    await WakelockPlus.enable();
-    var res;
-    if (mounted) {
-      res = await Locationhelper().checkGps(context);
-    }
-    if (res != true) return;
-    if (!loopOn) Dialogs.showLoading(context, GlobalKey());
-    toggleTrackingState();
-
-    setState(() {
-      _sharing = loopOn;
-      _distanceMeters = 0.0;
-    });
-
-    if (loopOn) {
-      final newLocal = await _locationHelper.actuallyPosition();
-
-      if (newLocal != null) {
-        if (viewModel.currentRotaId == null) {
-          await viewModel.insertTracking(newLocal);
-        }
-
-        _lastPlace = newLocal;
-        _lastPosition =
-            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
-        _addressLabel = newLocal.adress ?? 'Endereço não encontrado';
-
-        setState(() {
-          trackList.insert(0, newLocal);
-        });
-
-        _trackOnce(); // faz a primeira leitura
-        _startTimer(); // começa o timer para continuar rastreando
-      } else {
-        toggleTrackingState();
-        setState(() => _sharing = false);
-      }
-
-      popWidget(); // fecha o loading
-    } else {
-      if (trackList.isNotEmpty) {
-        await viewModel.stopTracking(trackList.first);
-      }
-
-      _stopSharing();
-      
-      if (!mounted) return;
-      setState(() {
-        trackList.clear();
-        _addressLabel = '';
-        _lastPlace = null;
-        _lastPosition = null;
-        _distanceMeters = 0.0;
-      });
-    }
-  }
-
-  void _startTimer() async {
-    temp = Timer.periodic(const Duration(seconds: 5), (_) => _trackOnce());
-  }
-
-  Future<void> _trackOnce() async {
-    try {
-      final newLocal = await _locationHelper.actuallyPosition();
-
-      if (newLocal != null) {
-        // Calcular distância
-        final newLatLng =
-            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
-        if (_lastPosition != null) {
-          _distanceMeters += const Distance().as(
-            LengthUnit.Meter,
-            _lastPosition!,
-            newLatLng,
-          );
-        }
-
-        _lastPosition = newLatLng;
-        _lastPlace = newLocal;
-        _addressLabel = newLocal.adress ?? 'Endereço não encontrado';
-
-        await viewModel.trackLocation(newLocal, nome ?? 'Sem nome');
-
-        setState(() {
-          trackList.insert(0, newLocal);
-        });
-      } else {
-        log('Localização retornou null.');
-      }
-    } catch (e) {
-      log('Erro no rastreamento: $e');
-      _stopSharing();
-      toggleTrackingState();
-    }
-  }
-
-  void _stopSharing() async {
-    await WakelockPlus.disable();
-    temp?.cancel();
-    temp = null;
-    log('Rastreamento finalizado');
-    if (mounted) {
-      setState(() => _sharing = false);
-    } else {
-      _sharing = false;
+          ],
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final trackVM = Provider.of<TrackingViewModel>(context);
     final authViewModel = Provider.of<LoginViewModel>(context);
-    nome = authViewModel.loginUser?.username ??
-        'user${DateTime.now().microsecond}';
-    String nomeCompleto = "${authViewModel.loginUser?.username}${authViewModel.loginUser?.sobrenome ?? 'username'}";
-
     final amizadeVM = Provider.of<AmizadeViewModel>(context);
-    amizadeVM.readMyFriends();
+
+    final nome = authViewModel.loginUser?.username ?? 'Sem nome';
+    final nomeCompleto =
+        "${authViewModel.loginUser?.username}${authViewModel.loginUser?.sobrenome ?? ''}";
 
     List<String> amigos = [];
     // supondo que amizadeVM.friends seja uma lista de maps
@@ -217,33 +63,26 @@ class _TrackPageState extends State<TrackPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "TRACKING",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+        title: const Text("TRACKING", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange[900],
-        foregroundColor: Colors.white,
+        centerTitle: true,
       ),
-      backgroundColor: _sharing ? Colors.black87 : null,
+      backgroundColor: Colors.black87,
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Observer(
+            builder: (_) => Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.assistant_navigation,
-                  size: _sharing ? 100 : 80,
+                  size: trackVM.trackingMode ? 100 : 80,
                   color: Colors.orange[900],
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  _sharing
+                  trackVM.trackingMode
                       ? 'Rastreamento em andamento'
                       : 'Toque para iniciar o compartilhamento',
                   textAlign: TextAlign.center,
@@ -254,73 +93,53 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (_sharing) ...[
+                if (trackVM.trackingMode) ...[
                   Text(
-                    'Distância: ${_distanceMeters.toStringAsFixed(1)} m',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
+                    'Distância: ${trackVM.distanceMeters.toStringAsFixed(1)} m',
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _addressLabel,
+                    trackVM.addressLabel,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                   const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
+                          onPressed: () {
+                            showQuickMessageBottomSheet(
+                              context,
+                              amigos,
+                              nomeCompleto,
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue[400],
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 10),
+                                borderRadius: BorderRadius.circular(30)),
                           ),
                           icon: const Icon(Icons.message, color: Colors.white),
-                          label: const FittedBox(
-                            // para o texto não estourar
-                            child: Text(
-                              "Mensagem rápida",
-                              style: TextStyle(color: Colors.white),
-                              maxLines: 1,
-                            ),
-                          ),
-                          onPressed: () {
-                            showQuickMessageBottomSheet(context, amigos, nomeCompleto);
-                          },
+                          label: const Text("Mensagem rápida",
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: ElevatedButton.icon(
+                          onPressed: () =>
+                              showEmergencyConfirmationDialog(context),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red[600],
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 10),
+                                borderRadius: BorderRadius.circular(30)),
                           ),
                           icon: const Icon(Icons.warning_amber_rounded,
                               color: Colors.white),
-                          label: const FittedBox(
-                            child: Text(
-                              "Situação de Perigo",
-                              style: TextStyle(color: Colors.white),
-                              maxLines: 1,
-                            ),
-                          ),
-                          onPressed: () {
-                            showEmergencyConfirmationDialog(context);
-                          },
+                          label: const Text("Situação de Perigo",
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ),
                     ],
@@ -332,9 +151,12 @@ class _TrackPageState extends State<TrackPage> {
                     minimumSize: const Size.fromHeight(50),
                     backgroundColor: Colors.orange[900],
                   ),
-                  onPressed: _startSharing,
+                  onPressed: () async {
+                    await _requestLocationPermission(context);
+                    await trackVM.startTracking(nome);
+                  },
                   child: Text(
-                    _sharing ? 'PARAR' : 'INICIAR',
+                    trackVM.trackingMode ? 'PARAR' : 'INICIAR',
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),

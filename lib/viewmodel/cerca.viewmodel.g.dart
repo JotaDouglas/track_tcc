@@ -25,6 +25,94 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     });
   }
 
+  late final _$cercasSalvasAtom =
+      Atom(name: 'CercaViewModelBase.cercasSalvas', context: context);
+
+  @override
+  ObservableList<String> get cercasSalvas {
+    _$cercasSalvasAtom.reportRead();
+    return super.cercasSalvas;
+  }
+
+  @override
+  set cercasSalvas(ObservableList<String> value) {
+    _$cercasSalvasAtom.reportWrite(value, super.cercasSalvas, () {
+      super.cercasSalvas = value;
+    });
+  }
+
+  late final _$cercaAtualAtom =
+      Atom(name: 'CercaViewModelBase.cercaAtual', context: context);
+
+  @override
+  String? get cercaAtual {
+    _$cercaAtualAtom.reportRead();
+    return super.cercaAtual;
+  }
+
+  @override
+  set cercaAtual(String? value) {
+    _$cercaAtualAtom.reportWrite(value, super.cercaAtual, () {
+      super.cercaAtual = value;
+    });
+  }
+
+  late final _$modoAtom =
+      Atom(name: 'CercaViewModelBase.modo', context: context);
+
+  @override
+  String get modo {
+    _$modoAtom.reportRead();
+    return super.modo;
+  }
+
+  @override
+  set modo(String value) {
+    _$modoAtom.reportWrite(value, super.modo, () {
+      super.modo = value;
+    });
+  }
+
+  late final _$salvarCercaAsyncAction =
+      AsyncAction('CercaViewModelBase.salvarCerca', context: context);
+
+  @override
+  Future<void> salvarCerca(String nome) {
+    return _$salvarCercaAsyncAction.run(() => super.salvarCerca(nome));
+  }
+
+  late final _$carregarCercaAsyncAction =
+      AsyncAction('CercaViewModelBase.carregarCerca', context: context);
+
+  @override
+  Future<void> carregarCerca(String nome) {
+    return _$carregarCercaAsyncAction.run(() => super.carregarCerca(nome));
+  }
+
+  late final _$listarCercasAsyncAction =
+      AsyncAction('CercaViewModelBase.listarCercas', context: context);
+
+  @override
+  Future<void> listarCercas() {
+    return _$listarCercasAsyncAction.run(() => super.listarCercas());
+  }
+
+  late final _$deletarCercaAsyncAction =
+      AsyncAction('CercaViewModelBase.deletarCerca', context: context);
+
+  @override
+  Future<void> deletarCerca(String nome) {
+    return _$deletarCercaAsyncAction.run(() => super.deletarCerca(nome));
+  }
+
+  late final _$editarCercaAsyncAction =
+      AsyncAction('CercaViewModelBase.editarCerca', context: context);
+
+  @override
+  Future<void> editarCerca(String nome) {
+    return _$editarCercaAsyncAction.run(() => super.editarCerca(nome));
+  }
+
   late final _$CercaViewModelBaseActionController =
       ActionController(name: 'CercaViewModelBase', context: context);
 
@@ -34,6 +122,17 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
         name: 'CercaViewModelBase.adicionarPonto');
     try {
       return super.adicionarPonto(ponto);
+    } finally {
+      _$CercaViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void removerPonto(int index) {
+    final _$actionInfo = _$CercaViewModelBaseActionController.startAction(
+        name: 'CercaViewModelBase.removerPonto');
+    try {
+      return super.removerPonto(index);
     } finally {
       _$CercaViewModelBaseActionController.endAction(_$actionInfo);
     }
@@ -51,9 +150,34 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
   }
 
   @override
+  void iniciarNovaCerca() {
+    final _$actionInfo = _$CercaViewModelBaseActionController.startAction(
+        name: 'CercaViewModelBase.iniciarNovaCerca');
+    try {
+      return super.iniciarNovaCerca();
+    } finally {
+      _$CercaViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void finalizarEdicao() {
+    final _$actionInfo = _$CercaViewModelBaseActionController.startAction(
+        name: 'CercaViewModelBase.finalizarEdicao');
+    try {
+      return super.finalizarEdicao();
+    } finally {
+      _$CercaViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
-pontos: ${pontos}
+pontos: ${pontos},
+cercasSalvas: ${cercasSalvas},
+cercaAtual: ${cercaAtual},
+modo: ${modo}
     ''';
   }
 }

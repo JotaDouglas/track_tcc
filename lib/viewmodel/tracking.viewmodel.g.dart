@@ -252,6 +252,22 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     return _$getRotasOnlineAsyncAction.run(() => super.getRotasOnline());
   }
 
+  late final _$startTrackingAsyncAction =
+      AsyncAction('TrackingViewModelBase.startTracking', context: context);
+
+  @override
+  Future<void> startTracking(String userName) {
+    return _$startTrackingAsyncAction.run(() => super.startTracking(userName));
+  }
+
+  late final _$_trackOnceAsyncAction =
+      AsyncAction('TrackingViewModelBase._trackOnce', context: context);
+
+  @override
+  Future<void> _trackOnce(String userName) {
+    return _$_trackOnceAsyncAction.run(() => super._trackOnce(userName));
+  }
+
   late final _$TrackingViewModelBaseActionController =
       ActionController(name: 'TrackingViewModelBase', context: context);
 
