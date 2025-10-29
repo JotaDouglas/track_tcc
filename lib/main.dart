@@ -7,7 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/configs/theme_settings.dart';
 import 'package:track_tcc_app/routes/routes.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -37,6 +39,8 @@ void main() async {
         ChangeNotifierProvider.value(value: themeProvider),
         Provider<LoginViewModel>(create: (_) => LoginViewModel()),
         Provider<AmizadeViewModel>(create: (_) => AmizadeViewModel()),
+        Provider<CercaViewModel>(create: (_) => CercaViewModel()),
+        Provider<TrackingViewModel>(create: (_) => TrackingViewModel()),
       ],
       child: const MyApp(),
     ),

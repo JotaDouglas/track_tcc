@@ -56,6 +56,14 @@ class DatabaseHelper {
         data_hora TEXT
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE cercas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        pontos TEXT NOT NULL
+      )
+    ''');
   }
 
   // Migrações de versão
