@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -15,12 +16,60 @@ class CercaMapView extends StatefulWidget {
 class _CercaMapViewState extends State<CercaMapView> {
   final TextEditingController _nomeController = TextEditingController();
   late CercaViewModel cercaVM;
+  final MapController _mapController = MapController();
+  LatLng? _currentLocation;
 
   @override
   void initState() {
     super.initState();
     cercaVM = Provider.of<CercaViewModel>(context, listen: false);
     cercaVM.listarCercas();
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Serviço de localização está desabilitado')),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permissão de localização negada')),
+        );
+        return;
+      }
+
+      final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      final latlng = LatLng(pos.latitude, pos.longitude);
+      if (!mounted) return;
+      setState(() {
+        _currentLocation = latlng;
+      });
+
+      // Move o mapa para a posição atual com zoom confortável
+      try {
+        _mapController.move(latlng, 16);
+      } catch (_) {
+        // caso o controller ainda não esteja pronto, ignorar
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao obter localização: $e')),
+      );
+    }
   }
 
   @override
@@ -104,8 +153,9 @@ class _CercaMapViewState extends State<CercaMapView> {
           Expanded(
             child: Observer(
               builder: (_) => FlutterMap(
+                mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: LatLng(-23.5505, -46.6333),
+                  initialCenter: _currentLocation ?? LatLng(-23.5505, -46.6333),
                   initialZoom: 14,
                   onTap: (tapPos, latlng) {
                     if (vm.modo == 'visualizar') return;
@@ -127,6 +177,21 @@ class _CercaMapViewState extends State<CercaMapView> {
                         'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                     subdomains: const ['a', 'b', 'c'],
                   ),
+                  if (_currentLocation != null)
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: _currentLocation!,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.my_location,
+                            color: Colors.blue,
+                            size: 28,
+                          ),
+                        ),
+                      ],
+                    ),
                   MarkerLayer(
                     markers: vm.pontos.map((p) {
                       return Marker(
