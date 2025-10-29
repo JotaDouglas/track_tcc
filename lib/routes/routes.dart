@@ -1,5 +1,9 @@
 import 'package:go_router/go_router.dart';
 import 'package:track_tcc_app/views/cerca/cerca.map.view.dart';
+import 'package:track_tcc_app/views/grupo/grupo_buscar.view.dart';
+import 'package:track_tcc_app/views/grupo/grupo_criar.view.dart';
+import 'package:track_tcc_app/views/grupo/grupo_detalhes.view.dart';
+import 'package:track_tcc_app/views/grupo/grupo_home.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home-detalhes.view.dart';
 import 'package:track_tcc_app/views/historicos/historico-home.view.dart';
 import 'package:track_tcc_app/views/home/home.view.dart';
@@ -88,6 +92,33 @@ class AppRouter {
           path: "/cerca-map",
           name: 'cerca-map',
           builder: (context, status) => const CercaMapView()),
+      GoRoute(
+        path: "/grupos",
+        name: 'grupos',
+        builder: (context, state) => const GroupListScreen(),
+      ),
+      GoRoute(
+        path: "/grupo-entrar",
+        name: 'grupo-entrar',
+        builder: (context, state) => const JoinGroupScreen(),
+      ),
+      GoRoute(
+        path: "/grupo-criar",
+        name: 'grupo-criar',
+        builder: (context, state) => const CreateGroupScreen(),
+      ),
+      GoRoute(
+        path: "/grupo-detalhe",
+        name: 'grupo-detalhe',
+        builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>;
+          return GroupDetailScreen(
+            grupoId: data['id'],
+            nomeGrupo: data['nome'],
+            codigo: data['codigo'],
+          );
+        },
+      ),
       GoRoute(
         path: "/location-share-map/:userId",
         name: 'location-share-map',
