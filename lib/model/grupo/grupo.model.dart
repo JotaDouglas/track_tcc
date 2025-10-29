@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:track_tcc_app/model/grupo/membros.model.dart';
 
 class Group {
   final String id; // uuid
@@ -9,6 +10,7 @@ class Group {
   final bool aberto;
   final DateTime criadoEm;
   final DateTime atualizadoEm;
+  List<GroupMember>? membros;
 
   Group({
     required this.id,
@@ -19,25 +21,26 @@ class Group {
     required this.aberto,
     required this.criadoEm,
     required this.atualizadoEm,
+    this.membros,
   });
 
   factory Group.fromMap(Map<String, dynamic> m) => Group(
-    id: m['id_grupo'] as String,
-    nome: m['nome'] as String,
-    descricao: m['descricao'] as String?,
-    codigo: m['codigo'] as String,
-    criadoPor: m['criado_por'] as String,
-    aberto: m['aberto'] as bool? ?? false,
-    criadoEm: DateTime.parse(m['criado_em'] as String),
-    atualizadoEm: DateTime.parse(m['atualizado_em'] as String),
-  );
+        id: m['id_grupo'] as String,
+        nome: m['nome'] as String,
+        descricao: m['descricao'] as String?,
+        codigo: m['codigo'] as String,
+        criadoPor: m['criado_por'] as String,
+        aberto: m['aberto'] as bool? ?? false,
+        criadoEm: DateTime.parse(m['criado_em'] as String),
+        atualizadoEm: DateTime.parse(m['atualizado_em'] as String),
+      );
 
   Map<String, dynamic> toMap() => {
-    'id_grupo': id,
-    'nome': nome,
-    'descricao': descricao,
-    'codigo': codigo,
-    'criado_por': criadoPor,
-    'aberto': aberto,
-  };
+        'id_grupo': id,
+        'nome': nome,
+        'descricao': descricao,
+        'codigo': codigo,
+        'criado_por': criadoPor,
+        'aberto': aberto,
+      };
 }

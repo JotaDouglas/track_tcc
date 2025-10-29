@@ -36,11 +36,15 @@ abstract class _GrupoViewModelBase with Store {
 
   @action
   Future<void> carregarGrupos() async {
+    // TODO: CRIAR O VINCULO DE MEMBROS COM SEUS NOMES E OPÇÃO DE EXCLUIR DO GRUPO
     if (userId == null) return;
     loading = true;
     try {
       final result = await _repo.listGroupsForUser(userId!);
       grupos = ObservableList.of(result);
+      for(var g in grupos){
+        g.membros = await _repo.listMembers(g.id);
+      }
     } catch (e) {
       errorMessage = e.toString();
     } finally {
