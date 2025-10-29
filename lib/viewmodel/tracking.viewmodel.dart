@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/repository/track.repository.dart';
+import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 part 'tracking.viewmodel.g.dart';
@@ -19,6 +20,7 @@ abstract class TrackingViewModelBase with Store {
   final SupabaseClient _supabase = Supabase.instance.client;
   final Locationhelper _locationHelper = Locationhelper();
   final LoginViewModel authViewModel = LoginViewModel();
+  final CercaViewModel cercaViewModel = CercaViewModel();
 
   int? currentRotaId;
 
@@ -320,7 +322,7 @@ abstract class TrackingViewModelBase with Store {
   void _startTimer(String userName) {
     temp?.cancel();
     temp = Timer.periodic(
-      const Duration(seconds: 5),
+      const Duration(seconds: 7),
       (_) => _trackOnce(userName),
     );
   }
@@ -344,6 +346,7 @@ abstract class TrackingViewModelBase with Store {
         await trackLocation(newLocal, userName);
 
         trackListLoop.insert(0, newLocal);
+        validarDentroCercas(newLatLng);
       } else {
         log('Localização retornou null.');
       }
@@ -352,6 +355,42 @@ abstract class TrackingViewModelBase with Store {
       _stopSharing();
       toggleTrackingState();
     }
+  }
+
+  //Verificar a cerca
+
+  Future<void> validarDentroCercas(LatLng ponto) async {
+    final vm = cercaViewModel;
+
+    // Se o map ainda estiver vazio, carrega todas as cercas
+    if (vm.cercasMap.isEmpty) {
+      await vm.listarCercas();
+      await vm.carregarTodasCercas();
+    }
+
+    vm.cercasMap.forEach((nome, poligono) {
+      if (pontoDentroDaCerca(ponto, poligono)) {
+        log('Usuário está DENTRO da cerca "$nome"');
+      } 
+    });
+  }
+
+  bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
+    int intersectCount = 0;
+    for (int j = 0; j < poligono.length; j++) {
+      LatLng a = poligono[j];
+      LatLng b = poligono[(j + 1) % poligono.length];
+
+      if (((a.latitude > ponto.latitude) != (b.latitude > ponto.latitude)) &&
+          (ponto.longitude <
+              (b.longitude - a.longitude) *
+                      (ponto.latitude - a.latitude) /
+                      (b.latitude - a.latitude) +
+                  a.longitude)) {
+        intersectCount++;
+      }
+    }
+    return (intersectCount % 2) == 1;
   }
 
   //novo

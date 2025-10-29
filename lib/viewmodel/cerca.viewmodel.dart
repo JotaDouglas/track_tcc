@@ -16,6 +16,10 @@ abstract class CercaViewModelBase with Store {
   ObservableList<String> cercasSalvas = ObservableList<String>();
 
   @observable
+  ObservableMap<String, List<LatLng>> cercasMap =
+      ObservableMap<String, List<LatLng>>();
+
+  @observable
   String? cercaAtual;
 
   @observable
@@ -86,5 +90,16 @@ abstract class CercaViewModelBase with Store {
   @action
   void finalizarEdicao() {
     modo = 'visualizar';
+  }
+
+  @action
+  Future<void> carregarTodasCercas() async {
+    cercasMap.clear();
+    for (var nome in cercasSalvas) {
+      final carregados = await _cercaRepository.carregarCerca(nome);
+      if (carregados != null) {
+        cercasMap[nome] = carregados;
+      }
+    }
   }
 }

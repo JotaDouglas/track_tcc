@@ -41,6 +41,22 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     });
   }
 
+  late final _$cercasMapAtom =
+      Atom(name: 'CercaViewModelBase.cercasMap', context: context);
+
+  @override
+  ObservableMap<String, List<LatLng>> get cercasMap {
+    _$cercasMapAtom.reportRead();
+    return super.cercasMap;
+  }
+
+  @override
+  set cercasMap(ObservableMap<String, List<LatLng>> value) {
+    _$cercasMapAtom.reportWrite(value, super.cercasMap, () {
+      super.cercasMap = value;
+    });
+  }
+
   late final _$cercaAtualAtom =
       Atom(name: 'CercaViewModelBase.cercaAtual', context: context);
 
@@ -113,6 +129,15 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     return _$editarCercaAsyncAction.run(() => super.editarCerca(nome));
   }
 
+  late final _$carregarTodasCercasAsyncAction =
+      AsyncAction('CercaViewModelBase.carregarTodasCercas', context: context);
+
+  @override
+  Future<void> carregarTodasCercas() {
+    return _$carregarTodasCercasAsyncAction
+        .run(() => super.carregarTodasCercas());
+  }
+
   late final _$CercaViewModelBaseActionController =
       ActionController(name: 'CercaViewModelBase', context: context);
 
@@ -176,6 +201,7 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     return '''
 pontos: ${pontos},
 cercasSalvas: ${cercasSalvas},
+cercasMap: ${cercasMap},
 cercaAtual: ${cercaAtual},
 modo: ${modo}
     ''';
