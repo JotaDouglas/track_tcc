@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/configs/theme_settings.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/card_home.dart';
@@ -45,6 +46,8 @@ class _HomeViewState extends State<HomeView> {
     final authViewModel = Provider.of<LoginViewModel>(context);
     final String nome = authViewModel.loginUser?.username ?? 'Usuário';
     final amizadeVM = Provider.of<AmizadeViewModel>(context);
+    final provider = Provider.of<ThemeProvider>(context);
+    final isDark = provider.mode == ThemeMode.dark;
     amizadeVM.readMyFriends();
 
     return SafeArea(
@@ -92,22 +95,6 @@ class _HomeViewState extends State<HomeView> {
                               style: TextStyle(color: Colors.white70),
                             ),
                           ),
-                          InkWell(
-                            onTap: () => GoRouter.of(context).push('/settings-theme'),
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.orange[700],
-                                shape: BoxShape
-                                    .circle, // deixa o fundo redondo
-                              ),
-                              child: Icon(
-                                Icons.settings,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ],
@@ -130,6 +117,29 @@ class _HomeViewState extends State<HomeView> {
                         Icon(Icons.logout, color: Colors.white),
                         SizedBox(width: 5),
                         Text("Sair", style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 35,
+                  left: 10,
+                  child: FilledButton(
+                    onPressed: () => provider.toggleTheme(!isDark),
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStatePropertyAll(Colors.orange[800]),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                            isDark
+                                ? Icons.nightlight_round_outlined
+                                : Icons.sunny,
+                            color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(isDark ? "Escuro" : "Claro",
+                            style: TextStyle(color: Colors.white)),
                       ],
                     ),
                   ),
