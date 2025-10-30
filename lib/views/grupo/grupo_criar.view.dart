@@ -21,8 +21,15 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Criar novo grupo'),
-        backgroundColor: Colors.teal,
+        title: const Text(
+          'Criar novo grupo',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.orange[900],
+        foregroundColor: Colors.white,
         centerTitle: true,
       ),
       body: Padding(
@@ -63,7 +70,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Colors.orange[900],
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: grupoVM.loading

@@ -56,7 +56,7 @@ abstract class GrupoViewModelBase with Store {
   }
 
   @action
-  changeMembros(dynamic m) => members = ObservableList.of(m);
+  changeMembros(List<GroupMember>? m) => members = ObservableList.of(m ?? []);
 
   @action
   Future<Group?> criarGrupo(String nome,

@@ -122,7 +122,7 @@ mixin _$GrupoViewModel on GrupoViewModelBase, Store {
       ActionController(name: 'GrupoViewModelBase', context: context);
 
   @override
-  dynamic changeMembros(dynamic m) {
+  dynamic changeMembros(List<GroupMember>? m) {
     final _$actionInfo = _$GrupoViewModelBaseActionController.startAction(
         name: 'GrupoViewModelBase.changeMembros');
     try {
