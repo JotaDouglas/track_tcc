@@ -28,13 +28,12 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _loginMessagem() async {
-    await Future.delayed(Duration(seconds: 1)); 
+    await Future.delayed(Duration(seconds: 1));
     var playerId = OneSignal.User.pushSubscription.id;
     log("💡 $playerId");
   }
 
   Future<void> _verificarPermissaoLocalizacao() async {
-    
     final status = await Permission.location.status;
     setState(() {
       _localizacaoAtiva = status.isGranted;
@@ -48,141 +47,142 @@ class _HomeViewState extends State<HomeView> {
     final amizadeVM = Provider.of<AmizadeViewModel>(context);
     amizadeVM.readMyFriends();
 
-    return Scaffold(
-      key: _scaffoldKey,
-      body: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(
-                    top: 100, left: 20, right: 20, bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.orange[900],
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        key: _scaffoldKey,
+        body: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(
+                      top: 100, left: 20, right: 20, bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[900],
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
                   ),
-                ),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Olá, $nome 👋',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Olá, $nome 👋',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        // Container(
-                        //   padding: const EdgeInsets.all(6),
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.orange[50],
-                        //     shape: BoxShape.circle, // deixa o fundo redondo
-                        //   ),
-                        //   child: Icon(
-                        //     _localizacaoAtiva
-                        //         ? Icons.location_on
-                        //         : Icons.location_off,
-                        //     color:
-                        //         _localizacaoAtiva ? Colors.green : Colors.red,
-                        //     size: 24,
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Seja bem-vindo de volta!',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 35,
-                right: 10,
-                child: FilledButton(
-                  onPressed: () {
-                    authViewModel.logout();
-                    GoRouter.of(context).pushReplacement('/login');
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(Colors.orange[800]),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.white),
-                      SizedBox(width: 5),
-                      Text("Sair", style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: const Text(
+                              'Seja bem-vindo de volta!',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => GoRouter.of(context).push('/settings-theme'),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.orange[700],
+                                shape: BoxShape
+                                    .circle, // deixa o fundo redondo
+                              ),
+                              child: Icon(
+                                Icons.settings,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: GridView.count(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                buildCard(
-                  icon: Icons.navigation,
-                  iconColor: Colors.white,
-                  textColor: Colors.white,
-                  color: Colors.orange[900],
-                  label: "Compartilhar \n Posição",
-                  onTap: () => GoRouter.of(context).push('/track'),
-                ),
-                buildCard(
-                  icon: Icons.person,
-                  label: "Perfil",
-                  onTap: () => GoRouter.of(context).push('/user-perfil'),
-                ),
-                buildCard(
-                  icon: Icons.people,
-                  label: "Amigos",
-                  onTap: () => GoRouter.of(context).push('/user-friends'),
-                ),
-                buildCard(
-                  icon: Icons.history,
-                  label: "Histórico",
-                  onTap: () => GoRouter.of(context).push('/historico-home'),
-                ),
-                buildCard(
-                  icon: Icons.emergency_share,
-                  label: "Acompanhar",
-                  onTap: () =>
-                      GoRouter.of(context).push('/location-share-home'),
-                ),
-                buildCard(
-                  icon: Icons.settings,
-                  label: "Configurações",
-                  onTap: () => GoRouter.of(context).push('/settings-theme'),
-                ),
-                buildCard(
-                  icon: Icons.zoom_out_map_rounded,
-                  label: "Cerca",
-                  onTap: () => GoRouter.of(context).push('/cerca-map'),
-                ),
-                buildCard(
-                  icon: Icons.groups_2_sharp,
-                  label: "Grupos",
-                  onTap: () => GoRouter.of(context).push('/grupos'),
+                Positioned(
+                  top: 35,
+                  right: 10,
+                  child: FilledButton(
+                    onPressed: () {
+                      authViewModel.logout();
+                      GoRouter.of(context).pushReplacement('/login');
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStatePropertyAll(Colors.orange[800]),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text("Sair", style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            Expanded(
+              child: GridView.count(
+                padding: const EdgeInsets.only(
+                    left: 16, right: 16, bottom: 10, top: 10),
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                children: [
+                  buildCard(
+                    icon: Icons.navigation,
+                    iconColor: Colors.white,
+                    textColor: Colors.white,
+                    color: Colors.orange[900],
+                    label: "Compartilhar \n Viajem",
+                    onTap: () => GoRouter.of(context).push('/track'),
+                  ),
+                  buildCard(
+                    icon: Icons.person,
+                    label: "Perfil",
+                    onTap: () => GoRouter.of(context).push('/user-perfil'),
+                  ),
+                  buildCard(
+                    icon: Icons.history,
+                    label: "Histórico",
+                    onTap: () => GoRouter.of(context).push('/historico-home'),
+                  ),
+                  buildCard(
+                    icon: Icons.emergency_share,
+                    label: "Acompanhar",
+                    onTap: () =>
+                        GoRouter.of(context).push('/location-share-home'),
+                  ),
+                  buildCard(
+                    icon: Icons.run_circle_outlined,
+                    label: "Cerca",
+                    onTap: () => GoRouter.of(context).push('/cerca-map'),
+                  ),
+                  buildCard(
+                    icon: Icons.groups_2_sharp,
+                    label: "Grupos",
+                    onTap: () => GoRouter.of(context).push('/grupos'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
