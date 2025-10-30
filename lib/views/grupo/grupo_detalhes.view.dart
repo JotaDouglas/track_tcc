@@ -43,8 +43,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final membros = grupoVM
-            .members; // supondo que exista o ObservableList<GroupMember> members
+        final membros = grupoVM.members;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +136,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                   );
 
                   if (confirm == true) {
-                    await grupoVM.removerMembro(widget.grupoId ?? 'sem id', membro.userId);
+                    await grupoVM.removerMembro(
+                        widget.grupoId ?? 'sem id', membro.userId);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Membro removido')),

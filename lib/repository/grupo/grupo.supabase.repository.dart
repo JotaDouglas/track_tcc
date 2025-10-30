@@ -6,7 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
 
-class GroupRepositorySupabase  {
+class GroupRepositorySupabase {
   final SupabaseClient client;
   GroupRepositorySupabase(this.client);
 
@@ -14,22 +14,31 @@ class GroupRepositorySupabase  {
   String _generateCode([int length = 6]) {
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sem ambíguos
     final rnd = Random.secure();
-    return List.generate(length, (_) => chars[rnd.nextInt(chars.length)]).join();
+    return List.generate(length, (_) => chars[rnd.nextInt(chars.length)])
+        .join();
   }
 
   Future<String> _generateUniqueCode() async {
-    for (var i=0;i<8;i++) {
+    for (var i = 0; i < 8; i++) {
       final candidate = _generateCode();
-      final resp = await client.from('grupos').select('id_grupo').eq('codigo', candidate).maybeSingle();
+      final resp = await client
+          .from('grupos')
+          .select('id_grupo')
+          .eq('codigo', candidate)
+          .maybeSingle();
       if (resp == null || (resp is List && resp.isEmpty)) return candidate;
       // se existir, continua
     }
     // fallback com timestamp hash
     final bytes = utf8.encode(DateTime.now().toIso8601String());
-    return sha1.convert(bytes).toString().substring(0,6).toUpperCase();
+    return sha1.convert(bytes).toString().substring(0, 6).toUpperCase();
   }
 
-  Future<Group> createGroup({required String nome, String? descricao, required String criadoPor, bool aberto = false}) async {
+  Future<Group> createGroup(
+      {required String nome,
+      String? descricao,
+      required String criadoPor,
+      bool aberto = false}) async {
     final codigo = await _generateUniqueCode();
     final insert = {
       'nome': nome,
@@ -38,7 +47,8 @@ class GroupRepositorySupabase  {
       'criado_por': criadoPor,
       'aberto': aberto,
     };
-    final res = await client.from('grupos').insert(insert).select().maybeSingle();
+    final res =
+        await client.from('grupos').insert(insert).select().maybeSingle();
     if (res == null) throw Exception('Erro ao criar grupo');
     final group = Group.fromMap(res);
 
@@ -54,14 +64,24 @@ class GroupRepositorySupabase  {
   }
 
   Future<Group?> getGroupByCode(String codigo) async {
-    final res = await client.from('grupos').select().eq('codigo', codigo).maybeSingle();
+    final res =
+        await client.from('grupos').select().eq('codigo', codigo).maybeSingle();
     if (res == null) return null;
     return Group.fromMap(res);
   }
 
-  Future<void> addMember({required String grupoId, required String userId, required String adicionadoPor, String papel = 'member'}) async {
+  Future<void> addMember(
+      {required String grupoId,
+      required String userId,
+      required String adicionadoPor,
+      String papel = 'member'}) async {
     // evita duplicidade
-    final exists = await client.from('grupo_membros').select('id').eq('grupo_id', grupoId).eq('user_id', userId).maybeSingle();
+    final exists = await client
+        .from('grupo_membros')
+        .select('id')
+        .eq('grupo_id', grupoId)
+        .eq('user_id', userId)
+        .maybeSingle();
     if (exists != null) return;
     await client.from('grupo_membros').insert({
       'grupo_id': grupoId,
@@ -71,30 +91,54 @@ class GroupRepositorySupabase  {
     });
   }
 
-  Future<void> removeMember({required String grupoId, required String userId}) async {
-    await client.from('grupo_membros').delete().eq('grupo_id', grupoId).eq('user_id', userId);
+  Future<void> removeMember(
+      {required String grupoId, required String userId}) async {
+    await client
+        .from('grupo_membros')
+        .delete()
+        .eq('grupo_id', grupoId)
+        .eq('user_id', userId);
   }
 
   Future<List<Group>> listGroupsForUser(String userId) async {
     // busca grupos onde user está em grupo_membros
-    final res = await client.from('grupos')
-      .select('*, grupo_membros!inner(user_id)')
-      .eq('grupo_membros.user_id', userId);
+    final res = await client
+        .from('grupos')
+        .select('*, grupo_membros!inner(user_id)')
+        .eq('grupo_membros.user_id', userId);
     if (res == null) return [];
-    return (res as List).map((e) => Group.fromMap(e as Map<String,dynamic>)).toList();
+    return (res as List)
+        .map((e) => Group.fromMap(e as Map<String, dynamic>))
+        .toList();
   }
 
+  @override
   Future<List<GroupMember>> listMembers(String grupoId) async {
-    final res = await client.from('grupo_membros').select().eq('grupo_id', grupoId);
+    final res = await client
+        .from('grupo_membros')
+        .select('*, usuarios:user_id (nome, sobrenome)')
+        .eq('grupo_id', grupoId)
+        .order('id', ascending: true);
+
     if (res == null) return [];
-    return (res as List).map((m) => GroupMember.fromMap(m as Map<String,dynamic>)).toList();
+
+    return (res as List)
+        .map((m) => GroupMember.fromMap(m as Map<String, dynamic>))
+        .toList();
   }
 
-  Future<void> promoteToAdmin({required String grupoId, required String userId}) async {
-    await client.from('grupo_membros').update({'papel': 'admin'}).eq('grupo_id', grupoId).eq('user_id', userId);
+  Future<void> promoteToAdmin(
+      {required String grupoId, required String userId}) async {
+    await client
+        .from('grupo_membros')
+        .update({'papel': 'admin'})
+        .eq('grupo_id', grupoId)
+        .eq('user_id', userId);
   }
 
   Stream<dynamic> watchGroup(String grupoId) {
-    return client.from('grupo_membros:grupo_id=eq.$grupoId').stream(primaryKey: ['id']);
+    return client
+        .from('grupo_membros:grupo_id=eq.$grupoId')
+        .stream(primaryKey: ['id']);
   }
 }

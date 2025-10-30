@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:mobx/mobx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
@@ -41,12 +43,14 @@ abstract class GrupoViewModelBase with Store {
     loading = true;
     try {
       final result = await _repo.listGroupsForUser(userId!);
-      grupos = ObservableList.of(result);
-      for (var g in grupos) {
+      for (var g in result) {
         g.membros = await _repo.listMembers(g.id);
       }
+      grupos = ObservableList.of(result);
+      
     } catch (e) {
       errorMessage = e.toString();
+      log("Erro: $e");
     } finally {
       loading = false;
     }

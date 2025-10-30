@@ -15,7 +15,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
   @override
   void initState() {
     super.initState();
-    final grupoVM = context.read<GrupoViewModel>();
+    final grupoVM = Provider.of<GrupoViewModel>(context, listen: false);
     grupoVM.carregarGrupos();
   }
 
