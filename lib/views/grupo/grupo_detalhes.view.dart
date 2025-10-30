@@ -36,8 +36,16 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.nomeGrupo ?? "Sem Nome"),
+        title: Text(
+          widget.nomeGrupo ?? "Sem Nome",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.orange[900],
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
               onPressed: () async {
@@ -81,14 +89,22 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Divider(
+                color: Colors.grey,
+                height: 0.5,
+                thickness: 0.8,
+              ),
+            ),
             Container(
-              color: Colors.teal.shade50,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'Código: ${widget.codigo}',
+                      'CÓDIGO: ${widget.codigo}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -103,6 +119,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     },
                   )
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Divider(
+                color: Colors.grey,
+                height: 0.5,
+                thickness: 0.8,
               ),
             ),
             const Padding(

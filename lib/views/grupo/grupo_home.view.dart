@@ -25,8 +25,14 @@ class _GroupListScreenState extends State<GroupListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meus grupos'),
-        backgroundColor: Colors.teal,
+        title: const Text('Meus Grupos',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            )),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -38,18 +44,26 @@ class _GroupListScreenState extends State<GroupListScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton.extended(
-            backgroundColor: Colors.teal,
+            backgroundColor: Colors.orange[900],
             heroTag: "search",
             icon: const Icon(Icons.group_add),
-            label: const Text('Entrar'),
+            label: const Text('Entrar',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                )),
             onPressed: () => context.pushNamed('grupo-entrar'),
           ),
           const SizedBox(height: 10),
           FloatingActionButton.extended(
-            backgroundColor: Colors.teal,
+            backgroundColor: Colors.green,
             heroTag: 'create',
             icon: const Icon(Icons.add),
-            label: const Text('Criar'),
+            label: const Text('Criar',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                )),
             onPressed: () => context.pushNamed('grupo-criar'),
           ),
         ],
@@ -81,8 +95,9 @@ class _GroupListScreenState extends State<GroupListScreen> {
                   title: Text(grupo.nome,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(grupo.descricao ?? 'Sem descrição'),
-                  trailing: const Icon(Icons.arrow_forward_ios_rounded,
-                      color: Colors.teal),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                  ),
                   onTap: () async {
                     grupoVM.changeMembros(grupo.membros);
                     context.pushNamed(
