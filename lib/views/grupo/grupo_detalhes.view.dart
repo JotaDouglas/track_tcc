@@ -32,11 +32,44 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final grupoVM = Provider.of<GrupoViewModel>(context);
+    String? userId = grupoVM.userId;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.nomeGrupo ?? "Sem Nome"),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.orange[900],
+        actions: [
+          IconButton(
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Remover membro'),
+                    content: const Text(
+                        'Tem certeza que deseja remover este membro do grupo?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Remover'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await grupoVM.removerMembro(
+                      widget.grupoId ?? 'sem id', userId ?? '');
+
+                  if (mounted) {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  }
+                }
+              },
+              icon: Icon(Icons.logout_outlined))
+        ],
       ),
       body: Observer(builder: (_) {
         if (grupoVM.loading) {
@@ -97,8 +130,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
   Widget _buildMemberTile(
       BuildContext context, GrupoViewModel grupoVM, GroupMember membro) {
     final userId = grupoVM.userId;
-    final podeRemover =
-        membro.userId != userId; // simples — refine com papel/admin
+    final podeRemover = membro.userId != userId && membro.papel != 'admin';
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -108,7 +140,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
           child: Icon(Icons.person, color: Colors.white),
         ),
         title: Text(
-          membro.userId,
+          '${membro.nome} ${membro.sobrenome}',
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text('Papel: ${membro.papel}'),
