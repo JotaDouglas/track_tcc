@@ -8,9 +8,9 @@ part of 'grupo.viewmodel.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
-mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
+mixin _$GrupoViewModel on GrupoViewModelBase, Store {
   late final _$gruposAtom =
-      Atom(name: '_GrupoViewModelBase.grupos', context: context);
+      Atom(name: 'GrupoViewModelBase.grupos', context: context);
 
   @override
   ObservableList<Group> get grupos {
@@ -26,7 +26,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$membersAtom =
-      Atom(name: '_GrupoViewModelBase.members', context: context);
+      Atom(name: 'GrupoViewModelBase.members', context: context);
 
   @override
   ObservableList<GroupMember> get members {
@@ -42,7 +42,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$loadingAtom =
-      Atom(name: '_GrupoViewModelBase.loading', context: context);
+      Atom(name: 'GrupoViewModelBase.loading', context: context);
 
   @override
   bool get loading {
@@ -58,7 +58,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$errorMessageAtom =
-      Atom(name: '_GrupoViewModelBase.errorMessage', context: context);
+      Atom(name: 'GrupoViewModelBase.errorMessage', context: context);
 
   @override
   String? get errorMessage {
@@ -74,7 +74,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$carregarGruposAsyncAction =
-      AsyncAction('_GrupoViewModelBase.carregarGrupos', context: context);
+      AsyncAction('GrupoViewModelBase.carregarGrupos', context: context);
 
   @override
   Future<void> carregarGrupos() {
@@ -82,7 +82,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$criarGrupoAsyncAction =
-      AsyncAction('_GrupoViewModelBase.criarGrupo', context: context);
+      AsyncAction('GrupoViewModelBase.criarGrupo', context: context);
 
   @override
   Future<Group?> criarGrupo(String nome,
@@ -92,7 +92,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$entrarPorCodigoAsyncAction =
-      AsyncAction('_GrupoViewModelBase.entrarPorCodigo', context: context);
+      AsyncAction('GrupoViewModelBase.entrarPorCodigo', context: context);
 
   @override
   Future<bool> entrarPorCodigo(String codigo) {
@@ -101,7 +101,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$carregarMembrosAsyncAction =
-      AsyncAction('_GrupoViewModelBase.carregarMembros', context: context);
+      AsyncAction('GrupoViewModelBase.carregarMembros', context: context);
 
   @override
   Future<void> carregarMembros(String grupoId) {
@@ -110,7 +110,7 @@ mixin _$GrupoViewModel on _GrupoViewModelBase, Store {
   }
 
   late final _$removerMembroAsyncAction =
-      AsyncAction('_GrupoViewModelBase.removerMembro', context: context);
+      AsyncAction('GrupoViewModelBase.removerMembro', context: context);
 
   @override
   Future<void> removerMembro(String grupoId, String membroId) {

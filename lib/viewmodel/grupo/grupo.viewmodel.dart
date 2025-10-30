@@ -2,24 +2,24 @@ import 'package:mobx/mobx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
-import 'package:track_tcc_app/repository/grupo/grupo.repository.dart';
 import 'package:track_tcc_app/repository/grupo/grupo.supabase.repository.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 part 'grupo.viewmodel.g.dart';
 
-class GrupoViewModel = _GrupoViewModelBase with _$GrupoViewModel;
+class GrupoViewModel = GrupoViewModelBase with _$GrupoViewModel;
 
-abstract class _GrupoViewModelBase with Store {
+abstract class GrupoViewModelBase with Store {
   final LoginViewModel loginVM;
   final SupabaseClient _client = Supabase.instance.client;
-  late final GroupRepository _repo;
+  late GroupRepositorySupabase _repo;
 
-  _GrupoViewModelBase(this.loginVM) {
+  GrupoViewModelBase(this.loginVM) {
     _repo = GroupRepositorySupabase(_client);
   }
 
-  String? get userId => loginVM.loginUser?.uidUsuario ?? _client.auth.currentUser?.id;
+  String? get userId =>
+      loginVM.loginUser?.uidUsuario ?? _client.auth.currentUser?.id;
 
   @observable
   ObservableList<Group> grupos = ObservableList<Group>();
@@ -42,7 +42,7 @@ abstract class _GrupoViewModelBase with Store {
     try {
       final result = await _repo.listGroupsForUser(userId!);
       grupos = ObservableList.of(result);
-      for(var g in grupos){
+      for (var g in grupos) {
         g.membros = await _repo.listMembers(g.id);
       }
     } catch (e) {
@@ -53,7 +53,8 @@ abstract class _GrupoViewModelBase with Store {
   }
 
   @action
-  Future<Group?> criarGrupo(String nome, {String? descricao, bool aberto = false}) async {
+  Future<Group?> criarGrupo(String nome,
+      {String? descricao, bool aberto = false}) async {
     if (userId == null) return null;
     loading = true;
     try {
@@ -80,7 +81,8 @@ abstract class _GrupoViewModelBase with Store {
     try {
       final group = await _repo.getGroupByCode(codigo);
       if (group == null) throw Exception('Código inválido');
-      await _repo.addMember(grupoId: group.id, userId: userId!, adicionadoPor: userId!);
+      await _repo.addMember(
+          grupoId: group.id, userId: userId!, adicionadoPor: userId!);
       await carregarGrupos();
       return true;
     } catch (e) {

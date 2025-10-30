@@ -5,9 +5,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
-import 'package:track_tcc_app/repository/grupo/grupo.repository.dart';
 
-class GroupRepositorySupabase implements GroupRepository {
+class GroupRepositorySupabase  {
   final SupabaseClient client;
   GroupRepositorySupabase(this.client);
 
@@ -30,7 +29,6 @@ class GroupRepositorySupabase implements GroupRepository {
     return sha1.convert(bytes).toString().substring(0,6).toUpperCase();
   }
 
-  @override
   Future<Group> createGroup({required String nome, String? descricao, required String criadoPor, bool aberto = false}) async {
     final codigo = await _generateUniqueCode();
     final insert = {
@@ -42,7 +40,7 @@ class GroupRepositorySupabase implements GroupRepository {
     };
     final res = await client.from('grupos').insert(insert).select().maybeSingle();
     if (res == null) throw Exception('Erro ao criar grupo');
-    final group = Group.fromMap(res as Map<String, dynamic>);
+    final group = Group.fromMap(res);
 
     // adiciona o criador como admin no grupo_membros
     await client.from('grupo_membros').insert({
@@ -55,14 +53,12 @@ class GroupRepositorySupabase implements GroupRepository {
     return group;
   }
 
-  @override
   Future<Group?> getGroupByCode(String codigo) async {
     final res = await client.from('grupos').select().eq('codigo', codigo).maybeSingle();
     if (res == null) return null;
-    return Group.fromMap(res as Map<String, dynamic>);
+    return Group.fromMap(res);
   }
 
-  @override
   Future<void> addMember({required String grupoId, required String userId, required String adicionadoPor, String papel = 'member'}) async {
     // evita duplicidade
     final exists = await client.from('grupo_membros').select('id').eq('grupo_id', grupoId).eq('user_id', userId).maybeSingle();
@@ -75,12 +71,10 @@ class GroupRepositorySupabase implements GroupRepository {
     });
   }
 
-  @override
   Future<void> removeMember({required String grupoId, required String userId}) async {
     await client.from('grupo_membros').delete().eq('grupo_id', grupoId).eq('user_id', userId);
   }
 
-  @override
   Future<List<Group>> listGroupsForUser(String userId) async {
     // busca grupos onde user está em grupo_membros
     final res = await client.from('grupos')
@@ -90,19 +84,16 @@ class GroupRepositorySupabase implements GroupRepository {
     return (res as List).map((e) => Group.fromMap(e as Map<String,dynamic>)).toList();
   }
 
-  @override
   Future<List<GroupMember>> listMembers(String grupoId) async {
     final res = await client.from('grupo_membros').select().eq('grupo_id', grupoId);
     if (res == null) return [];
     return (res as List).map((m) => GroupMember.fromMap(m as Map<String,dynamic>)).toList();
   }
 
-  @override
   Future<void> promoteToAdmin({required String grupoId, required String userId}) async {
     await client.from('grupo_membros').update({'papel': 'admin'}).eq('grupo_id', grupoId).eq('user_id', userId);
   }
 
-  @override
   Stream<dynamic> watchGroup(String grupoId) {
     return client.from('grupo_membros:grupo_id=eq.$grupoId').stream(primaryKey: ['id']);
   }
