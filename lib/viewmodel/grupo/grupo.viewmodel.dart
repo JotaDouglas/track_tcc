@@ -38,7 +38,6 @@ abstract class GrupoViewModelBase with Store {
 
   @action
   Future<void> carregarGrupos() async {
-    // TODO: CRIAR O VINCULO DE MEMBROS COM SEUS NOMES E OPÇÃO DE EXCLUIR DO GRUPO
     if (userId == null) return;
     loading = true;
     try {
@@ -55,6 +54,9 @@ abstract class GrupoViewModelBase with Store {
       loading = false;
     }
   }
+
+  @action
+  changeMembros(dynamic m) => members = ObservableList.of(m);
 
   @action
   Future<Group?> criarGrupo(String nome,

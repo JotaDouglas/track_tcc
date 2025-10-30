@@ -83,7 +83,8 @@ class _GroupListScreenState extends State<GroupListScreen> {
                   subtitle: Text(grupo.descricao ?? 'Sem descrição'),
                   trailing: const Icon(Icons.arrow_forward_ios_rounded,
                       color: Colors.teal),
-                  onTap: () {
+                  onTap: () async {
+                    grupoVM.changeMembros(grupo.membros);
                     context.pushNamed(
                       'grupo-detalhe',
                       extra: {
