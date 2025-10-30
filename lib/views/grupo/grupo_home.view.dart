@@ -25,11 +25,13 @@ class _GroupListScreenState extends State<GroupListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meus Grupos',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            )),
+        title: const Text(
+          'Meus Grupos',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.orange[900],
         foregroundColor: Colors.white,
@@ -46,7 +48,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
           FloatingActionButton.extended(
             backgroundColor: Colors.orange[900],
             heroTag: "search",
-            icon: const Icon(Icons.group_add),
+            icon: const Icon(Icons.group_add, color: Colors.white,),
             label: const Text('Entrar',
                 style: TextStyle(
                   color: Colors.white,
@@ -58,7 +60,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
           FloatingActionButton.extended(
             backgroundColor: Colors.green,
             heroTag: 'create',
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, color: Colors.white,),
             label: const Text('Criar',
                 style: TextStyle(
                   color: Colors.white,

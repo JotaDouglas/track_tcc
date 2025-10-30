@@ -19,8 +19,16 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Entrar em um grupo'),
-        backgroundColor: Colors.teal,
+        title: const Text(
+          'Entrar em um grupo',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.orange[900],
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -53,7 +61,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                       : const Text('Entrar no grupo',
                           style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Colors.orange[900],
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: grupoVM.loading
@@ -69,15 +77,15 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                             return;
                           }
 
-                          final sucesso =
-                              await grupoVM.entrarPorCodigo(codigo);
+                          final sucesso = await grupoVM.entrarPorCodigo(codigo);
 
                           if (!mounted) return;
 
                           if (sucesso) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Você entrou no grupo com sucesso!'),
+                                content:
+                                    Text('Você entrou no grupo com sucesso!'),
                               ),
                             );
                             Navigator.pop(context); // volta para a lista
