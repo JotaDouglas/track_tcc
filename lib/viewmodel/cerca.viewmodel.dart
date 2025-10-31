@@ -102,4 +102,11 @@ abstract class CercaViewModelBase with Store {
       }
     }
   }
+
+  @action
+  Future<void> mostrarTodasCercas() async {
+    await listarCercas(); // garante que temos a lista atualizada
+    await carregarTodasCercas(); // carrega os pontos de cada cerca
+    modo = 'visualizar_todas';
+  }
 }
