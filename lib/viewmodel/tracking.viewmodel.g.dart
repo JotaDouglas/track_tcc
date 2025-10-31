@@ -276,6 +276,15 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     return _$startTrackingAsyncAction.run(() => super.startTracking(userName));
   }
 
+  late final _$_startTrackingLoopAsyncAction =
+      AsyncAction('TrackingViewModelBase._startTrackingLoop', context: context);
+
+  @override
+  Future<void> _startTrackingLoop(String userName) {
+    return _$_startTrackingLoopAsyncAction
+        .run(() => super._startTrackingLoop(userName));
+  }
+
   late final _$_trackOnceAsyncAction =
       AsyncAction('TrackingViewModelBase._trackOnce', context: context);
 

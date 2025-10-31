@@ -63,7 +63,7 @@ abstract class TrackingViewModelBase with Store {
   Timer? temp;
 
   @observable
-  int trackingInterval = 20; // valor padrão (Eficiente)
+  int trackingInterval = 30; // valor padrão (Eficiente)
 
   @action
   void setTrackingInterval(int seconds) {
@@ -107,16 +107,23 @@ abstract class TrackingViewModelBase with Store {
       return;
     }
 
-    try {
-      final uid = _supabase.auth.currentUser?.id;
-      if (uid == null) {
-        log('Usuário não autenticado');
-        return;
-      }
+    final uid = _supabase.auth.currentUser?.id;
+    if (uid == null) {
+      log('Usuário não autenticado');
+      return;
+    }
 
+    // 🔹 Sempre salva localmente primeiro
+    try {
       trackList.insert(0, location);
       await trackRepository.insertRotaPoint(currentRotaId!, location);
+      log('Localização salva no SQLite: ${location.latitude}, ${location.longitude}');
+    } catch (e, stack) {
+      log('Erro ao salvar localmente: $e\n$stack');
+    }
 
+    // 🔹 Depois tenta enviar para o Supabase (sem travar o app)
+    try {
       final row = {
         'user_id': uid,
         'data_hora': DateTime.now().toIso8601String(),
@@ -126,10 +133,9 @@ abstract class TrackingViewModelBase with Store {
       };
 
       await _supabase.from('localizacoes').upsert(row, onConflict: 'user_id');
-
       log('Localização enviada para Supabase: $row');
     } catch (e, stack) {
-      log("Erro ao rastrear localização: $e\n$stack");
+      log("Falha no envio ao Supabase (mas salvo localmente): $e\n$stack");
     }
   }
 
@@ -283,6 +289,9 @@ abstract class TrackingViewModelBase with Store {
   //Sistema de tracking
 
   // tracking.viewmodel.dart
+
+  bool _isTracking = false;
+
   @action
   Future<void> startTracking(String userName) async {
     final gpsOn = await _locationHelper.checkGps(null);
@@ -301,14 +310,19 @@ abstract class TrackingViewModelBase with Store {
         }
 
         lastPlace = newLocal;
-        lastPosition =
-            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
+        lastPosition = LatLng(
+          newLocal.latitude ?? 0.0,
+          newLocal.longitude ?? 0.0,
+        );
         addressLabel = newLocal.adress ?? 'Endereço não encontrado';
 
         trackListLoop.insert(0, newLocal);
 
-        await _trackOnce(userName); // primeira leitura
-        _startTimer(userName); // inicia o loop
+        // 🔹 Faz a primeira leitura imediatamente
+        await _trackOnce(userName);
+
+        // 🔹 Inicia o loop contínuo com intervalo controlado
+        _startTrackingLoop(userName);
       } else {
         toggleTrackingState();
         trackingLoop = false;
@@ -324,15 +338,77 @@ abstract class TrackingViewModelBase with Store {
       lastPlace = null;
       lastPosition = null;
       distanceMeters = 0.0;
+
+      // 🔹 Encerra o loop se estiver rodando
+      stopTrackingLoop();
     }
   }
 
-  void _startTimer(String userName) {
-    temp?.cancel();
-    temp = Timer.periodic(
-      Duration(seconds: trackingInterval),
-      (_) => _trackOnce(userName),
-    );
+  @action
+  Future<void> _startTrackingLoop(String userName) async {
+    if (_isTracking) return; // evita duplicidade
+    _isTracking = true;
+
+    log('Iniciando rastreamento com intervalo de $trackingInterval segundos');
+
+    while (_isTracking) {
+      final start = DateTime.now();
+
+      try {
+        // Obtém a nova posição
+        final newLocal = await _locationHelper.actuallyPosition();
+
+        if (newLocal != null) {
+          final newLatLng = LatLng(
+            newLocal.latitude ?? 0.0,
+            newLocal.longitude ?? 0.0,
+          );
+
+          // Calcula distância percorrida
+          if (lastPosition != null) {
+            distanceMeters += const Distance().as(
+              LengthUnit.Meter,
+              lastPosition!,
+              newLatLng,
+            );
+          }
+
+          // Atualiza estado atual
+          lastPosition = newLatLng;
+          lastPlace = newLocal;
+          addressLabel = newLocal.adress ?? 'Endereço não encontrado';
+
+          // 🔹 Salva no SQLite e tenta enviar ao Supabase
+          await trackLocation(newLocal, userName);
+
+          // Mantém histórico em memória
+          trackListLoop.insert(0, newLocal);
+          validarDentroCercas(newLatLng);
+        } else {
+          log('Localização retornou null.');
+        }
+      } catch (e, stack) {
+        log('Erro no rastreamento: $e\n$stack');
+      }
+
+      // Calcula quanto tempo esperar até o próximo envio
+      final elapsed = DateTime.now().difference(start);
+      final waitTime = Duration(seconds: trackingInterval) - elapsed;
+
+      if (waitTime.isNegative) {
+        log('Envio demorou mais que o intervalo, iniciando novo ciclo imediatamente');
+        continue;
+      }
+
+      await Future.delayed(waitTime);
+    }
+
+    log('Rastreamento encerrado');
+  }
+
+  void stopTrackingLoop() {
+    _isTracking = false;
+    log('Solicitada parada do rastreamento');
   }
 
   @action

@@ -138,6 +138,15 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
         .run(() => super.carregarTodasCercas());
   }
 
+  late final _$mostrarTodasCercasAsyncAction =
+      AsyncAction('CercaViewModelBase.mostrarTodasCercas', context: context);
+
+  @override
+  Future<void> mostrarTodasCercas() {
+    return _$mostrarTodasCercasAsyncAction
+        .run(() => super.mostrarTodasCercas());
+  }
+
   late final _$CercaViewModelBaseActionController =
       ActionController(name: 'CercaViewModelBase', context: context);
 

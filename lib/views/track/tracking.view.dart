@@ -109,25 +109,25 @@ class _TrackPageState extends State<TrackPage> {
                         context,
                         label: 'Econômico',
                         color: Colors.green,
-                        isSelected: trackVM.trackingInterval == 40,
+                        isSelected: trackVM.trackingInterval == 60,
                         onTap: () =>
-                            setState(() => trackVM.setTrackingInterval(40)),
+                            setState(() => trackVM.setTrackingInterval(60)),
                       ),
                       _buildModeButton(
                         context,
                         label: 'Eficiente',
                         color: Colors.orange,
-                        isSelected: trackVM.trackingInterval == 20,
+                        isSelected: trackVM.trackingInterval == 30,
                         onTap: () =>
-                            setState(() => trackVM.setTrackingInterval(20)),
+                            setState(() => trackVM.setTrackingInterval(30)),
                       ),
                       _buildModeButton(
                         context,
                         label: 'Preciso',
                         color: Colors.red,
-                        isSelected: trackVM.trackingInterval == 7,
+                        isSelected: trackVM.trackingInterval == 10,
                         onTap: () =>
-                            setState(() => trackVM.setTrackingInterval(7)),
+                            setState(() => trackVM.setTrackingInterval(10)),
                       ),
                     ],
                   ),
@@ -292,12 +292,12 @@ Widget _buildModeButton(
 
 String _getModeDescription(int interval) {
   switch (interval) {
-    case 40:
-      return 'Atualiza a cada 40 segundos — maior economia de bateria.';
-    case 20:
-      return 'Atualiza a cada 20 segundos — equilíbrio entre precisão e bateria.';
-    case 7:
-      return 'Atualiza a cada 7 segundos — localização em tempo real e maior consumo de bateria.';
+    case 60:
+      return 'Atualiza a cada 60 segundos — maior economia de bateria.';
+    case 30:
+      return 'Atualiza a cada 30 segundos — equilíbrio entre precisão e bateria.';
+    case 10:
+      return 'Atualiza a cada 10 segundos — localização em tempo real e maior consumo de bateria.';
     default:
       return '';
   }
