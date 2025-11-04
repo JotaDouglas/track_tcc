@@ -5,9 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class CercaMapView extends StatefulWidget {
-  const CercaMapView({super.key});
+  final String? grupoId;
+  final String? grupoNome;
+  const CercaMapView({super.key, this.grupoId, this.grupoNome});
 
   @override
   State<CercaMapView> createState() => _CercaMapViewState();
@@ -22,7 +25,17 @@ class _CercaMapViewState extends State<CercaMapView> {
   void initState() {
     super.initState();
     final vm = Provider.of<CercaViewModel>(context, listen: false);
-    vm.listarCercas();
+    final loginVM = Provider.of<LoginViewModel>(context, listen: false);
+
+    // Se for um grupo válido, carregar do Supabase e salvar no cache local
+    if (widget.grupoId != null) {
+      vm.carregarCercasGrupo(widget.grupoId!).then((_) async {
+        await vm.sincronizarCercasLocais(widget.grupoId!); // novo método
+      });
+    } else {
+      vm.listarCercas(); // fallback local
+    }
+
     _initLocation();
   }
 
@@ -90,10 +103,10 @@ class _CercaMapViewState extends State<CercaMapView> {
               ),
               children: [
                 TileLayer(
-                    urlTemplate:
-                        'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                    subdomains: const ['a', 'b', 'c'],
-                  ),
+                  urlTemplate:
+                      'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                  subdomains: const ['a', 'b', 'c'],
+                ),
                 // Polígonos das cercas
                 ..._buildPolygons(vm),
                 // Marcadores (pins)
@@ -178,7 +191,9 @@ class _CercaMapViewState extends State<CercaMapView> {
             backgroundColor: Colors.blueAccent,
             child: const Icon(Icons.menu),
           ),
-          SizedBox(height: 200,)
+          SizedBox(
+            height: 200,
+          )
         ],
       ),
     );
@@ -536,7 +551,7 @@ class _CercaMapViewState extends State<CercaMapView> {
     );
   }
 
-  void _salvarCerca(CercaViewModel vm) {
+  void _salvarCerca(CercaViewModel vm) async {
     if (_nomeController.text.trim().isEmpty) {
       showDialog(
         context: context,
@@ -557,9 +572,9 @@ class _CercaMapViewState extends State<CercaMapView> {
             ),
             ElevatedButton(
               child: const Text("Salvar"),
-              onPressed: () {
+              onPressed: () async {
                 if (_nomeController.text.trim().isNotEmpty) {
-                  vm.salvarCerca(_nomeController.text.trim());
+                  vm.salvarCercaLocal(_nomeController.text.trim());
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Cerca salva com sucesso!")),
@@ -571,9 +586,26 @@ class _CercaMapViewState extends State<CercaMapView> {
         ),
       );
     } else {
-      vm.salvarCerca(_nomeController.text.trim());
+      final nome = _nomeController.text.trim();
+      final loginVM = context.read<LoginViewModel>();
+
+      // 🔹 Salva localmente
+      await vm.salvarCercaLocal(nome);
+
+      // 🔹 Salva online (no grupo)
+      if (widget.grupoId != null) {
+        await vm.salvarCercaGrupo(
+          widget.grupoId!,
+          loginVM.loginUser?.uidUsuario ?? 'unknown',
+        );
+
+        // 🔹 Atualiza cache local com o que está no Supabase
+        await vm.carregarCercasGrupo(widget.grupoId!);
+        await vm.sincronizarCercasLocais(widget.grupoId!);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cerca salva com sucesso!")),
+        const SnackBar(content: Text("Cerca salva e sincronizada!")),
       );
     }
   }
@@ -707,7 +739,7 @@ class _CercaMapViewState extends State<CercaMapView> {
   }
 
   void _editarCerca(CercaViewModel vm, String nome) {
-    vm.carregarCerca(nome);
+    vm.carregarCercaLocal(nome);
     _nomeController.text = nome;
     vm.modo = 'editar'; // Força o modo de edição
     ScaffoldMessenger.of(context).showSnackBar(
@@ -735,7 +767,7 @@ class _CercaMapViewState extends State<CercaMapView> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text("Excluir"),
             onPressed: () {
-              vm.deletarCerca(nome);
+              vm.deletarCercaLocal(nome);
               Navigator.pop(dialogContext);
               Navigator.pop(context); // Fecha o bottom sheet
               ScaffoldMessenger.of(context).showSnackBar(
@@ -749,16 +781,24 @@ class _CercaMapViewState extends State<CercaMapView> {
   }
 
   void _visualizarTodas(CercaViewModel vm) async {
-    await vm.mostrarTodasCercas();
+    if (widget.grupoId != null) {
+      await vm.carregarCercasGrupo(widget.grupoId!);
+    } else {
+      await vm.carregarTodasCercasLocais(); // se não tiver grupo
+    }
+
+    vm.modo = 'visualizar_todas';
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Visualizando todas as cercas"),
+          content: Text("Visualizando cercas do grupo"),
           duration: Duration(seconds: 2),
         ),
       );
     }
   }
+  
 
   void _mostrarMenu(BuildContext context, CercaViewModel vm) {
     showModalBottomSheet(

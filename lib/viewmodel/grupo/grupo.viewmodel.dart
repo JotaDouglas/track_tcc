@@ -4,6 +4,7 @@ import 'package:mobx/mobx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
+import 'package:track_tcc_app/repository/cerca.repository.dart';
 import 'package:track_tcc_app/repository/grupo/grupo.supabase.repository.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
@@ -46,7 +47,6 @@ abstract class GrupoViewModelBase with Store {
         g.membros = await _repo.listMembers(g.id);
       }
       grupos = ObservableList.of(result);
-      
     } catch (e) {
       errorMessage = e.toString();
       log("Erro: $e");
@@ -70,6 +70,11 @@ abstract class GrupoViewModelBase with Store {
         criadoPor: userId!,
         aberto: aberto,
       );
+
+      // 🔹 Cria linha na tabela 'cercas'
+      final cercaRepo = CercaSupabaseRepository(_client);
+      await cercaRepo.criarRegistroGrupo(group.id, userId!);
+
       grupos.insert(0, group);
       return group;
     } catch (e) {

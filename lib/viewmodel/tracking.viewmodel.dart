@@ -458,6 +458,7 @@ abstract class TrackingViewModelBase with Store {
       }
     });
   }
+  
 
   bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
     int intersectCount = 0;

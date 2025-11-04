@@ -89,20 +89,66 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     });
   }
 
-  late final _$salvarCercaAsyncAction =
-      AsyncAction('CercaViewModelBase.salvarCerca', context: context);
+  late final _$grupoIdSelecionadoAtom =
+      Atom(name: 'CercaViewModelBase.grupoIdSelecionado', context: context);
 
   @override
-  Future<void> salvarCerca(String nome) {
-    return _$salvarCercaAsyncAction.run(() => super.salvarCerca(nome));
+  String? get grupoIdSelecionado {
+    _$grupoIdSelecionadoAtom.reportRead();
+    return super.grupoIdSelecionado;
   }
 
-  late final _$carregarCercaAsyncAction =
-      AsyncAction('CercaViewModelBase.carregarCerca', context: context);
+  @override
+  set grupoIdSelecionado(String? value) {
+    _$grupoIdSelecionadoAtom.reportWrite(value, super.grupoIdSelecionado, () {
+      super.grupoIdSelecionado = value;
+    });
+  }
+
+  late final _$sincronizarCercasLocaisAsyncAction = AsyncAction(
+      'CercaViewModelBase.sincronizarCercasLocais',
+      context: context);
 
   @override
-  Future<void> carregarCerca(String nome) {
-    return _$carregarCercaAsyncAction.run(() => super.carregarCerca(nome));
+  Future<void> sincronizarCercasLocais(String grupoId) {
+    return _$sincronizarCercasLocaisAsyncAction
+        .run(() => super.sincronizarCercasLocais(grupoId));
+  }
+
+  late final _$carregarCercasGrupoAsyncAction =
+      AsyncAction('CercaViewModelBase.carregarCercasGrupo', context: context);
+
+  @override
+  Future<void> carregarCercasGrupo(String grupoId) {
+    return _$carregarCercasGrupoAsyncAction
+        .run(() => super.carregarCercasGrupo(grupoId));
+  }
+
+  late final _$salvarCercaGrupoAsyncAction =
+      AsyncAction('CercaViewModelBase.salvarCercaGrupo', context: context);
+
+  @override
+  Future<void> salvarCercaGrupo(String nome, String userId) {
+    return _$salvarCercaGrupoAsyncAction
+        .run(() => super.salvarCercaGrupo(nome, userId));
+  }
+
+  late final _$salvarCercaLocalAsyncAction =
+      AsyncAction('CercaViewModelBase.salvarCercaLocal', context: context);
+
+  @override
+  Future<void> salvarCercaLocal(String nome) {
+    return _$salvarCercaLocalAsyncAction
+        .run(() => super.salvarCercaLocal(nome));
+  }
+
+  late final _$carregarCercaLocalAsyncAction =
+      AsyncAction('CercaViewModelBase.carregarCercaLocal', context: context);
+
+  @override
+  Future<void> carregarCercaLocal(String nome) {
+    return _$carregarCercaLocalAsyncAction
+        .run(() => super.carregarCercaLocal(nome));
   }
 
   late final _$listarCercasAsyncAction =
@@ -111,22 +157,6 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
   @override
   Future<void> listarCercas() {
     return _$listarCercasAsyncAction.run(() => super.listarCercas());
-  }
-
-  late final _$deletarCercaAsyncAction =
-      AsyncAction('CercaViewModelBase.deletarCerca', context: context);
-
-  @override
-  Future<void> deletarCerca(String nome) {
-    return _$deletarCercaAsyncAction.run(() => super.deletarCerca(nome));
-  }
-
-  late final _$editarCercaAsyncAction =
-      AsyncAction('CercaViewModelBase.editarCerca', context: context);
-
-  @override
-  Future<void> editarCerca(String nome) {
-    return _$editarCercaAsyncAction.run(() => super.editarCerca(nome));
   }
 
   late final _$carregarTodasCercasAsyncAction =
@@ -138,13 +168,21 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
         .run(() => super.carregarTodasCercas());
   }
 
-  late final _$mostrarTodasCercasAsyncAction =
-      AsyncAction('CercaViewModelBase.mostrarTodasCercas', context: context);
+  late final _$deletarCercaLocalAsyncAction =
+      AsyncAction('CercaViewModelBase.deletarCercaLocal', context: context);
 
   @override
-  Future<void> mostrarTodasCercas() {
-    return _$mostrarTodasCercasAsyncAction
-        .run(() => super.mostrarTodasCercas());
+  Future<void> deletarCercaLocal(String nome) {
+    return _$deletarCercaLocalAsyncAction
+        .run(() => super.deletarCercaLocal(nome));
+  }
+
+  late final _$editarCercaAsyncAction =
+      AsyncAction('CercaViewModelBase.editarCerca', context: context);
+
+  @override
+  Future<void> editarCerca(String nome) {
+    return _$editarCercaAsyncAction.run(() => super.editarCerca(nome));
   }
 
   late final _$CercaViewModelBaseActionController =
@@ -212,7 +250,8 @@ pontos: ${pontos},
 cercasSalvas: ${cercasSalvas},
 cercasMap: ${cercasMap},
 cercaAtual: ${cercaAtual},
-modo: ${modo}
+modo: ${modo},
+grupoIdSelecionado: ${grupoIdSelecionado}
     ''';
   }
 }

@@ -181,7 +181,7 @@ class _HomeViewState extends State<HomeView> {
                   buildCard(
                     icon: Icons.run_circle_outlined,
                     label: "Cerca",
-                    onTap: () => GoRouter.of(context).push('/cerca-map'),
+                    onTap: () => GoRouter.of(context).push('/cerca-menu'),
                   ),
                   buildCard(
                     icon: Icons.groups_2_sharp,

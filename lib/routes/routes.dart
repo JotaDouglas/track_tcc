@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:track_tcc_app/views/cerca/cerca.map.view.dart';
+import 'package:track_tcc_app/views/cerca/cerca.menu.view.dart';
 import 'package:track_tcc_app/views/grupo/grupo_buscar.view.dart';
 import 'package:track_tcc_app/views/grupo/grupo_criar.view.dart';
 import 'package:track_tcc_app/views/grupo/grupo_detalhes.view.dart';
@@ -90,7 +91,11 @@ class AppRouter {
       GoRoute(
           path: "/cerca-map",
           name: 'cerca-map',
-          builder: (context, status) => const CercaMapView()),
+          builder: (context, status) => const CercaMapView(grupoId: '', grupoNome: '',)),
+      GoRoute(
+          path: "/cerca-menu",
+          name: 'cerca-menu',
+          builder: (context, status) => const CercaGrupoListScreen()),
       GoRoute(
         path: "/grupos",
         name: 'grupos',
