@@ -32,6 +32,9 @@ abstract class CercaViewModelBase with Store {
   @observable
   String? grupoIdSelecionado;
 
+  @observable
+  String? cercaSelecionada; 
+
   @action
   Future<void> carregarTodasCercasLocais() async {
     cercasMap.clear();

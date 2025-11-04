@@ -65,6 +65,9 @@ abstract class TrackingViewModelBase with Store {
   @observable
   int trackingInterval = 30; // valor padrão (Eficiente)
 
+  @observable
+  String? cercaSelecionada; // nome da cerca escolhida
+
   @action
   void setTrackingInterval(int seconds) {
     trackingInterval = seconds;
@@ -446,19 +449,30 @@ abstract class TrackingViewModelBase with Store {
   Future<void> validarDentroCercas(LatLng ponto) async {
     final vm = cercaViewModel;
 
-    // Se o map ainda estiver vazio, carrega todas as cercas
+    // Se não há cercas carregadas, busca do grupo
     if (vm.cercasMap.isEmpty) {
       await vm.listarCercas();
       await vm.carregarTodasCercas();
     }
 
-    vm.cercasMap.forEach((nome, poligono) {
-      if (pontoDentroDaCerca(ponto, poligono)) {
-        log('Usuário está DENTRO da cerca "$nome"');
-      }
-    });
+    final nomeSelecionado = cercaSelecionada;
+    if (nomeSelecionado == null) {
+      log('⚠️ Nenhuma cerca selecionada.');
+      return;
+    }
+
+    final poligono = vm.cercasMap[nomeSelecionado];
+    if (poligono == null || poligono.isEmpty) {
+      log('⚠️ A cerca "$nomeSelecionado" não possui pontos.');
+      return;
+    }
+
+    if (pontoDentroDaCerca(ponto, poligono)) {
+      log('✅ Usuário está DENTRO da cerca "$nomeSelecionado"');
+    } else {
+      log('🚧 Usuário está FORA da cerca "$nomeSelecionado"');
+    }
   }
-  
 
   bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
     int intersectCount = 0;

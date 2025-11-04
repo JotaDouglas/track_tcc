@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/alert_message.widget.dart';
@@ -41,10 +43,23 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    loadcercas();
+  }
+
+  Future<void> loadcercas() async {
+    final cercaVM = Provider.of<CercaViewModel>(context, listen: false);
+    await cercaVM.listarCercas();
+    await cercaVM.carregarTodasCercasLocais();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final trackVM = Provider.of<TrackingViewModel>(context);
     final authViewModel = Provider.of<LoginViewModel>(context);
     final amizadeVM = Provider.of<AmizadeViewModel>(context);
+    final cercaVM = Provider.of<CercaViewModel>(context, listen: false);
 
     final nome = authViewModel.loginUser?.username ?? 'Sem nome';
     final nomeCompleto =
@@ -83,6 +98,7 @@ class _TrackPageState extends State<TrackPage> {
             builder: (_) => Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                _buildCercaSelector(context, cercaVM, trackVM),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -287,6 +303,44 @@ Widget _buildModeButton(
         ),
       ),
     ),
+  );
+}
+
+Widget _buildCercaSelector(BuildContext context, CercaViewModel cerca, TrackingViewModel track) {
+  return Observer(
+    builder: (context) {
+      // Exibe somente se houver cercas carregadas
+      if (cerca.cercasMap.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            "Nenhuma cerca disponível para este grupo.",
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: DropdownButtonFormField<String>(
+          decoration: const InputDecoration(
+            labelText: "Selecione a cerca para monitorar",
+            border: OutlineInputBorder(),
+          ),
+          value: cerca.cercaSelecionada,
+          items: cerca.cercasMap.keys.map((nome) {
+            return DropdownMenuItem(
+              value: nome,
+              child: Text(nome),
+            );
+          }).toList(),
+          onChanged: (value) {
+            cerca.cercaSelecionada = value;
+            track.cercaSelecionada = value;
+          },
+        ),
+      );
+    },
   );
 }
 
