@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/helper/database.helper.dart';
+import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 
 class CercaRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
@@ -47,6 +48,12 @@ class CercaRepository {
     final result = await db.query('cercas', columns: ['nome']);
     return result.map((e) => e['nome'] as String).toList();
   }
+  Future listarGrupos() async {
+    final db = await _dbHelper.database;
+    final result = await db.query('cercas_cache_grupo');
+    List<Group> grupsList = (result.map((r) => Group.fromJson(r)).toList());
+    return grupsList;
+  }
 
   Future<void> deletarCerca(String nome) async {
     final db = await _dbHelper.database;
@@ -64,6 +71,7 @@ class CercaRepository {
         grupo_id TEXT PRIMARY KEY,
         geo_data TEXT NOT NULL,
         atualizado_em TEXT,
+        grupo_name TEXT,
         sync_status TEXT DEFAULT 'synced'
       );
     ''');
@@ -74,8 +82,11 @@ class CercaRepository {
     String grupoId,
     Map<String, List<LatLng>> cercas, {
     String? atualizadoEm,
+    String? grupoName,
     String syncStatus = 'synced',
   }) async {
+    try {
+      
     final db = await _dbHelper.database;
     await _ensureGrupoTable(db);
 
@@ -92,18 +103,43 @@ class CercaRepository {
 
     final jsonStr = jsonEncode(data);
 
-    await db.insert(
+    var res = await db.insert(
       'cercas_cache_grupo',
       {
         'grupo_id': grupoId,
+        'grupo_name': grupoName,
         'geo_data': jsonStr,
         'atualizado_em': atualizadoEm ?? DateTime.now().toIso8601String(),
         'sync_status': syncStatus,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    log(res.toString());
+    } catch (e) {
+      log('Erro 1: $e');
+    }
   }
 
+  /// Carrega as cercas armazenadas localmente para o grupo
+  Future<Map<String, List<LatLng>>> convertCercasGrupo(List<Map<String, Object?>> res) async {
+    //Tranforma grupos em objetos
+    List<Group> grupos = [];
+    if (res.isEmpty) return {};
+
+    final jsonData = jsonDecode(res.first['geo_data'] as String);
+    final List cercasList = jsonData['cercas'] ?? [];
+
+    final Map<String, List<LatLng>> result = {};
+    for (final item in cercasList) {
+      final nome = item['nome'] ?? 'Sem nome';
+      final pontos = (item['pontos'] as List)
+          .map((p) => LatLng(p['lat'], p['lng']))
+          .toList();
+      result[nome] = pontos;
+    }
+    return result;
+  }
   /// Carrega as cercas armazenadas localmente para o grupo
   Future<Map<String, List<LatLng>>> getCercasGrupo(String grupoId) async {
     final db = await _dbHelper.database;

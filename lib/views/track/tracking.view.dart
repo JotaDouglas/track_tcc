@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
@@ -65,6 +65,7 @@ class _TrackPageState extends State<TrackPage> {
   Future<void> loadcercas() async {
     final cercaVM = Provider.of<CercaViewModel>(context, listen: false);
     await cercaVM.listarCercas();
+    await cercaVM.listarGrupos();
     await cercaVM.carregarTodasCercasLocais();
   }
 
@@ -223,7 +224,8 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   // Step 1: Seleção de Cerca
-  Widget _buildStep1(BuildContext context, CercaViewModel cercaVM, TrackingViewModel track) {
+  Widget _buildStep1(
+      BuildContext context, CercaViewModel cercaVM, TrackingViewModel track) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -237,14 +239,14 @@ class _TrackPageState extends State<TrackPage> {
                   color: Colors.orange[900]?.withOpacity(0.1),
                 ),
                 child: Icon(
-                  Icons.fence,
+                  Icons.groups,
                   size: 80,
                   color: Colors.orange[900],
                 ),
               ),
               const SizedBox(height: 32),
               const Text(
-                'Selecione a Cerca',
+                'Selecione o Grupo',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -264,7 +266,7 @@ class _TrackPageState extends State<TrackPage> {
                     return const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        "Nenhuma cerca disponível para este grupo.",
+                        "Nenhum grupo disponível.",
                         style: TextStyle(color: Colors.grey),
                       ),
                     );
@@ -281,22 +283,26 @@ class _TrackPageState extends State<TrackPage> {
                     // ),
                     child: DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
-                        labelText: "Grupo/Cerca",
+                        labelText: "Grupo",
                         border: InputBorder.none,
                         labelStyle: TextStyle(color: Colors.white70),
                       ),
                       dropdownColor: const Color(0xFF2A2A2A),
                       style: const TextStyle(color: Colors.white),
-                      value: cercaVM.cercaSelecionada,
-                      items: cercaVM.cercasMap.keys.map((nome) {
+                      value: cercaVM.grupoSelecionado?.nome,
+                      items: cercaVM.gruposNames.map((grupo) {
                         return DropdownMenuItem(
-                          value: nome,
-                          child: Text(nome),
+                          value: grupo.nome,
+                          child: Text(grupo.nome),
                         );
                       }).toList(),
                       onChanged: (value) {
-                        cercaVM.cercaSelecionada = value;
-                        track.cercaSelecionada = value;
+                        if (value?.isNotEmpty == true) {
+                          Group grupoSelected = cercaVM.gruposNames
+                              .firstWhere((g) => g.nome == value);
+                          cercaVM.grupoSelecionado = grupoSelected;
+                          track.grupoSelecionado = grupoSelected;
+                        }
                       },
                     ),
                   );

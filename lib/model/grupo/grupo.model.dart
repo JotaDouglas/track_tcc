@@ -1,15 +1,18 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
 
 class Group {
-  final String id; // uuid
+  final String id;
   final String nome;
   final String? descricao;
   final String codigo;
-  final String criadoPor; // user_id uuid
+  final String criadoPor;
   final bool aberto;
   final DateTime criadoEm;
   final DateTime atualizadoEm;
+  final dynamic geoData; // <-- Adicione isto
   List<GroupMember>? membros;
 
   Group({
@@ -21,6 +24,7 @@ class Group {
     required this.aberto,
     required this.criadoEm,
     required this.atualizadoEm,
+    this.geoData, // <-- Adicione isto
     this.membros,
   });
 
@@ -33,6 +37,19 @@ class Group {
         aberto: m['aberto'] as bool? ?? false,
         criadoEm: DateTime.parse(m['criado_em'] as String),
         atualizadoEm: DateTime.parse(m['atualizado_em'] as String),
+      );
+
+  factory Group.fromJson(Map<String, dynamic> m) => Group(
+        id: m['grupo_id'] as String,
+        nome: m['grupo_name'] as String,
+        descricao: null,
+        codigo: '',
+        criadoPor: '',
+        aberto: m['aberto'] as bool? ?? false,
+        criadoEm: DateTime.now(),
+        atualizadoEm:
+            DateTime.tryParse(m['atualizado_em'] ?? '') ?? DateTime.now(),
+        geoData: m['geo_data'] != null ? jsonDecode(m['geo_data']) : null,
       );
 
   Map<String, dynamic> toMap() => {

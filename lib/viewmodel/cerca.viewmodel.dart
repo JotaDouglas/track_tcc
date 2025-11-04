@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:mobx/mobx.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/repository/cerca.repository.dart';
 
 part 'cerca.viewmodel.g.dart';
@@ -20,6 +21,9 @@ abstract class CercaViewModelBase with Store {
   ObservableList<String> cercasSalvas = ObservableList<String>();
 
   @observable
+  ObservableList<Group> gruposNames = ObservableList<Group>();
+
+  @observable
   ObservableMap<String, List<LatLng>> cercasMap =
       ObservableMap<String, List<LatLng>>();
 
@@ -34,6 +38,9 @@ abstract class CercaViewModelBase with Store {
 
   @observable
   String? cercaSelecionada; 
+
+  @observable
+  Group? grupoSelecionado; 
 
   @action
   Future<void> carregarTodasCercasLocais() async {
@@ -64,7 +71,7 @@ abstract class CercaViewModelBase with Store {
   // 🔹 Carregar cercas de um grupo (online → cache local → memória)
   // =====================================================================
   @action
-  Future<void> carregarCercasGrupo(String grupoId) async {
+  Future<void> carregarCercasGrupo(String grupoId, String? grupoName) async {
     grupoIdSelecionado = grupoId;
     try {
       log('🔹 Carregando cercas do grupo $grupoId...');
@@ -77,6 +84,7 @@ abstract class CercaViewModelBase with Store {
         onlineMapa,
         atualizadoEm: DateTime.now().toIso8601String(),
         syncStatus: 'synced',
+        grupoName: grupoName ?? '', 
       );
 
       // 3️⃣ Carrega do cache local
@@ -174,6 +182,16 @@ abstract class CercaViewModelBase with Store {
   Future<void> listarCercas() async {
     final lista = await _cercaRepository.listarCercas();
     cercasSalvas
+      ..clear()
+      ..addAll(lista);
+  }
+  
+  @action
+  Future<void> listarGrupos() async {
+    
+    var ite =  await _cercaRepository.listarGrupos();
+    var lista =  await _cercaRepository.listarGrupos();
+    gruposNames
       ..clear()
       ..addAll(lista);
   }

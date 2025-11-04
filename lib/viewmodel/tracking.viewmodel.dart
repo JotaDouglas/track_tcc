@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:mobx/mobx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
+import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/repository/track.repository.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
@@ -67,6 +68,9 @@ abstract class TrackingViewModelBase with Store {
 
   @observable
   String? cercaSelecionada; // nome da cerca escolhida
+
+  @observable
+  Group? grupoSelecionado; // nome da cerca escolhida
 
   @action
   void setTrackingInterval(int seconds) {

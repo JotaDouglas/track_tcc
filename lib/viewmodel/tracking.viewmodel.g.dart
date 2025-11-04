@@ -217,6 +217,38 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     });
   }
 
+  late final _$cercaSelecionadaAtom =
+      Atom(name: 'TrackingViewModelBase.cercaSelecionada', context: context);
+
+  @override
+  String? get cercaSelecionada {
+    _$cercaSelecionadaAtom.reportRead();
+    return super.cercaSelecionada;
+  }
+
+  @override
+  set cercaSelecionada(String? value) {
+    _$cercaSelecionadaAtom.reportWrite(value, super.cercaSelecionada, () {
+      super.cercaSelecionada = value;
+    });
+  }
+
+  late final _$grupoSelecionadoAtom =
+      Atom(name: 'TrackingViewModelBase.grupoSelecionado', context: context);
+
+  @override
+  Group? get grupoSelecionado {
+    _$grupoSelecionadoAtom.reportRead();
+    return super.grupoSelecionado;
+  }
+
+  @override
+  set grupoSelecionado(Group? value) {
+    _$grupoSelecionadoAtom.reportWrite(value, super.grupoSelecionado, () {
+      super.grupoSelecionado = value;
+    });
+  }
+
   late final _$insertTrackingAsyncAction =
       AsyncAction('TrackingViewModelBase.insertTracking', context: context);
 
@@ -344,7 +376,9 @@ lastPosition: ${lastPosition},
 addressLabel: ${addressLabel},
 trackListLoop: ${trackListLoop},
 temp: ${temp},
-trackingInterval: ${trackingInterval}
+trackingInterval: ${trackingInterval},
+cercaSelecionada: ${cercaSelecionada},
+grupoSelecionado: ${grupoSelecionado}
     ''';
   }
 }

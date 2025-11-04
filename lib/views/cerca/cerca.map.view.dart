@@ -29,7 +29,7 @@ class _CercaMapViewState extends State<CercaMapView> {
 
     // Se for um grupo válido, carregar do Supabase e salvar no cache local
     if (widget.grupoId != null) {
-      vm.carregarCercasGrupo(widget.grupoId!).then((_) async {
+      vm.carregarCercasGrupo(widget.grupoId!, widget.grupoNome).then((_) async {
         await vm.sincronizarCercasLocais(widget.grupoId!); // novo método
       });
     } else {
@@ -600,7 +600,7 @@ class _CercaMapViewState extends State<CercaMapView> {
         );
 
         // 🔹 Atualiza cache local com o que está no Supabase
-        await vm.carregarCercasGrupo(widget.grupoId!);
+        await vm.carregarCercasGrupo(widget.grupoId!, widget.grupoNome);
         await vm.sincronizarCercasLocais(widget.grupoId!);
       }
 
@@ -782,7 +782,7 @@ class _CercaMapViewState extends State<CercaMapView> {
 
   void _visualizarTodas(CercaViewModel vm) async {
     if (widget.grupoId != null) {
-      await vm.carregarCercasGrupo(widget.grupoId!);
+      await vm.carregarCercasGrupo(widget.grupoId!, widget.grupoNome);
     } else {
       await vm.carregarTodasCercasLocais(); // se não tiver grupo
     }

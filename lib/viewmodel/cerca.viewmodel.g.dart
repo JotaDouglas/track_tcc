@@ -41,6 +41,22 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     });
   }
 
+  late final _$gruposNamesAtom =
+      Atom(name: 'CercaViewModelBase.gruposNames', context: context);
+
+  @override
+  ObservableList<Group> get gruposNames {
+    _$gruposNamesAtom.reportRead();
+    return super.gruposNames;
+  }
+
+  @override
+  set gruposNames(ObservableList<Group> value) {
+    _$gruposNamesAtom.reportWrite(value, super.gruposNames, () {
+      super.gruposNames = value;
+    });
+  }
+
   late final _$cercasMapAtom =
       Atom(name: 'CercaViewModelBase.cercasMap', context: context);
 
@@ -105,6 +121,48 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     });
   }
 
+  late final _$cercaSelecionadaAtom =
+      Atom(name: 'CercaViewModelBase.cercaSelecionada', context: context);
+
+  @override
+  String? get cercaSelecionada {
+    _$cercaSelecionadaAtom.reportRead();
+    return super.cercaSelecionada;
+  }
+
+  @override
+  set cercaSelecionada(String? value) {
+    _$cercaSelecionadaAtom.reportWrite(value, super.cercaSelecionada, () {
+      super.cercaSelecionada = value;
+    });
+  }
+
+  late final _$grupoSelecionadoAtom =
+      Atom(name: 'CercaViewModelBase.grupoSelecionado', context: context);
+
+  @override
+  Group? get grupoSelecionado {
+    _$grupoSelecionadoAtom.reportRead();
+    return super.grupoSelecionado;
+  }
+
+  @override
+  set grupoSelecionado(Group? value) {
+    _$grupoSelecionadoAtom.reportWrite(value, super.grupoSelecionado, () {
+      super.grupoSelecionado = value;
+    });
+  }
+
+  late final _$carregarTodasCercasLocaisAsyncAction = AsyncAction(
+      'CercaViewModelBase.carregarTodasCercasLocais',
+      context: context);
+
+  @override
+  Future<void> carregarTodasCercasLocais() {
+    return _$carregarTodasCercasLocaisAsyncAction
+        .run(() => super.carregarTodasCercasLocais());
+  }
+
   late final _$sincronizarCercasLocaisAsyncAction = AsyncAction(
       'CercaViewModelBase.sincronizarCercasLocais',
       context: context);
@@ -119,9 +177,9 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
       AsyncAction('CercaViewModelBase.carregarCercasGrupo', context: context);
 
   @override
-  Future<void> carregarCercasGrupo(String grupoId) {
+  Future<void> carregarCercasGrupo(String grupoId, String? grupoName) {
     return _$carregarCercasGrupoAsyncAction
-        .run(() => super.carregarCercasGrupo(grupoId));
+        .run(() => super.carregarCercasGrupo(grupoId, grupoName));
   }
 
   late final _$salvarCercaGrupoAsyncAction =
@@ -157,6 +215,14 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
   @override
   Future<void> listarCercas() {
     return _$listarCercasAsyncAction.run(() => super.listarCercas());
+  }
+
+  late final _$listarGruposAsyncAction =
+      AsyncAction('CercaViewModelBase.listarGrupos', context: context);
+
+  @override
+  Future<void> listarGrupos() {
+    return _$listarGruposAsyncAction.run(() => super.listarGrupos());
   }
 
   late final _$carregarTodasCercasAsyncAction =
@@ -248,10 +314,13 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     return '''
 pontos: ${pontos},
 cercasSalvas: ${cercasSalvas},
+gruposNames: ${gruposNames},
 cercasMap: ${cercasMap},
 cercaAtual: ${cercaAtual},
 modo: ${modo},
-grupoIdSelecionado: ${grupoIdSelecionado}
+grupoIdSelecionado: ${grupoIdSelecionado},
+cercaSelecionada: ${cercaSelecionada},
+grupoSelecionado: ${grupoSelecionado}
     ''';
   }
 }

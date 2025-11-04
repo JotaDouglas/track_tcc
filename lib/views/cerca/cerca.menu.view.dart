@@ -117,7 +117,7 @@ class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
               onTap: () async {
                 try {
                   // Carrega as cercas do grupo selecionado (atualiza CercaViewModel)
-                  await cercaVM.carregarCercasGrupo(grupo.id);
+                  await cercaVM.carregarCercasGrupo(grupo.id, grupo.nome);
 
                   // Passe apenas os dados necessários para a rota do mapa.
                   // Recomendo configurar a rota nomeada 'cerca-mapa' no GoRouter.
