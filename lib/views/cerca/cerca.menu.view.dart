@@ -17,12 +17,9 @@ class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
   String? _error;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_inited) {
-      _inited = true;
-      _initLoad();
-    }
+  void initState() {
+    super.initState();
+    _initLoad();
   }
 
   Future<void> _initLoad() async {
@@ -121,12 +118,19 @@ class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
 
                   // Passe apenas os dados necessários para a rota do mapa.
                   // Recomendo configurar a rota nomeada 'cerca-mapa' no GoRouter.
-                  if(!mounted) return;
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CercaMapView(grupoId: grupo.id, grupoNome: grupo.nome,)));
+                  if (!mounted) return;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CercaMapView(
+                                grupoId: grupo.id,
+                                grupoNome: grupo.nome,
+                              )));
                 } catch (e) {
                   // tratamento amigável
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao abrir mapa: ${e.toString()}')),
+                    SnackBar(
+                        content: Text('Erro ao abrir mapa: ${e.toString()}')),
                   );
                 }
               },
