@@ -390,7 +390,7 @@ abstract class TrackingViewModelBase with Store {
 
           // Mantém histórico em memória
           trackListLoop.insert(0, newLocal);
-          validarDentroCercas(newLatLng);
+          validarDentroDeAlgumaCerca(newLatLng);
         } else {
           log('Localização retornou null.');
         }
@@ -437,7 +437,7 @@ abstract class TrackingViewModelBase with Store {
         await trackLocation(newLocal, userName);
 
         trackListLoop.insert(0, newLocal);
-        validarDentroCercas(newLatLng);
+        validarDentroDeAlgumaCerca(newLatLng);
       } else {
         log('Localização retornou null.');
       }
@@ -450,32 +450,28 @@ abstract class TrackingViewModelBase with Store {
 
   //Verificar a cerca
 
-  Future<void> validarDentroCercas(LatLng ponto) async {
-    final vm = cercaViewModel;
+  Future<void> validarDentroDeAlgumaCerca(LatLng ponto) async {
+    final grupo = grupoSelecionado;
 
-    // Se não há cercas carregadas, busca do grupo
-    if (vm.cercasMap.isEmpty) {
-      await vm.listarCercas();
-      await vm.carregarTodasCercas();
-    }
-
-    final nomeSelecionado = cercaSelecionada;
-    if (nomeSelecionado == null) {
-      log('⚠️ Nenhuma cerca selecionada.');
+    if (grupo == null) {
+      log("⚠️ Nenhum grupo selecionado.");
       return;
     }
 
-    final poligono = vm.cercasMap[nomeSelecionado];
-    if (poligono == null || poligono.isEmpty) {
-      log('⚠️ A cerca "$nomeSelecionado" não possui pontos.');
+    final cercas = grupo.cercasPoligonos;
+    if (cercas.isEmpty) {
+      log("⚠️ Grupo selecionado não possui cercas.");
       return;
     }
 
-    if (pontoDentroDaCerca(ponto, poligono)) {
-      log('✅ Usuário está DENTRO da cerca "$nomeSelecionado"');
-    } else {
-      log('🚧 Usuário está FORA da cerca "$nomeSelecionado"');
+    for (var cerca in grupo.cercasPoligonos) {
+      if (pontoDentroDaCerca(ponto, cerca.pontos)) {
+        log('✅ DENTRO de uma cerca do grupo: ${cerca.nome}');
+        return;
+      }
     }
+
+    log('🚧 FORA de todas as cercas do grupo: ${grupo.nome}');
   }
 
   bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {

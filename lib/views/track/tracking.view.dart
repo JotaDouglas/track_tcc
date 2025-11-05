@@ -316,11 +316,9 @@ class _TrackPageState extends State<TrackPage> {
           showBack: false,
           showNext: true,
           onNext: () {
-            if (cercaVM.cercaSelecionada != null) {
-              setState(() {
-                _currentStep = 1;
-              });
-            }
+            setState(() {
+              _currentStep = 1;
+            });
           },
         ),
       ],

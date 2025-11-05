@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:latlong2/latlong.dart';
 import 'package:meta/meta.dart';
+import 'package:track_tcc_app/model/cerca.model.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
 
 class Group {
@@ -60,4 +63,27 @@ class Group {
         'criado_por': criadoPor,
         'aberto': aberto,
       };
+}
+
+extension GroupGeo on Group {
+  List<CercaPoligono> get cercasPoligonos {
+    final dados = geoData?['cercas'];
+
+    if (dados is! List) return [];
+
+    return dados.map((cerca) {
+      final nome = cerca['nome'] ?? 'Sem Nome';
+      final pontosRaw = cerca['pontos'];
+
+      if (pontosRaw is! List) {
+        return CercaPoligono(nome, []);
+      }
+
+      final pontos = pontosRaw.map((p) {
+        return LatLng(p['lat'], p['lng']);
+      }).toList();
+
+      return CercaPoligono(nome, pontos);
+    }).toList();
+  }
 }
