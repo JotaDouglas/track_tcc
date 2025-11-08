@@ -595,7 +595,7 @@ class _CercaMapViewState extends State<CercaMapView> {
       // 🔹 Salva online (no grupo)
       if (widget.grupoId != null) {
         await vm.salvarCercaGrupo(
-          widget.grupoId!,
+          nome,
           loginVM.loginUser?.uidUsuario ?? 'unknown',
         );
 

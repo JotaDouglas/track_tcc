@@ -119,21 +119,29 @@ abstract class CercaViewModelBase with Store {
     final grupoId = grupoIdSelecionado!;
     final pontosCerca = pontos.toList();
 
-    // 1️⃣ Atualiza cache local primeiro
+    // 1️⃣ Carrega todas as cercas existentes do cache local
+    final cercasExistentes = await _cercaRepository.getCercasGrupo(grupoId);
+
+    // 2️⃣ Adiciona a nova cerca ao mapa completo
+    cercasExistentes[nome] = pontosCerca;
+
+    // 3️⃣ Atualiza cache local primeiro
     await _cercaRepository.saveSingleCercaLocal(grupoId, nome, pontosCerca,
         syncStatus: 'pending');
 
-    // 2️⃣ Atualiza memória (MobX)
-    cercasMap[nome] = pontosCerca;
+    // 4️⃣ Atualiza memória (MobX) com todas as cercas
+    cercasMap
+      ..clear()
+      ..addAll(cercasExistentes);
     cercaAtual = nome;
     log('🧩 Cerca "$nome" salva localmente (pending sync)');
 
-    // 3️⃣ Tenta sincronizar com o Supabase
+    // 5️⃣ Tenta sincronizar com o Supabase enviando TODAS as cercas
     try {
-      await _cercaSupabaseRepo.salvarCercas(grupoId, cercasMap, userId);
+      await _cercaSupabaseRepo.salvarCercas(grupoId, cercasExistentes, userId);
       await _cercaRepository.upsertCercasGrupo(
         grupoId,
-        cercasMap,
+        cercasExistentes,
         atualizadoEm: DateTime.now().toIso8601String(),
         syncStatus: 'synced',
       );
