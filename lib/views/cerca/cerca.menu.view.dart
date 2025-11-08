@@ -13,51 +13,33 @@ class CercaGrupoListScreen extends StatefulWidget {
 }
 
 class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
-  bool _inited = false;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _initLoad();
+    // Carrega os dados assim que a tela é inicializada
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _carregarDados();
+    });
   }
 
-  Future<void> _initLoad() async {
+  Future<void> _carregarDados() async {
     try {
-      // tenta ler o GrupoViewModel — se não estiver registrado, lança e mostra erro
-      final grupoVM = context.read<GrupoViewModel>();
-      if (grupoVM.grupos.isEmpty) {
-        await grupoVM.carregarGrupos();
-      }
-      // opcional: pré-carregar dados de cercas? não aqui
+      final grupoVM = Provider.of<GrupoViewModel>(context, listen: false);
+      // Sempre busca dados atualizados do Supabase ao acessar a tela
+      await grupoVM.carregarGrupos();
     } catch (e) {
-      setState(() => _error = 'Erro ao inicializar: ${e.toString()}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao carregar grupos: ${e.toString()}')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     // Provider.of com listen true para rebuild automático
-    late final GrupoViewModel grupoVM;
-    try {
-      grupoVM = context.watch<GrupoViewModel>();
-    } catch (e) {
-      // Se não estiver registrado, mostramos mensagem amigável
-      return Scaffold(
-        appBar: AppBar(title: const Text('Cercas por Grupo')),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              'GrupoViewModel não encontrado via Provider.\n'
-              'Certifique-se de que você registrou Provider<GrupoViewModel> no main.dart.\n\n'
-              'Erro: ${e.toString()}',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      );
-    }
+    final grupoVM = Provider.of<GrupoViewModel>(context, listen: false);
 
     final cercaVM = context.read<CercaViewModel>();
 
@@ -71,12 +53,32 @@ class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
   }
 
   Widget _buildBody(GrupoViewModel grupoVM, CercaViewModel cercaVM) {
-    if (_error != null) {
-      return Center(child: Text(_error!));
-    }
-
+    // Exibe o loading quando está carregando e não há grupos ainda
     if (grupoVM.loading && grupoVM.grupos.isEmpty) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    // Exibe erro se houver
+    if (grupoVM.errorMessage != null && grupoVM.grupos.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 72, color: Colors.red),
+            const SizedBox(height: 12),
+            Text(
+              'Erro: ${grupoVM.errorMessage}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _carregarDados,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
+      );
     }
 
     if (grupoVM.grupos.isEmpty) {
@@ -89,7 +91,7 @@ class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
             const Text('Você ainda não participa de nenhum grupo.'),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => grupoVM.carregarGrupos(),
+              onPressed: _carregarDados,
               child: const Text('Tentar novamente'),
             ),
           ],
@@ -98,7 +100,7 @@ class _CercaGrupoListScreenState extends State<CercaGrupoListScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: () => grupoVM.carregarGrupos(),
+      onRefresh: _carregarDados,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: grupoVM.grupos.length,

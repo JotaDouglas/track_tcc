@@ -39,18 +39,30 @@ abstract class GrupoViewModelBase with Store {
 
   @action
   Future<void> carregarGrupos() async {
-    if (userId == null) return;
+    if (userId == null) {
+      loading = false;
+      return;
+    }
+
     loading = true;
+    errorMessage = null;
+
     try {
+      // Limpa a lista de grupos antes de buscar novos dados
+      grupos.clear();
+
       final result = await _repo.listGroupsForUser(userId!);
       for (var g in result) {
         g.membros = await _repo.listMembers(g.id);
       }
+
+      // Atualiza a lista com os novos dados do Supabase
       grupos = ObservableList.of(result);
     } catch (e) {
       errorMessage = e.toString();
-      log("Erro: $e");
+      log("Erro ao carregar grupos: $e");
     } finally {
+      // Garante que o loading sempre será desativado
       loading = false;
     }
   }
@@ -124,7 +136,7 @@ abstract class GrupoViewModelBase with Store {
     loading = true;
     try {
       await _repo.removeMember(grupoId: grupoId, userId: membroId);
-      members.removeWhere((m) => m?.userId == membroId);
+      members.removeWhere((m) => m.userId == membroId);
     } catch (e) {
       errorMessage = e.toString();
     } finally {
