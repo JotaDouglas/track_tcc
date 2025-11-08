@@ -48,10 +48,69 @@ class CercaRepository {
     final result = await db.query('cercas', columns: ['nome']);
     return result.map((e) => e['nome'] as String).toList();
   }
-  Future listarGrupos() async {
+  Future<List<Group>> listarGrupos() async {
     final db = await _dbHelper.database;
-    final result = await db.query('cercas_cache_grupo');
-    List<Group> grupsList = (result.map((r) => Group.fromJson(r)).toList());
+
+    // Garante que as tabelas existem
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS grupos (
+        id TEXT PRIMARY KEY,
+        nome TEXT NOT NULL,
+        descricao TEXT,
+        aberto INTEGER DEFAULT 0,
+        codigo TEXT NOT NULL,
+        criado_por TEXT NOT NULL,
+        criado_em TEXT NOT NULL,
+        atualizado_em TEXT NOT NULL
+      );
+    ''');
+
+    await _ensureGrupoTable(db);
+
+    // Busca grupos com LEFT JOIN para pegar o geo_data se existir
+    final result = await db.rawQuery('''
+      SELECT
+        g.id,
+        g.nome,
+        g.descricao,
+        g.aberto,
+        g.codigo,
+        g.criado_por,
+        g.criado_em,
+        g.atualizado_em,
+        c.geo_data
+      FROM grupos g
+      LEFT JOIN cercas_cache_grupo c ON g.id = c.grupo_id
+      ORDER BY g.criado_em DESC
+    ''');
+
+    if (result.isEmpty) return [];
+
+    List<Group> grupsList = result.map((row) {
+      // Decodifica o geo_data se existir
+      dynamic geoData;
+      if (row['geo_data'] != null) {
+        try {
+          geoData = jsonDecode(row['geo_data'] as String);
+        } catch (e) {
+          log('Erro ao decodificar geo_data do grupo ${row['id']}: $e');
+          geoData = null;
+        }
+      }
+
+      return Group(
+        id: row['id'] as String,
+        nome: row['nome'] as String,
+        descricao: row['descricao'] as String?,
+        codigo: row['codigo'] as String,
+        aberto: (row['aberto'] as int) == 1,
+        criadoPor: row['criado_por'] as String,
+        criadoEm: DateTime.parse(row['criado_em'] as String),
+        atualizadoEm: DateTime.parse(row['atualizado_em'] as String),
+        geoData: geoData,
+      );
+    }).toList();
+
     return grupsList;
   }
 
@@ -123,8 +182,6 @@ class CercaRepository {
 
   /// Carrega as cercas armazenadas localmente para o grupo
   Future<Map<String, List<LatLng>>> convertCercasGrupo(List<Map<String, Object?>> res) async {
-    //Tranforma grupos em objetos
-    List<Group> grupos = [];
     if (res.isEmpty) return {};
 
     final jsonData = jsonDecode(res.first['geo_data'] as String);

@@ -197,7 +197,6 @@ abstract class CercaViewModelBase with Store {
   @action
   Future<void> listarGrupos() async {
     
-    var ite =  await _cercaRepository.listarGrupos();
     var lista =  await _cercaRepository.listarGrupos();
     gruposNames
       ..clear()

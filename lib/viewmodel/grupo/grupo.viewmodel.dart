@@ -6,6 +6,7 @@ import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/grupo/membros.model.dart';
 import 'package:track_tcc_app/repository/cerca.repository.dart';
 import 'package:track_tcc_app/repository/grupo/grupo.supabase.repository.dart';
+import 'package:track_tcc_app/repository/grupo/grupo.local.repository.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 part 'grupo.viewmodel.g.dart';
@@ -16,9 +17,11 @@ abstract class GrupoViewModelBase with Store {
   final LoginViewModel loginVM;
   final SupabaseClient _client = Supabase.instance.client;
   late GroupRepositorySupabase _repo;
+  late GrupoLocalRepository _localRepo;
 
   GrupoViewModelBase(this.loginVM) {
     _repo = GroupRepositorySupabase(_client);
+    _localRepo = GrupoLocalRepository();
   }
 
   String? get userId =>
@@ -38,32 +41,69 @@ abstract class GrupoViewModelBase with Store {
   String? errorMessage;
 
   @action
+  void changeLoading(bool value) => loading = value;
+
+  @action
   Future<void> carregarGrupos() async {
     if (userId == null) {
-      loading = false;
+      changeLoading(false);
       return;
     }
 
-    loading = true;
+    changeLoading(true);
+
     errorMessage = null;
 
     try {
       // Limpa a lista de grupos antes de buscar novos dados
       grupos.clear();
 
+      // 1️⃣ Busca dados atualizados do Supabase
       final result = await _repo.listGroupsForUser(userId!);
+
+      // Carrega os membros de cada grupo
       for (var g in result) {
         g.membros = await _repo.listMembers(g.id);
       }
 
-      // Atualiza a lista com os novos dados do Supabase
+      // 2️⃣ Se houver dados do Supabase, limpa e atualiza o SQLite
+      if (result.isNotEmpty) {
+        log('📥 ${result.length} grupos recebidos do Supabase');
+
+        // Limpa as tabelas locais antes de inserir novos dados
+        await _localRepo.limparTabelasGrupos();
+
+        // Salva os grupos no SQLite
+        await _localRepo.salvarGrupos(result);
+
+        // Salva os membros de cada grupo no SQLite
+        for (var grupo in result) {
+          if (grupo.membros != null && grupo.membros!.isNotEmpty) {
+            await _localRepo.salvarMembrosGrupo(grupo.id, grupo.membros!);
+          }
+        }
+
+        log('✅ Dados sincronizados com SQLite local');
+      }
+
+      // 3️⃣ Atualiza a lista observável com os novos dados
       grupos = ObservableList.of(result);
     } catch (e) {
       errorMessage = e.toString();
-      log("Erro ao carregar grupos: $e");
+      log("⚠️ Erro ao carregar grupos online: $e");
+
+      // 4️⃣ Em caso de erro, tenta carregar do cache local
+      try {
+        log('🔄 Tentando carregar grupos do cache local...');
+        final localGrupos = await _localRepo.carregarGrupos();
+        grupos = ObservableList.of(localGrupos);
+        log('📖 ${localGrupos.length} grupos carregados do cache local');
+      } catch (localError) {
+        log("❌ Erro ao carregar do cache local: $localError");
+      }
     } finally {
       // Garante que o loading sempre será desativado
-      loading = false;
+      changeLoading(false);
     }
   }
 
