@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/grupo/grupo.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 import 'package:track_tcc_app/views/widgets/alert_message.widget.dart';
@@ -78,8 +79,9 @@ class _TrackPageState extends State<TrackPage> {
 
     final nome = authViewModel.loginUser?.username ?? 'Sem nome';
     final nomeCompleto =
-        "${authViewModel.loginUser?.username}${authViewModel.loginUser?.sobrenome ?? ''}";
+        "${authViewModel.loginUser?.username ?? ''} ${authViewModel.loginUser?.sobrenome ?? ''}";
 
+    // Lista de amigos (mantido para compatibilidade/fallback)
     List<String> amigos = [];
     for (var amigo in amizadeVM.friends) {
       String messageid =
@@ -412,6 +414,8 @@ class _TrackPageState extends State<TrackPage> {
     String nomeCompleto,
     String nome,
   ) {
+    final grupoVM = Provider.of<GrupoViewModel>(context, listen: false);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -453,12 +457,25 @@ class _TrackPageState extends State<TrackPage> {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    showQuickMessageBottomSheet(
-                      context,
-                      amigos,
-                      nomeCompleto,
-                    );
+                  onPressed: () async {
+                    // Busca os message_ids do grupo selecionado
+                    List<String> messageIds = [];
+                    if (trackVM.grupoSelecionado != null) {
+                      messageIds = await grupoVM.obterMessageIdsDoGrupo(
+                        trackVM.grupoSelecionado!.id,
+                      );
+                    } else {
+                      // Fallback para amigos se nenhum grupo estiver selecionado
+                      messageIds = amigos;
+                    }
+
+                    if (context.mounted) {
+                      showQuickMessageBottomSheet(
+                        context,
+                        messageIds,
+                        nomeCompleto,
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[700]?.withOpacity(0.9),
@@ -475,7 +492,26 @@ class _TrackPageState extends State<TrackPage> {
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => showEmergencyConfirmationDialog(context),
+                  onPressed: () async {
+                    // Busca os message_ids do grupo selecionado
+                    List<String> messageIds = [];
+                    if (trackVM.grupoSelecionado != null) {
+                      messageIds = await grupoVM.obterMessageIdsDoGrupo(
+                        trackVM.grupoSelecionado!.id,
+                      );
+                    } else {
+                      // Fallback para amigos se nenhum grupo estiver selecionado
+                      messageIds = amigos;
+                    }
+
+                    if (context.mounted) {
+                      showEmergencyConfirmationDialog(
+                        context,
+                        messageIds: messageIds,
+                        nomeCompleto: nomeCompleto,
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red[700]?.withOpacity(0.9),
                     shape: RoundedRectangleBorder(

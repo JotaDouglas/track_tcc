@@ -118,8 +118,29 @@ mixin _$GrupoViewModel on GrupoViewModelBase, Store {
         .run(() => super.removerMembro(grupoId, membroId));
   }
 
+  late final _$obterMessageIdsDoGrupoAsyncAction = AsyncAction(
+      'GrupoViewModelBase.obterMessageIdsDoGrupo',
+      context: context);
+
+  @override
+  Future<List<String>> obterMessageIdsDoGrupo(String grupoId) {
+    return _$obterMessageIdsDoGrupoAsyncAction
+        .run(() => super.obterMessageIdsDoGrupo(grupoId));
+  }
+
   late final _$GrupoViewModelBaseActionController =
       ActionController(name: 'GrupoViewModelBase', context: context);
+
+  @override
+  void changeLoading(bool value) {
+    final _$actionInfo = _$GrupoViewModelBaseActionController.startAction(
+        name: 'GrupoViewModelBase.changeLoading');
+    try {
+      return super.changeLoading(value);
+    } finally {
+      _$GrupoViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   dynamic changeMembros(List<GroupMember>? m) {

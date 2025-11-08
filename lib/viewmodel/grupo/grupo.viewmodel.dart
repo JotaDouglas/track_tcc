@@ -183,4 +183,16 @@ abstract class GrupoViewModelBase with Store {
       loading = false;
     }
   }
+
+  /// Retorna todos os message_ids (OneSignal player IDs) dos membros de um grupo
+  /// excluindo o usuário atual
+  @action
+  Future<List<String>> obterMessageIdsDoGrupo(String grupoId) async {
+    try {
+      return await _repo.getGroupMemberMessageIds(grupoId);
+    } catch (e) {
+      log("⚠️ Erro ao obter message_ids do grupo: $e");
+      return [];
+    }
+  }
 }

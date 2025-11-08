@@ -116,7 +116,7 @@ class GroupRepositorySupabase {
   Future<List<GroupMember>> listMembers(String grupoId) async {
     final res = await client
         .from('grupo_membros')
-        .select('*, usuarios:user_id (nome, sobrenome)')
+        .select('*, usuarios:user_id (nome, sobrenome, message_id)')
         .eq('grupo_id', grupoId)
         .order('id', ascending: true);
 
@@ -134,6 +134,27 @@ class GroupRepositorySupabase {
         .update({'papel': 'admin'})
         .eq('grupo_id', grupoId)
         .eq('user_id', userId);
+  }
+
+  /// Retorna todos os message_ids (OneSignal player IDs) dos membros de um grupo
+  /// Útil para enviar notificações em massa para todos os membros
+  Future<List<String>> getGroupMemberMessageIds(String grupoId) async {
+    final res = await client
+        .from('grupo_membros')
+        .select('usuarios:user_id (message_id)')
+        .eq('grupo_id', grupoId);
+
+    if (res.isEmpty) return [];
+
+    final messageIds = <String>[];
+    for (var item in res) {
+      final usuarios = item['usuarios'];
+      if (usuarios != null && usuarios['message_id'] != null) {
+        messageIds.add(usuarios['message_id'] as String);
+      }
+    }
+
+    return messageIds;
   }
 
   Stream<dynamic> watchGroup(String grupoId) {
