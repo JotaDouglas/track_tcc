@@ -7,9 +7,9 @@ import 'package:track_tcc_app/model/grupo/membros.model.dart';
 class GrupoLocalRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
-  /// Garante que as tabelas de grupos e membros existem
-  Future<void> _ensureGrupoTables(Database db) async {
-    // Tabela de grupos
+  // ========== Inicialização e setup ==========
+
+  Future<void> _inicializarTabelas(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS grupos (
         id TEXT PRIMARY KEY,
@@ -23,7 +23,6 @@ class GrupoLocalRepository {
       );
     ''');
 
-    // Tabela de membros dos grupos
     await db.execute('''
       CREATE TABLE IF NOT EXISTS grupos_membros (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,43 +37,33 @@ class GrupoLocalRepository {
       );
     ''');
 
-    // Índice para otimizar consultas por grupo_id
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_grupos_membros_grupo_id
       ON grupos_membros(grupo_id);
     ''');
   }
 
-  /// Limpa todas as tabelas de grupos e membros
   Future<void> limparTabelasGrupos() async {
     final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
+    await _inicializarTabelas(db);
 
     await db.delete('grupos_membros');
     await db.delete('grupos');
     log('🧹 Tabelas de grupos e membros limpas');
   }
 
-  /// Salva uma lista de grupos no SQLite
+  // ========== Operações com grupos ==========
+
   Future<void> salvarGrupos(List<Group> grupos) async {
     final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
+    await _inicializarTabelas(db);
 
     final batch = db.batch();
 
-    for (final grupo in grupos) {
+    for (var grupo in grupos) {
       batch.insert(
         'grupos',
-        {
-          'id': grupo.id,
-          'nome': grupo.nome,
-          'descricao': grupo.descricao,
-          'aberto': grupo.aberto ? 1 : 0,
-          'codigo': grupo.codigo,
-          'criado_por': grupo.criadoPor,
-          'criado_em': grupo.criadoEm.toIso8601String(),
-          'atualizado_em': grupo.atualizadoEm.toIso8601String(),
-        },
+        _converterGrupoParaMapa(grupo),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
@@ -83,64 +72,17 @@ class GrupoLocalRepository {
     log('💾 ${grupos.length} grupos salvos no SQLite');
   }
 
-  /// Salva os membros de um grupo específico
-  Future<void> salvarMembrosGrupo(String grupoId, List<GroupMember> membros) async {
-    final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
-
-    // Remove membros antigos deste grupo
-    await db.delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
-
-    if (membros.isEmpty) return;
-
-    final batch = db.batch();
-
-    for (final membro in membros) {
-      batch.insert(
-        'grupos_membros',
-        {
-          'grupo_id': grupoId,
-          'user_id': membro.userId,
-          'papel': membro.papel,
-          'adicionado_por': membro.adicionadoPor,
-          'adicionado_em': membro.adicionadoEm.toIso8601String(),
-          'nome': membro.nome,
-          'sobrenome': membro.sobrenome,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-
-    await batch.commit(noResult: true);
-    log('💾 ${membros.length} membros do grupo $grupoId salvos no SQLite');
-  }
-
-  /// Carrega todos os grupos do SQLite
   Future<List<Group>> carregarGrupos() async {
     final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
+    await _inicializarTabelas(db);
 
-    final result = await db.query('grupos', orderBy: 'criado_em DESC');
+    final dados = await db.query('grupos', orderBy: 'criado_em DESC');
+    if (dados.isEmpty) return [];
 
-    if (result.isEmpty) return [];
-
-    final grupos = <Group>[];
-
-    for (final row in result) {
-      final grupo = Group(
-        id: row['id'] as String,
-        nome: row['nome'] as String,
-        descricao: row['descricao'] as String?,
-        codigo: row['codigo'] as String,
-        aberto: (row['aberto'] as int) == 1,
-        criadoPor: row['criado_por'] as String,
-        criadoEm: DateTime.parse(row['criado_em'] as String),
-        atualizadoEm: DateTime.parse(row['atualizado_em'] as String),
-      );
-
-      // Carrega os membros deste grupo
+    List<Group> grupos = [];
+    for (var linha in dados) {
+      final grupo = _converterMapaParaGrupo(linha);
       grupo.membros = await carregarMembrosGrupo(grupo.id);
-
       grupos.add(grupo);
     }
 
@@ -148,49 +90,9 @@ class GrupoLocalRepository {
     return grupos;
   }
 
-  /// Carrega os membros de um grupo específico
-  Future<List<GroupMember>> carregarMembrosGrupo(String grupoId) async {
-    final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
-
-    final result = await db.query(
-      'grupos_membros',
-      where: 'grupo_id = ?',
-      whereArgs: [grupoId],
-      orderBy: 'adicionado_em ASC',
-    );
-
-    if (result.isEmpty) return [];
-
-    return result.map((row) {
-      return GroupMember(
-        id: row['id'] as int,
-        grupoId: row['grupo_id'] as String,
-        userId: row['user_id'] as String,
-        papel: row['papel'] as String,
-        adicionadoPor: row['adicionado_por'] as String,
-        adicionadoEm: DateTime.parse(row['adicionado_em'] as String),
-        nome: row['nome'] as String?,
-        sobrenome: row['sobrenome'] as String?,
-      );
-    }).toList();
-  }
-
-  /// Remove um grupo e seus membros do SQLite
-  Future<void> removerGrupo(String grupoId) async {
-    final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
-
-    await db.delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
-    await db.delete('grupos', where: 'id = ?', whereArgs: [grupoId]);
-
-    log('🗑️ Grupo $grupoId removido do SQLite');
-  }
-
-  /// Atualiza um grupo específico
   Future<void> atualizarGrupo(Group grupo) async {
     final db = await _dbHelper.database;
-    await _ensureGrupoTables(db);
+    await _inicializarTabelas(db);
 
     await db.update(
       'grupos',
@@ -210,5 +112,107 @@ class GrupoLocalRepository {
     }
 
     log('🔄 Grupo ${grupo.id} atualizado no SQLite');
+  }
+
+  Future<void> removerGrupo(String grupoId) async {
+    final db = await _dbHelper.database;
+    await _inicializarTabelas(db);
+
+    await db.delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
+    await db.delete('grupos', where: 'id = ?', whereArgs: [grupoId]);
+
+    log('🗑️ Grupo $grupoId removido do SQLite');
+  }
+
+  // ========== Operações com membros ==========
+
+  Future<void> salvarMembrosGrupo(String grupoId, List<GroupMember> membros) async {
+    final db = await _dbHelper.database;
+    await _inicializarTabelas(db);
+
+    await db.delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
+
+    if (membros.isEmpty) return;
+
+    final batch = db.batch();
+    for (var membro in membros) {
+      batch.insert(
+        'grupos_membros',
+        _converterMembroParaMapa(grupoId, membro),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    await batch.commit(noResult: true);
+    log('💾 ${membros.length} membros do grupo $grupoId salvos no SQLite');
+  }
+
+  Future<List<GroupMember>> carregarMembrosGrupo(String grupoId) async {
+    final db = await _dbHelper.database;
+    await _inicializarTabelas(db);
+
+    final dados = await db.query(
+      'grupos_membros',
+      where: 'grupo_id = ?',
+      whereArgs: [grupoId],
+      orderBy: 'adicionado_em ASC',
+    );
+
+    if (dados.isEmpty) return [];
+
+    return dados.map((linha) => _converterMapaParaMembro(linha)).toList();
+  }
+
+  // ========== Métodos auxiliares ==========
+
+  Map<String, dynamic> _converterGrupoParaMapa(Group grupo) {
+    return {
+      'id': grupo.id,
+      'nome': grupo.nome,
+      'descricao': grupo.descricao,
+      'aberto': grupo.aberto ? 1 : 0,
+      'codigo': grupo.codigo,
+      'criado_por': grupo.criadoPor,
+      'criado_em': grupo.criadoEm.toIso8601String(),
+      'atualizado_em': grupo.atualizadoEm.toIso8601String(),
+    };
+  }
+
+  Group _converterMapaParaGrupo(Map<String, dynamic> linha) {
+    return Group(
+      id: linha['id'] as String,
+      nome: linha['nome'] as String,
+      descricao: linha['descricao'] as String?,
+      codigo: linha['codigo'] as String,
+      aberto: (linha['aberto'] as int) == 1,
+      criadoPor: linha['criado_por'] as String,
+      criadoEm: DateTime.parse(linha['criado_em'] as String),
+      atualizadoEm: DateTime.parse(linha['atualizado_em'] as String),
+    );
+  }
+
+  Map<String, dynamic> _converterMembroParaMapa(String grupoId, GroupMember membro) {
+    return {
+      'grupo_id': grupoId,
+      'user_id': membro.userId,
+      'papel': membro.papel,
+      'adicionado_por': membro.adicionadoPor,
+      'adicionado_em': membro.adicionadoEm.toIso8601String(),
+      'nome': membro.nome,
+      'sobrenome': membro.sobrenome,
+    };
+  }
+
+  GroupMember _converterMapaParaMembro(Map<String, dynamic> linha) {
+    return GroupMember(
+      id: linha['id'] as int,
+      grupoId: linha['grupo_id'] as String,
+      userId: linha['user_id'] as String,
+      papel: linha['papel'] as String,
+      adicionadoPor: linha['adicionado_por'] as String,
+      adicionadoEm: DateTime.parse(linha['adicionado_em'] as String),
+      nome: linha['nome'] as String?,
+      sobrenome: linha['sobrenome'] as String?,
+    );
   }
 }
