@@ -76,36 +76,42 @@ class Locationhelper {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
-      // Mostra diálogo e abre configurações para ativar GPS
-      bool gpsEnabledByUser = false;
+      // Se não tiver context, apenas abre as configurações sem diálogo
+      if (context == null) {
+        await Geolocator.openLocationSettings();
+        await Future.delayed(const Duration(seconds: 2));
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          return false;
+        }
+      } else {
+        // Mostra diálogo e abre configurações para ativar GPS
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('GPS desativado'),
+            content: const Text(
+                'Por favor, ative o GPS para continuar usando o aplicativo.'),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  await Geolocator.openLocationSettings();
+                },
+                child: const Text('Abrir configurações'),
+              ),
+            ],
+          ),
+        );
 
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('GPS desativado'),
-          content: const Text(
-              'Por favor, ative o GPS para continuar usando o aplicativo.'),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await Geolocator.openLocationSettings();
-                // Aqui, não tem retorno direto se o usuário ativou ou não o GPS
-                // Pode fazer uma espera ou checar novamente ao voltar
-              },
-              child: const Text('Abrir configurações'),
-            ),
-          ],
-        ),
-      );
+        // Após o diálogo, espera um tempo e verifica novamente se o GPS foi ativado
+        await Future.delayed(const Duration(seconds: 2));
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
-      // Após o diálogo, espera um tempo e verifica novamente se o GPS foi ativado
-      await Future.delayed(const Duration(seconds: 2));
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-      if (!serviceEnabled) {
-        // Se ainda não ativou, retorna false para indicar que não pode prosseguir
-        return false;
+        if (!serviceEnabled) {
+          // Se ainda não ativou, retorna false para indicar que não pode prosseguir
+          return false;
+        }
       }
     }
 
@@ -121,25 +127,57 @@ class Locationhelper {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissão negada permanentemente, abre configurações do app
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Permissão negada'),
-          content: const Text(
-              'A permissão de localização foi negada permanentemente. Por favor, ative nas configurações do dispositivo.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Geolocator.openAppSettings();
-              },
-              child: const Text('Abrir configurações'),
-            ),
-          ],
-        ),
-      );
+      // Permissão negada permanentemente
+      if (context == null) {
+        // Se não tiver context, apenas abre as configurações
+        await Geolocator.openAppSettings();
+      } else {
+        // Mostra diálogo e abre configurações do app
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Permissão negada'),
+            content: const Text(
+                'A permissão de localização foi negada permanentemente. Por favor, ative nas configurações do dispositivo.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  Geolocator.openAppSettings();
+                },
+                child: const Text('Abrir configurações'),
+              ),
+            ],
+          ),
+        );
+      }
       return false;
+    }
+
+    // 3. Solicitar permissão para localização em segundo plano (Always)
+    if (permission == LocationPermission.whileInUse) {
+      if (context != null) {
+        // Mostrar diálogo explicando a necessidade da permissão Always
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Permissão de localização em segundo plano'),
+            content: const Text(
+                'Para continuar rastreando sua localização mesmo com a tela desligada ou o app em segundo plano, precisamos de permissão "Sempre permitir".'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: const Text('Entendi'),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // Solicitar permissão Always
+      permission = await Geolocator.requestPermission();
     }
 
     // Tudo ok: GPS ativo e permissão concedida

@@ -5,7 +5,17 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location when open.</string>
+	<string>Este app precisa acessar sua localização para rastreamento.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Este app precisa acessar sua localização em segundo plano para continuar o rastreamento mesmo quando a tela estiver desligada.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Este app precisa acessar sua localização em segundo plano para continuar o rastreamento mesmo quando a tela estiver desligada.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Track Tcc App</string>
 	<key>CFBundleExecutable</key>

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/configs/theme_settings.dart';
 import 'package:track_tcc_app/routes/routes.dart';
+import 'package:track_tcc_app/services/background_location_service.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/grupo/grupo.viewmodel.dart';
@@ -20,6 +22,14 @@ void main() async {
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_KEY']!,
   );
+
+  // Salvar credenciais do Supabase para uso no background service
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('supabase_url', dotenv.env['SUPABASE_URL']!);
+  await prefs.setString('supabase_key', dotenv.env['SUPABASE_KEY']!);
+
+  // Inicializar serviço de background
+  await BackgroundLocationService.initializeService();
 
   // Inicializa e carrega o ThemeProvider antes do runApp
   final themeProvider = ThemeProvider();

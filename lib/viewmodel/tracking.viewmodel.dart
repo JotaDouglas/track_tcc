@@ -4,11 +4,13 @@ import 'dart:developer';
 
 import 'package:latlong2/latlong.dart';
 import 'package:mobx/mobx.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/helper/location.helper.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/repository/track.repository.dart';
+import 'package:track_tcc_app/services/background_location_service.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
@@ -73,8 +75,12 @@ abstract class TrackingViewModelBase with Store {
   Group? grupoSelecionado; // nome da cerca escolhida
 
   @action
-  void setTrackingInterval(int seconds) {
+  void setTrackingInterval(int seconds) async {
     trackingInterval = seconds;
+
+    // Atualizar o intervalo no SharedPreferences para o background service
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tracking_interval', seconds);
   }
 
   @action
@@ -325,10 +331,19 @@ abstract class TrackingViewModelBase with Store {
 
         trackListLoop.insert(0, newLocal);
 
+        // Salvar dados do usuário no SharedPreferences para o background service
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_id', _supabase.auth.currentUser?.id ?? '');
+        await prefs.setString('user_name', userName);
+        await prefs.setInt('tracking_interval', trackingInterval);
+
         // 🔹 Faz a primeira leitura imediatamente
         await _trackOnce(userName);
 
-        // 🔹 Inicia o loop contínuo com intervalo controlado
+        // 🔹 Inicia o serviço em background
+        await BackgroundLocationService.startService();
+
+        // 🔹 Inicia o loop contínuo com intervalo controlado (também funciona em background)
         _startTrackingLoop(userName);
       } else {
         toggleTrackingState();
@@ -338,6 +353,9 @@ abstract class TrackingViewModelBase with Store {
       if (trackListLoop.isNotEmpty) {
         await stopTracking(trackListLoop.first);
       }
+
+      // 🔹 Para o serviço em background
+      await BackgroundLocationService.stopService();
 
       _stopSharing();
       trackListLoop.clear();
