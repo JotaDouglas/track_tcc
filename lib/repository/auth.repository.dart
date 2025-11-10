@@ -7,6 +7,7 @@ class AuthRepository {
   late SharedPreferences preferences;
   final supabase = Supabase.instance.client;
 
+  //Função de criação de conta, ela aguarda receber um email e senha(password)
   Future createUserWithEmailAndPassword({
     required String email,
     required String password,
@@ -22,6 +23,7 @@ class AuthRepository {
     }
   }
 
+  //Função de login de usuario, ela aguarda receber um email e senha(password)
   Future loginWithEmail({
     required String email,
     required String password,
@@ -59,8 +61,7 @@ class AuthRepository {
       final data = await supabase
           .from('usuarios')
           .select()
-          .eq('user_id', id); // equals filter
-
+          .eq('user_id', id); 
       
       return data.first;
           

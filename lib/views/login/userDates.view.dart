@@ -148,7 +148,11 @@ class _UserCadastroViewState extends State<UserCadastroView> {
             final nome = nomeController.text;
             final sobrenome = sobrenomeController.text;
             try {
-              await loginVM.insertUsuario(nome: nome, sobrenome: sobrenome);
+              await loginVM.insertUsuario(
+                nome: nome,
+                sobrenome: sobrenome,
+                termo: true,
+              );
               if (mounted) {
                 showDialog(
                   context: context,

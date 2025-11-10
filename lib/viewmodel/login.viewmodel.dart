@@ -149,11 +149,12 @@ abstract class LoginViewModelBase with Store {
     required String sobrenome,
     String? uuid,
     String? biografia,
+    bool termo = false,
   }) async {
     if (uuid != null) {
       emailUser = loginUser!.email;
     }
-    var res = await supabase.from('usuarios').insert(
+    await supabase.from('usuarios').insert(
       {
         'nome': nome,
         'sobrenome': sobrenome,
@@ -161,6 +162,7 @@ abstract class LoginViewModelBase with Store {
         "user_id": uuid ?? idNewUser,
         "tipo_usuario": "responsavel",
         'biografia': biografia,
+        'termo': termo,
       },
     );
 
