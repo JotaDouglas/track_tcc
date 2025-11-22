@@ -104,9 +104,11 @@ class _CercaMapViewState extends State<CercaMapView> {
               children: [
                 TileLayer(
                   urlTemplate:
-                      'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                  subdomains: const ['a', 'b', 'c'],
+                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  subdomains: ['a', 'b', 'c'],
+                  userAgentPackageName: 'com.tracktcc.nome',
                 ),
+
                 // Polígonos das cercas
                 ..._buildPolygons(vm),
                 // Marcadores (pins)
