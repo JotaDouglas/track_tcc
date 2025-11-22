@@ -61,7 +61,7 @@ class TrackRepository {
     );
   }
 
-  // (Opcional) Pegar pontos de uma rota específica
+  // Pegar pontos de uma rota específica
   Future<List<Map<String, dynamic>>> getRotaPoints(int rotaId) async {
     final db = await _dbHelper.database;
     return await db
@@ -141,7 +141,7 @@ class TrackRepository {
       return [];
     }
   }
-  
+
   Future deleteRotaOnline(String id) async {
     try {
       final response = await _supabase.from('rotas').delete().eq('id_rota', id);

@@ -136,8 +136,7 @@ class GroupRepositorySupabase {
         .eq('user_id', userId);
   }
 
-  /// Retorna todos os message_ids (OneSignal player IDs) dos membros de um grupo
-  /// Útil para enviar notificações em massa para todos os membros
+  // Útil para enviar notificações em massa para todos os membros
   Future<List<String>> getGroupMemberMessageIds(String grupoId) async {
     final res = await client
         .from('grupo_membros')

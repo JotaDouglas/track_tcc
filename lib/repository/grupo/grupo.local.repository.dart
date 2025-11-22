@@ -7,9 +7,8 @@ import 'package:track_tcc_app/model/grupo/membros.model.dart';
 class GrupoLocalRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
-  /// Garante que as tabelas de grupos e membros existem
+  // Garante que as tabelas de grupos e membros existem
   Future<void> _ensureGrupoTables(Database db) async {
-    // Tabela de grupos
     await db.execute('''
       CREATE TABLE IF NOT EXISTS grupos (
         id TEXT PRIMARY KEY,
@@ -45,7 +44,7 @@ class GrupoLocalRepository {
     ''');
   }
 
-  /// Limpa todas as tabelas de grupos e membros
+  // Limpa todas as tabelas de grupos e membros
   Future<void> limparTabelasGrupos() async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
@@ -55,7 +54,7 @@ class GrupoLocalRepository {
     log('🧹 Tabelas de grupos e membros limpas');
   }
 
-  /// Salva uma lista de grupos no SQLite
+  // Salva uma lista de grupos no SQLite
   Future<void> salvarGrupos(List<Group> grupos) async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
@@ -83,13 +82,15 @@ class GrupoLocalRepository {
     log('💾 ${grupos.length} grupos salvos no SQLite');
   }
 
-  /// Salva os membros de um grupo específico
-  Future<void> salvarMembrosGrupo(String grupoId, List<GroupMember> membros) async {
+  // Salva os membros de um grupo específico
+  Future<void> salvarMembrosGrupo(
+      String grupoId, List<GroupMember> membros) async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
 
     // Remove membros antigos deste grupo
-    await db.delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
+    await db
+        .delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
 
     if (membros.isEmpty) return;
 
@@ -115,7 +116,7 @@ class GrupoLocalRepository {
     log('💾 ${membros.length} membros do grupo $grupoId salvos no SQLite');
   }
 
-  /// Carrega todos os grupos do SQLite
+  // Carrega todos os grupos do SQLite
   Future<List<Group>> carregarGrupos() async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
@@ -138,7 +139,6 @@ class GrupoLocalRepository {
         atualizadoEm: DateTime.parse(row['atualizado_em'] as String),
       );
 
-      // Carrega os membros deste grupo
       grupo.membros = await carregarMembrosGrupo(grupo.id);
 
       grupos.add(grupo);
@@ -148,7 +148,7 @@ class GrupoLocalRepository {
     return grupos;
   }
 
-  /// Carrega os membros de um grupo específico
+  // Carrega os membros de um grupo específico
   Future<List<GroupMember>> carregarMembrosGrupo(String grupoId) async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
@@ -176,18 +176,19 @@ class GrupoLocalRepository {
     }).toList();
   }
 
-  /// Remove um grupo e seus membros do SQLite
+  // Remove um grupo e seus membros do SQLite
   Future<void> removerGrupo(String grupoId) async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
 
-    await db.delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
+    await db
+        .delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
     await db.delete('grupos', where: 'id = ?', whereArgs: [grupoId]);
 
     log('🗑️ Grupo $grupoId removido do SQLite');
   }
 
-  /// Atualiza um grupo específico
+  // Atualiza um grupo específico
   Future<void> atualizarGrupo(Group grupo) async {
     final db = await _dbHelper.database;
     await _ensureGrupoTables(db);
@@ -209,6 +210,6 @@ class GrupoLocalRepository {
       await salvarMembrosGrupo(grupo.id, grupo.membros!);
     }
 
-    log('🔄 Grupo ${grupo.id} atualizado no SQLite');
+    log('Grupo ${grupo.id} atualizado no SQLite');
   }
 }
