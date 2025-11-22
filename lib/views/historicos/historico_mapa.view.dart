@@ -8,7 +8,11 @@ class HistoricMapFlutter extends StatefulWidget {
   final int idTrack;
   final bool isFromSystem;
   final String? cordenadas;
-  const HistoricMapFlutter({super.key, required this.idTrack, this.isFromSystem = false, this.cordenadas});
+  const HistoricMapFlutter(
+      {super.key,
+      required this.idTrack,
+      this.isFromSystem = false,
+      this.cordenadas});
 
   @override
   State<HistoricMapFlutter> createState() => _HistoricMapFlutterState();
@@ -19,7 +23,7 @@ class _HistoricMapFlutterState extends State<HistoricMapFlutter> {
 
   List<LatLng> route = [];
   bool isReady = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -29,11 +33,10 @@ class _HistoricMapFlutterState extends State<HistoricMapFlutter> {
   Future<void> readRoute() async {
     List<PlaceModel> result = [];
 
-    if(widget.isFromSystem){
-      //convertendo as cordenadas e adicionar na lista de result       
+    if (widget.isFromSystem) {
+      //convertendo as cordenadas e adicionar na lista de result
       result = await trackViewModel.readCordenadas(widget.cordenadas ?? '');
-
-    } else{
+    } else {
       result = await trackViewModel.getPontosByRota(widget.idTrack);
     }
 

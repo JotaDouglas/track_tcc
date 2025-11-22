@@ -32,6 +32,7 @@ class TrackingMapWidget extends StatelessWidget {
         TileLayer(
           urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
           subdomains: ['a', 'b', 'c'],
+          userAgentPackageName: 'com.tracktcc.nome',
         ),
 
         // Marcador (ponto atual)
