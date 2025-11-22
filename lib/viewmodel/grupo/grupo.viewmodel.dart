@@ -74,13 +74,13 @@ abstract class GrupoViewModelBase with Store {
       // Sincroniza com cache local
       if (result.isNotEmpty) {
         await _syncGroupsToLocal(result);
-        log('📥 ${result.length} grupos sincronizados');
+        log('${result.length} grupos sincronizados');
       }
 
       grupos = ObservableList.of(result);
     } catch (e) {
       errorMessage = e.toString();
-      log("⚠️ Erro ao carregar grupos online: $e");
+      log("Erro ao carregar grupos online: $e");
 
       // Fallback: tenta carregar do cache local
       await _loadGroupsFromLocal();
@@ -111,7 +111,7 @@ abstract class GrupoViewModelBase with Store {
     try {
       return await _repo.getGroupMemberMessageIds(grupoId);
     } catch (e) {
-      log("⚠️ Erro ao obter message_ids do grupo: $e");
+      log("Erro ao obter message_ids do grupo: $e");
       return [];
     }
   }
@@ -213,7 +213,7 @@ abstract class GrupoViewModelBase with Store {
         }
       }
 
-      log('✅ Dados sincronizados com SQLite local');
+      log('Dados sincronizados com SQLite local');
     } catch (e) {
       log("Erro ao sincronizar com SQLite: $e");
     }
@@ -222,12 +222,12 @@ abstract class GrupoViewModelBase with Store {
   // Carrega grupos do cache local
   Future<void> _loadGroupsFromLocal() async {
     try {
-      log('🔄 Tentando carregar grupos do cache local...');
+      log('Tentando carregar grupos do cache local...');
       final localGrupos = await _localRepo.carregarGrupos();
       grupos = ObservableList.of(localGrupos);
-      log('📖 ${localGrupos.length} grupos carregados do cache local');
+      log('${localGrupos.length} grupos carregados do cache local');
     } catch (localError) {
-      log("❌ Erro ao carregar do cache local: $localError");
+      log("Erro ao carregar do cache local: $localError");
     }
   }
 }

@@ -31,7 +31,7 @@ class _HomeViewState extends State<HomeView> {
   Future<void> _loginMessagem() async {
     await Future.delayed(Duration(seconds: 1));
     var playerId = OneSignal.User.pushSubscription.id;
-    log("💡 $playerId");
+    log("$playerId");
   }
 
   Future<void> _verificarPermissaoLocalizacao() async {

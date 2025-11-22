@@ -32,11 +32,11 @@ Future<void> enviarNotificacaoOneSignal({
     );
 
     if (response.statusCode == 200) {
-      log('✅ Notificação enviada com sucesso!');
+      log('Notificação enviada com sucesso!');
     } else {
-      log('⚠️ Erro ao enviar: ${response.statusCode} - ${response.data}');
+      log('Erro ao enviar: ${response.statusCode} - ${response.data}');
     }
   } catch (e) {
-    log('❌ Erro na requisição: $e');
+    log('Erro na requisição: $e');
   }
 }

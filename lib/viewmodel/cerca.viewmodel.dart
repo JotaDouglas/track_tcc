@@ -83,16 +83,16 @@ abstract class CercaViewModelBase with Store {
       _updateCercasMap(locais);
 
       modo = 'visualizar_todas';
-      log('✅ Cercas carregadas e sincronizadas: ${cercasMap.keys}');
+      log('Cercas carregadas e sincronizadas: ${cercasMap.keys}');
     } catch (e) {
-      log('⚠️ Erro ao carregar cercas online, usando cache local: $e');
+      log('Erro ao carregar cercas online, usando cache local: $e');
 
       // Fallback: usa cache local
       final locais = await _cercaRepository.getCercasCacheGrupo(grupoId);
       _updateCercasMap(locais);
 
       modo = 'visualizar_todas';
-      log('🔸 Cercas carregadas do cache local: ${cercasMap.keys}');
+      log('Cercas carregadas do cache local: ${cercasMap.keys}');
     }
   }
 
@@ -100,7 +100,7 @@ abstract class CercaViewModelBase with Store {
   @action
   Future<void> salvarCercaGrupo(String nome, String userId) async {
     if (grupoIdSelecionado == null) {
-      log('❌ Nenhum grupo selecionado para salvar a cerca.');
+      log('Nenhum grupo selecionado para salvar a cerca.');
       return;
     }
 
@@ -125,7 +125,7 @@ abstract class CercaViewModelBase with Store {
     // Atualiza memória (MobX)
     _updateCercasMap(cercasExistentes);
     cercaAtual = nome;
-    log('🧩 Cerca "$nome" salva localmente (pending sync)');
+    log('Cerca "$nome" salva localmente (pending sync)');
 
     // Tenta sincronizar com Supabase
     await _syncCercasToSupabase(grupoId, cercasExistentes, nome, userId);
@@ -150,9 +150,9 @@ abstract class CercaViewModelBase with Store {
           syncStatus: 'synced',
         );
 
-        log('✅ Grupo $grupoId sincronizado com sucesso.');
+        log('Grupo $grupoId sincronizado com sucesso.');
       } catch (e) {
-        log('⚠️ Erro ao sincronizar grupo pendente $grupoId: $e');
+        log('Erro ao sincronizar grupo pendente $grupoId: $e');
       }
     }
   }
@@ -223,7 +223,7 @@ abstract class CercaViewModelBase with Store {
     }
 
     await listarCercas();
-    log("✅ Cercas do grupo $grupoId sincronizadas no SQLite");
+    log("Cercas do grupo $grupoId sincronizadas no SQLite");
   }
 
   @action
@@ -284,10 +284,10 @@ abstract class CercaViewModelBase with Store {
         syncStatus: 'synced',
       );
 
-      log('✅ Cerca "$nomeCerca" sincronizada com o Supabase');
+      log('Cerca "$nomeCerca" sincronizada com o Supabase');
     } catch (e) {
       await _cercaRepository.marcarGrupoPendenteSync(grupoId);
-      log('⚠️ Falha ao sincronizar com o Supabase: $e (mantida como pending)');
+      log('Falha ao sincronizar com o Supabase: $e (mantida como pending)');
     }
   }
 }

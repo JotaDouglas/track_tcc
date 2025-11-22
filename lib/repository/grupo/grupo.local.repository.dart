@@ -51,7 +51,7 @@ class GrupoLocalRepository {
 
     await db.delete('grupos_membros');
     await db.delete('grupos');
-    log('🧹 Tabelas de grupos e membros limpas');
+    log('Tabelas de grupos e membros limpas');
   }
 
   // Salva uma lista de grupos no SQLite
@@ -79,7 +79,7 @@ class GrupoLocalRepository {
     }
 
     await batch.commit(noResult: true);
-    log('💾 ${grupos.length} grupos salvos no SQLite');
+    log('${grupos.length} grupos salvos no SQLite');
   }
 
   // Salva os membros de um grupo específico
@@ -113,7 +113,7 @@ class GrupoLocalRepository {
     }
 
     await batch.commit(noResult: true);
-    log('💾 ${membros.length} membros do grupo $grupoId salvos no SQLite');
+    log('${membros.length} membros do grupo $grupoId salvos no SQLite');
   }
 
   // Carrega todos os grupos do SQLite
@@ -144,7 +144,7 @@ class GrupoLocalRepository {
       grupos.add(grupo);
     }
 
-    log('📖 ${grupos.length} grupos carregados do SQLite');
+    log('${grupos.length} grupos carregados do SQLite');
     return grupos;
   }
 
@@ -185,7 +185,7 @@ class GrupoLocalRepository {
         .delete('grupos_membros', where: 'grupo_id = ?', whereArgs: [grupoId]);
     await db.delete('grupos', where: 'id = ?', whereArgs: [grupoId]);
 
-    log('🗑️ Grupo $grupoId removido do SQLite');
+    log('Grupo $grupoId removido do SQLite');
   }
 
   // Atualiza um grupo específico

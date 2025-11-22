@@ -360,23 +360,23 @@ abstract class TrackingViewModelBase with Store {
     final grupo = grupoSelecionado;
 
     if (grupo == null) {
-      log("⚠️ Nenhum grupo selecionado.");
+      log("Nenhum grupo selecionado.");
       return;
     }
 
     if (grupo.cercasPoligonos.isEmpty) {
-      log("⚠️ Grupo selecionado não possui cercas.");
+      log("Grupo selecionado não possui cercas.");
       return;
     }
 
     for (var cerca in grupo.cercasPoligonos) {
       if (pontoDentroDaCerca(ponto, cerca.pontos)) {
-        log('✅ DENTRO de uma cerca do grupo: ${cerca.nome}');
+        log('DENTRO de uma cerca do grupo: ${cerca.nome}');
         return;
       }
     }
 
-    log('🚧 FORA de todas as cercas do grupo: ${grupo.nome}');
+    log('FORA de todas as cercas do grupo: ${grupo.nome}');
   }
 
   // Algoritmo Ray Casting para verificar se ponto está dentro do polígono
