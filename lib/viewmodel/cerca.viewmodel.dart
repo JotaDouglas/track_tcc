@@ -70,7 +70,7 @@ abstract class CercaViewModelBase with Store {
           await _cercaSupabaseRepo.getCercasDoGrupoRemoto(grupoId);
 
       // Atualiza cache local
-      await _cercaRepository.upsertCercasCacheGrupo(
+      await _cercaRepository.cercasCacheGrupo(
         grupoId,
         onlineMapa,
         atualizadoEm: DateTime.now().toIso8601String(),
@@ -143,7 +143,7 @@ abstract class CercaViewModelBase with Store {
         await _cercaSupabaseRepo.salvarCercasNoSupabase(
             grupoId, decoded, userId);
 
-        await _cercaRepository.upsertCercasCacheGrupo(
+        await _cercaRepository.cercasCacheGrupo(
           grupoId,
           decoded,
           atualizadoEm: DateTime.now().toIso8601String(),
@@ -277,7 +277,7 @@ abstract class CercaViewModelBase with Store {
     try {
       await _cercaSupabaseRepo.salvarCercasNoSupabase(grupoId, cercas, userId);
 
-      await _cercaRepository.upsertCercasCacheGrupo(
+      await _cercaRepository.cercasCacheGrupo(
         grupoId,
         cercas,
         atualizadoEm: DateTime.now().toIso8601String(),
