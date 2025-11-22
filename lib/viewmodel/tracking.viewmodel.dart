@@ -98,7 +98,7 @@ abstract class TrackingViewModelBase with Store {
     trackingLoop = !trackingLoop;
   }
 
-  /// Inicia uma nova rota de rastreamento
+  // Inicia uma nova rota de rastreamento
   @action
   Future<void> insertTracking(PlaceModel initialLocation) async {
     try {
@@ -112,7 +112,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Adiciona uma localização à rota atual
+  // Adiciona uma localização à rota atual
   @action
   Future<void> trackLocation(PlaceModel location, String name) async {
     if (currentRotaId == null) {
@@ -133,7 +133,7 @@ abstract class TrackingViewModelBase with Store {
     await _syncLocationToSupabase(location, name, uid);
   }
 
-  /// Finaliza o rastreamento da rota atual
+  // Finaliza o rastreamento da rota atual
   @action
   Future<void> stopTracking(PlaceModel finalLocation) async {
     if (currentRotaId == null) {
@@ -160,19 +160,19 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Remove uma rota do banco local
+  // Remove uma rota do banco local
   @action
   Future<void> removeRota(int rotaId) async {
     await trackRepository.deleteRota(rotaId);
   }
 
-  /// Carrega todas as rotas salvas localmente
+  // Carrega todas as rotas salvas localmente
   Future<void> getAllRotas() async {
     final rotasAux = await trackRepository.getAllRotas();
     listRotasLocal = List.from(rotasAux);
   }
 
-  /// Carrega rotas sincronizadas online
+  // Carrega rotas sincronizadas online
   @action
   Future<void> getRotasOnline() async {
     changeLoading(true);
@@ -195,12 +195,12 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Retorna os pontos de uma rota específica
+  // Retorna os pontos de uma rota específica
   Future<List<PlaceModel>> getPontosByRota(int rotaId) async {
     return await trackRepository.getPontosByRotaId(rotaId);
   }
 
-  /// Converte string JSON de coordenadas em lista de PlaceModel
+  // Converte string JSON de coordenadas em lista de PlaceModel
   Future<List<PlaceModel>> readCordenadas(String cordenadas) async {
     if (cordenadas.isEmpty) return [];
 
@@ -222,7 +222,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Sincroniza uma rota local com o Supabase
+  // Sincroniza uma rota local com o Supabase
   @action
   Future<bool> syncRota(PlaceModel rota) async {
     try {
@@ -256,7 +256,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Deleta uma rota online
+  // Deleta uma rota online
   Future<void> deleteRotaOnline(String id) async {
     changeLoading(true);
 
@@ -270,7 +270,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Inicia ou para o rastreamento em tempo real
+  // Inicia ou para o rastreamento em tempo real
   @action
   Future<void> startTracking(String userName) async {
     final gpsOn = await _locationHelper.checkGps(null);
@@ -287,7 +287,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Inicia o loop de rastreamento contínuo
+  // Inicia o loop de rastreamento contínuo
   @action
   Future<void> _startTrackingLoop(String userName) async {
     if (_isTracking) return;
@@ -325,13 +325,13 @@ abstract class TrackingViewModelBase with Store {
     log('Rastreamento encerrado');
   }
 
-  /// Para o loop de rastreamento
+  // Para o loop de rastreamento
   void stopTrackingLoop() {
     _isTracking = false;
     log('Solicitada parada do rastreamento');
   }
 
-  /// Realiza um único rastreamento
+  // Realiza um único rastreamento
   @action
   Future<void> _trackOnce(String userName) async {
     try {
@@ -349,13 +349,13 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Método auxiliar usado para compatibilidade
+  // Método auxiliar usado para compatibilidade
   Future<void> primeiroTrack() async {
     final userName = authViewModel.loginUser?.username ?? 'Sem nome';
     await _trackOnce(userName);
   }
 
-  /// Valida se o ponto está dentro de alguma cerca do grupo
+  // Valida se o ponto está dentro de alguma cerca do grupo
   Future<void> validarDentroDeAlgumaCerca(LatLng ponto) async {
     final grupo = grupoSelecionado;
 
@@ -379,7 +379,7 @@ abstract class TrackingViewModelBase with Store {
     log('🚧 FORA de todas as cercas do grupo: ${grupo.nome}');
   }
 
-  /// Algoritmo Ray Casting para verificar se ponto está dentro do polígono
+  // Algoritmo Ray Casting para verificar se ponto está dentro do polígono
   bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
     int intersectCount = 0;
 
@@ -400,7 +400,7 @@ abstract class TrackingViewModelBase with Store {
     return (intersectCount % 2) == 1;
   }
 
-  /// Salva localização localmente no SQLite
+  // Salva localização localmente no SQLite
   Future<void> _saveLocationLocally(PlaceModel location) async {
     try {
       trackList.insert(0, location);
@@ -411,7 +411,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Sincroniza localização com Supabase
+  // Sincroniza localização com Supabase
   Future<void> _syncLocationToSupabase(
     PlaceModel location,
     String name,
@@ -433,7 +433,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Sincroniza automaticamente a rota atual
+  // Sincroniza automaticamente a rota atual
   Future<void> _autoSyncCurrentRoute() async {
     try {
       await getAllRotas();
@@ -448,7 +448,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  /// Converte lista de mapas em lista de PlaceModel
+  // Converte lista de mapas em lista de PlaceModel
   List<PlaceModel> _convertToPlaceModelList(
     List<Map<String, dynamic>> rotasOnline,
   ) {
@@ -466,7 +466,7 @@ abstract class TrackingViewModelBase with Store {
     }).toList();
   }
 
-  /// Processa nova localização no rastreamento
+  // Processa nova localização no rastreamento
   Future<void> _processNewLocation(
     PlaceModel newLocal,
     String userName,
@@ -501,7 +501,7 @@ abstract class TrackingViewModelBase with Store {
     await validarDentroDeAlgumaCerca(newLatLng);
   }
 
-  /// Inicia o processo de rastreamento
+  // Inicia o processo de rastreamento
   Future<void> _iniciarRastreamento(String userName) async {
     final newLocal = await _locationHelper.actuallyPosition();
 
@@ -538,7 +538,7 @@ abstract class TrackingViewModelBase with Store {
     await _startTrackingLoop(userName);
   }
 
-  /// Para o processo de rastreamento
+  // Para o processo de rastreamento
   Future<void> _pararRastreamento() async {
     if (trackListLoop.isNotEmpty) {
       await stopTracking(trackListLoop.first);
@@ -557,7 +557,7 @@ abstract class TrackingViewModelBase with Store {
     distanceMeters = 0.0;
   }
 
-  /// Salva preferências de rastreamento
+  // Salva preferências de rastreamento
   Future<void> _saveTrackingPreferences(String userName) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_id', _supabase.auth.currentUser?.id ?? '');
@@ -565,7 +565,7 @@ abstract class TrackingViewModelBase with Store {
     await prefs.setInt('tracking_interval', trackingInterval);
   }
 
-  /// Finaliza compartilhamento
+  // Finaliza compartilhamento
   void _stopSharing() {
     temp?.cancel();
     temp = null;

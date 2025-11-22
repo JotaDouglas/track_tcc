@@ -28,8 +28,8 @@ abstract class AmizadeViewModelBase with Store {
     requests = List.from(newRequests);
   }
 
-  /// Carrega todas as amizades do usuário atual
-  /// Separa amigos aceitos e solicitações pendentes
+  // Carrega todas as amizades do usuário atual
+  // Separa amigos aceitos e solicitações pendentes
   @action
   Future<void> readMyFriends({
     bool onlyFriends = false,
@@ -65,8 +65,8 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
-  /// Envia uma solicitação de amizade para outro usuário
-  /// Retorna true se enviada com sucesso
+  // Envia uma solicitação de amizade para outro usuário
+  // Retorna true se enviada com sucesso
   Future<bool> enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
     try {
       final sucesso = await _amizadesRepository.enviarSolicitacaoAmizade(
@@ -81,8 +81,8 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
-  /// Aceita uma solicitação de amizade
-  /// Retorna true se aceita com sucesso
+  // Aceita uma solicitação de amizade
+  // Retorna true se aceita com sucesso
   Future<bool> aceitarAmizade(int idSolicitacao) async {
     try {
       final sucesso = await _amizadesRepository.aceitarAmizade(idSolicitacao);
@@ -93,8 +93,8 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
-  /// Cancela uma amizade ou solicitação pendente
-  /// Retorna true se cancelada com sucesso
+  // Cancela uma amizade ou solicitação pendente
+  // Retorna true se cancelada com sucesso
   Future<bool> cancelarSolicitacaoAmizade(int idAmigo) async {
     try {
       final sucesso = await _amizadesRepository.desfazerAmizade(idAmigo);
@@ -111,8 +111,8 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
-  /// Busca usuários por termo de pesquisa
-  /// Retorna lista de usuários encontrados
+  // Busca usuários por termo de pesquisa
+  // Retorna lista de usuários encontrados
   Future<List<Map<String, dynamic>>> buscarAmigos(String termo) async {
     final currentUserId = _supabase.auth.currentUser?.id;
 
@@ -129,7 +129,7 @@ abstract class AmizadeViewModelBase with Store {
     }
   }
 
-  /// Remove um amigo da lista local
+  // Remove um amigo da lista local
   void _removeFriendFromList(int idAmigo) {
     friends.removeWhere(
       (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo,

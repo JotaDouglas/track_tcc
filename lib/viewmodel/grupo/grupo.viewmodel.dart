@@ -24,7 +24,7 @@ abstract class GrupoViewModelBase with Store {
     _localRepo = GrupoLocalRepository();
   }
 
-  /// ID do usuário atual
+  // ID do usuário atual
   String? get userId =>
       loginVM.loginUser?.uidUsuario ?? _client.auth.currentUser?.id;
 
@@ -48,8 +48,8 @@ abstract class GrupoViewModelBase with Store {
     members = ObservableList.of(newMembers ?? []);
   }
 
-  /// Carrega todos os grupos do usuário
-  /// Tenta buscar do Supabase primeiro, em caso de erro usa o cache local
+  // Carrega todos os grupos do usuário
+  // Tenta buscar do Supabase primeiro, em caso de erro usa o cache local
   @action
   Future<void> carregarGrupos() async {
     if (userId == null) {
@@ -89,7 +89,7 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Carrega os membros de um grupo específico
+  // Carrega os membros de um grupo específico
   @action
   Future<void> carregarMembros(String grupoId) async {
     loading = true;
@@ -105,7 +105,7 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Retorna os message IDs (OneSignal) dos membros do grupo
+  // Retorna os message IDs (OneSignal) dos membros do grupo
   @action
   Future<List<String>> obterMessageIdsDoGrupo(String grupoId) async {
     try {
@@ -116,8 +116,8 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Cria um novo grupo
-  /// Retorna o grupo criado ou null em caso de erro
+  // Cria um novo grupo
+  // Retorna o grupo criado ou null em caso de erro
   @action
   Future<Group?> criarGrupo(
     String nome, {
@@ -151,8 +151,8 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Entra em um grupo usando código de convite
-  /// Retorna true se entrou com sucesso
+  // Entra em um grupo usando código de convite
+  // Retorna true se entrou com sucesso
   @action
   Future<bool> entrarPorCodigo(String codigo) async {
     if (userId == null) return false;
@@ -183,7 +183,7 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Remove um membro de um grupo
+  // Remove um membro de um grupo
   @action
   Future<void> removerMembro(String grupoId, String membroId) async {
     if (userId == null) return;
@@ -201,7 +201,7 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Sincroniza grupos com o cache local (SQLite)
+  // Sincroniza grupos com o cache local (SQLite)
   Future<void> _syncGroupsToLocal(List<Group> groups) async {
     try {
       await _localRepo.limparTabelasGrupos();
@@ -219,7 +219,7 @@ abstract class GrupoViewModelBase with Store {
     }
   }
 
-  /// Carrega grupos do cache local
+  // Carrega grupos do cache local
   Future<void> _loadGroupsFromLocal() async {
     try {
       log('🔄 Tentando carregar grupos do cache local...');

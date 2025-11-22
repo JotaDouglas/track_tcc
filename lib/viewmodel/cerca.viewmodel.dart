@@ -56,8 +56,8 @@ abstract class CercaViewModelBase with Store {
   @action
   void limparPontos() => pontos.clear();
 
-  /// Carrega cercas de um grupo (Supabase → Cache → Memória)
-  /// Em caso de erro, usa o cache local como fallback
+  // Carrega cercas de um grupo (Supabase → Cache → Memória)
+  // Em caso de erro, usa o cache local como fallback
   @action
   Future<void> carregarCercasGrupo(String grupoId, String? grupoName) async {
     grupoIdSelecionado = grupoId;
@@ -96,7 +96,7 @@ abstract class CercaViewModelBase with Store {
     }
   }
 
-  /// Salva uma cerca no grupo (SQLite + Supabase)
+  // Salva uma cerca no grupo (SQLite + Supabase)
   @action
   Future<void> salvarCercaGrupo(String nome, String userId) async {
     if (grupoIdSelecionado == null) {
@@ -131,7 +131,7 @@ abstract class CercaViewModelBase with Store {
     await _syncCercasToSupabase(grupoId, cercasExistentes, nome, userId);
   }
 
-  /// Sincroniza cercas pendentes ao reconectar
+  // Sincroniza cercas pendentes ao reconectar
   Future<void> sincronizarPendentes(String userId) async {
     final pendentes = await _cercaRepository.getGruposPendentes();
 
@@ -260,14 +260,14 @@ abstract class CercaViewModelBase with Store {
     modo = 'visualizar';
   }
 
-  /// Atualiza o mapa de cercas na memória
+  // Atualiza o mapa de cercas na memória
   void _updateCercasMap(Map<String, List<LatLng>> novasCercas) {
     cercasMap
       ..clear()
       ..addAll(novasCercas);
   }
 
-  /// Sincroniza cercas com Supabase
+  // Sincroniza cercas com Supabase
   Future<void> _syncCercasToSupabase(
     String grupoId,
     Map<String, List<LatLng>> cercas,

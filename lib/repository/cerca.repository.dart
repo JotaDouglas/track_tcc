@@ -120,7 +120,7 @@ class CercaRepository {
     await db.delete('cercas', where: 'nome = ?', whereArgs: [nome]);
   }
 
-  /// Garante que a tabela de cache de grupo existe
+  // Garante que a tabela de cache de grupo existe
   Future<void> _cercasCacheGrupoTable(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS cercas_cache_grupo (
@@ -133,7 +133,7 @@ class CercaRepository {
     ''');
   }
 
-  /// Insere ou atualiza o JSON de cercas do grupo (cache local)
+  // Insere ou atualiza o JSON de cercas do grupo (cache local)
   Future<void> cercasCacheGrupo(
     String grupoId,
     Map<String, List<LatLng>> cercas, {
@@ -176,7 +176,7 @@ class CercaRepository {
     }
   }
 
-  /// Carrega as cercas armazenadas localmente para o grupo
+  // Carrega as cercas armazenadas localmente para o grupo
   Future<Map<String, List<LatLng>>> parseCercasCacheGrupo(
       List<Map<String, Object?>> res) async {
     if (res.isEmpty) return {};
@@ -195,7 +195,7 @@ class CercaRepository {
     return result;
   }
 
-  /// Carrega as cercas armazenadas localmente para o grupo
+  // Carrega as cercas armazenadas localmente para o grupo
   Future<Map<String, List<LatLng>>> getCercasCacheGrupo(String grupoId) async {
     final db = await _dbHelper.database;
     await _cercasCacheGrupoTable(db);
@@ -222,7 +222,7 @@ class CercaRepository {
     return result;
   }
 
-  /// Atualiza apenas uma cerca dentro do grupo (mantendo as outras)
+  // Atualiza apenas uma cerca dentro do grupo (mantendo as outras)
   Future<void> salvarCercaNoCacheGrupo(
     String grupoId,
     String nome,
@@ -234,7 +234,7 @@ class CercaRepository {
     await cercasCacheGrupo(grupoId, current, syncStatus: syncStatus);
   }
 
-  /// Remove uma cerca específica de um grupo
+  // Remove uma cerca específica de um grupo
   Future<void> deletarCercaDoCacheGrupo(
     String grupoId,
     String nome, {
@@ -245,7 +245,7 @@ class CercaRepository {
     await cercasCacheGrupo(grupoId, current, syncStatus: syncStatus);
   }
 
-  /// Marca um grupo como "pendente" para sincronizar depois
+  // Marca um grupo como "pendente" para sincronizar depois
   Future<void> marcarGrupoPendenteSync(String grupoId) async {
     final db = await _dbHelper.database;
     await _cercasCacheGrupoTable(db);
@@ -257,7 +257,7 @@ class CercaRepository {
     );
   }
 
-  /// Busca todos os grupos com alterações pendentes de sync
+  // Busca todos os grupos com alterações pendentes de sync
   Future<List<Map<String, dynamic>>> getGruposPendentes() async {
     final db = await _dbHelper.database;
     await _cercasCacheGrupoTable(db);
@@ -273,7 +273,7 @@ class CercaSupabaseRepository {
   final SupabaseClient _client;
   CercaSupabaseRepository(this._client);
 
-  /// Busca as cercas de um grupo
+  // Busca as cercas de um grupo
   Future<Map<String, List<LatLng>>> getCercasDoGrupoRemoto(
       String grupoId) async {
     try {
@@ -315,7 +315,7 @@ class CercaSupabaseRepository {
     }
   }
 
-  /// Cria a linha inicial no Supabase ao criar o grupo
+  // Cria a linha inicial no Supabase ao criar o grupo
   Future<void> criarRegistroCercasGrupoRemoto(
       String grupoId, String userId) async {
     await _client.from('cercas').insert({
@@ -325,7 +325,7 @@ class CercaSupabaseRepository {
     });
   }
 
-  /// Atualiza o JSON de cercas
+  // Atualiza o JSON de cercas
   Future<void> salvarCercasNoSupabase(
       String grupoId, Map<String, List<LatLng>> cercas, String userId) async {
     try {

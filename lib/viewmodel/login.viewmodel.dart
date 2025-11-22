@@ -28,8 +28,8 @@ abstract class LoginViewModelBase with Store {
   @observable
   String? emailUser;
 
-  /// Cria uma nova conta de usuário com email e senha
-  /// Retorna true se a conta foi criada com sucesso
+  // Cria uma nova conta de usuário com email e senha
+  // Retorna true se a conta foi criada com sucesso
   Future<bool> createEmailAndPassword({
     required String email,
     required String password,
@@ -53,8 +53,8 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Realiza login com email e senha
-  /// Carrega dados do usuário e salva localmente
+  // Realiza login com email e senha
+  // Carrega dados do usuário e salva localmente
   Future<void> loginWithEmailAndPassword({
     required String email,
     required String password,
@@ -80,7 +80,7 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Carrega dados do usuário do banco e salva no estado local
+  // Carrega dados do usuário do banco e salva no estado local
   Future<void> _loadAndSaveUserData(User user) async {
     final dadosUsuario = await _loadUsuarioData(user.id);
 
@@ -96,7 +96,7 @@ abstract class LoginViewModelBase with Store {
     await _saveUserToPreferences(loginUser!);
   }
 
-  /// Atualiza o ID de mensagem do usuário (OneSignal)
+  // Atualiza o ID de mensagem do usuário (OneSignal)
   Future<void> _updateUserMessageId() async {
     await Future.delayed(const Duration(seconds: 1));
 
@@ -110,7 +110,7 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Recarrega os dados do usuário atual do banco
+  // Recarrega os dados do usuário atual do banco
   Future<void> reloadUser() async {
     if (loginUser == null) return;
 
@@ -131,21 +131,21 @@ abstract class LoginViewModelBase with Store {
     await _saveUserToPreferences(loginUser!);
   }
 
-  /// Realiza logout e limpa dados salvos
+  // Realiza logout e limpa dados salvos
   Future<void> logout() async {
     await _authRepository.signOut();
     await _clearUserFromPreferences();
     loginUser = null;
   }
 
-  /// Salva os dados do usuário no SharedPreferences
+  // Salva os dados do usuário no SharedPreferences
   Future<void> _saveUserToPreferences(Login login) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = jsonEncode(login.toJson());
     await prefs.setString('user_data', jsonString);
   }
 
-  /// Recupera os dados do usuário do SharedPreferences
+  // Recupera os dados do usuário do SharedPreferences
   Future<void> loadUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString('user_data');
@@ -160,13 +160,13 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Remove os dados do usuário do SharedPreferences
+  // Remove os dados do usuário do SharedPreferences
   Future<void> _clearUserFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data');
   }
 
-  /// Envia email de recuperação de senha
+  // Envia email de recuperação de senha
   Future<bool> forgetKey({required String email}) async {
     try {
       await _authRepository.forgetKey(email);
@@ -177,7 +177,7 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Insere um novo usuário no banco de dados
+  // Insere um novo usuário no banco de dados
   Future<bool> insertUsuario({
     required String nome,
     required String sobrenome,
@@ -211,7 +211,7 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Atualiza os dados do usuário no banco
+  // Atualiza os dados do usuário no banco
   Future<bool> updateUsuario({
     required int userId,
     required String nome,
@@ -247,7 +247,7 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  /// Atualiza o objeto loginUser com os dados da resposta do banco
+  // Atualiza o objeto loginUser com os dados da resposta do banco
   void _updateLoginUserFromResponse(Map<String, dynamic> dados) {
     loginUser = Login(
       email: dados['email'],
@@ -259,7 +259,7 @@ abstract class LoginViewModelBase with Store {
     );
   }
 
-  /// Carrega os dados do usuário do banco pelo ID
+  // Carrega os dados do usuário do banco pelo ID
   Future<Map<String, dynamic>?> _loadUsuarioData(String id) async {
     try {
       return await _authRepository.loadUsuario(id);
