@@ -138,7 +138,7 @@ abstract class GrupoViewModelBase with Store {
 
       // Cria registro de cercas para o grupo
       final cercaRepo = CercaSupabaseRepository(_client);
-      await cercaRepo.criarRegistroGrupo(group.id, userId!);
+      await cercaRepo.criarRegistroCercasGrupoRemoto(group.id, userId!);
 
       grupos.insert(0, group);
       return group;

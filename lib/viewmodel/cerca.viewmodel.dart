@@ -63,13 +63,14 @@ abstract class CercaViewModelBase with Store {
     grupoIdSelecionado = grupoId;
 
     try {
-      log('🔹 Carregando cercas do grupo $grupoId...');
+      log('  Carregando cercas do grupo $grupoId...');
 
       // Busca online do Supabase
-      final onlineMapa = await _cercaSupabaseRepo.getCercasPorGrupo(grupoId);
+      final onlineMapa =
+          await _cercaSupabaseRepo.getCercasDoGrupoRemoto(grupoId);
 
       // Atualiza cache local
-      await _cercaRepository.upsertCercasGrupo(
+      await _cercaRepository.upsertCercasCacheGrupo(
         grupoId,
         onlineMapa,
         atualizadoEm: DateTime.now().toIso8601String(),
@@ -78,7 +79,7 @@ abstract class CercaViewModelBase with Store {
       );
 
       // Carrega do cache local para memória
-      final locais = await _cercaRepository.getCercasGrupo(grupoId);
+      final locais = await _cercaRepository.getCercasCacheGrupo(grupoId);
       _updateCercasMap(locais);
 
       modo = 'visualizar_todas';
@@ -87,7 +88,7 @@ abstract class CercaViewModelBase with Store {
       log('⚠️ Erro ao carregar cercas online, usando cache local: $e');
 
       // Fallback: usa cache local
-      final locais = await _cercaRepository.getCercasGrupo(grupoId);
+      final locais = await _cercaRepository.getCercasCacheGrupo(grupoId);
       _updateCercasMap(locais);
 
       modo = 'visualizar_todas';
@@ -107,13 +108,14 @@ abstract class CercaViewModelBase with Store {
     final pontosCerca = pontos.toList();
 
     // Carrega cercas existentes do cache local
-    final cercasExistentes = await _cercaRepository.getCercasGrupo(grupoId);
+    final cercasExistentes =
+        await _cercaRepository.getCercasCacheGrupo(grupoId);
 
     // Adiciona a nova cerca
     cercasExistentes[nome] = pontosCerca;
 
     // Atualiza cache local primeiro
-    await _cercaRepository.saveSingleCercaLocal(
+    await _cercaRepository.salvarCercaNoCacheGrupo(
       grupoId,
       nome,
       pontosCerca,
@@ -131,16 +133,17 @@ abstract class CercaViewModelBase with Store {
 
   /// Sincroniza cercas pendentes ao reconectar
   Future<void> sincronizarPendentes(String userId) async {
-    final pendentes = await _cercaRepository.getPendingGroups();
+    final pendentes = await _cercaRepository.getGruposPendentes();
 
     for (final p in pendentes) {
       final grupoId = p['grupo_id'] as String;
 
       try {
-        final decoded = await _cercaRepository.getCercasGrupo(grupoId);
-        await _cercaSupabaseRepo.salvarCercas(grupoId, decoded, userId);
+        final decoded = await _cercaRepository.getCercasCacheGrupo(grupoId);
+        await _cercaSupabaseRepo.salvarCercasNoSupabase(
+            grupoId, decoded, userId);
 
-        await _cercaRepository.upsertCercasGrupo(
+        await _cercaRepository.upsertCercasCacheGrupo(
           grupoId,
           decoded,
           atualizadoEm: DateTime.now().toIso8601String(),
@@ -156,14 +159,14 @@ abstract class CercaViewModelBase with Store {
 
   @action
   Future<void> salvarCercaLocal(String nome) async {
-    await _cercaRepository.salvarCerca(nome, pontos.toList());
+    await _cercaRepository.salvarCercaIndividual(nome, pontos.toList());
     cercaAtual = nome;
     await listarCercas();
   }
 
   @action
   Future<void> carregarCercaLocal(String nome) async {
-    final carregados = await _cercaRepository.carregarCerca(nome);
+    final carregados = await _cercaRepository.carregarCercaIndividual(nome);
 
     if (carregados != null) {
       cercaAtual = nome;
@@ -175,7 +178,7 @@ abstract class CercaViewModelBase with Store {
 
   @action
   Future<void> deletarCercaLocal(String nome) async {
-    await _cercaRepository.deletarCerca(nome);
+    await _cercaRepository.deletarCercaIndividual(nome);
 
     if (cercaAtual == nome) {
       limparPontos();
@@ -190,7 +193,7 @@ abstract class CercaViewModelBase with Store {
     cercasMap.clear();
 
     for (var nome in cercasSalvas) {
-      final carregados = await _cercaRepository.carregarCerca(nome);
+      final carregados = await _cercaRepository.carregarCercaIndividual(nome);
       if (carregados != null) {
         cercasMap[nome] = carregados;
       }
@@ -202,7 +205,7 @@ abstract class CercaViewModelBase with Store {
     cercasMap.clear();
 
     for (var nome in cercasSalvas) {
-      final carregados = await _cercaRepository.carregarCerca(nome);
+      final carregados = await _cercaRepository.carregarCercaIndividual(nome);
       if (carregados != null) {
         cercasMap[nome] = carregados;
       }
@@ -216,7 +219,7 @@ abstract class CercaViewModelBase with Store {
     for (var entry in cercasMap.entries) {
       final nome = entry.key;
       final pontos = entry.value;
-      await _cercaRepository.salvarCerca(nome, pontos);
+      await _cercaRepository.salvarCercaIndividual(nome, pontos);
     }
 
     await listarCercas();
@@ -225,7 +228,7 @@ abstract class CercaViewModelBase with Store {
 
   @action
   Future<void> listarCercas() async {
-    final lista = await _cercaRepository.listarCercas();
+    final lista = await _cercaRepository.listarNomesCercasIndividuais();
     cercasSalvas
       ..clear()
       ..addAll(lista);
@@ -272,9 +275,9 @@ abstract class CercaViewModelBase with Store {
     String userId,
   ) async {
     try {
-      await _cercaSupabaseRepo.salvarCercas(grupoId, cercas, userId);
+      await _cercaSupabaseRepo.salvarCercasNoSupabase(grupoId, cercas, userId);
 
-      await _cercaRepository.upsertCercasGrupo(
+      await _cercaRepository.upsertCercasCacheGrupo(
         grupoId,
         cercas,
         atualizadoEm: DateTime.now().toIso8601String(),
@@ -283,7 +286,7 @@ abstract class CercaViewModelBase with Store {
 
       log('✅ Cerca "$nomeCerca" sincronizada com o Supabase');
     } catch (e) {
-      await _cercaRepository.markGrupoPending(grupoId);
+      await _cercaRepository.marcarGrupoPendenteSync(grupoId);
       log('⚠️ Falha ao sincronizar com o Supabase: $e (mantida como pending)');
     }
   }

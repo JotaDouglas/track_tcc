@@ -589,17 +589,17 @@ class _CercaMapViewState extends State<CercaMapView> {
       final nome = _nomeController.text.trim();
       final loginVM = context.read<LoginViewModel>();
 
-      // 🔹 Salva localmente
+      //   Salva localmente
       await vm.salvarCercaLocal(nome);
 
-      // 🔹 Salva online (no grupo)
+      //   Salva online (no grupo)
       if (widget.grupoId != null) {
         await vm.salvarCercaGrupo(
           nome,
           loginVM.loginUser?.uidUsuario ?? 'unknown',
         );
 
-        // 🔹 Atualiza cache local com o que está no Supabase
+        //   Atualiza cache local com o que está no Supabase
         await vm.carregarCercasGrupo(widget.grupoId!, widget.grupoNome);
         await vm.sincronizarCercasLocais(widget.grupoId!);
       }
@@ -798,7 +798,6 @@ class _CercaMapViewState extends State<CercaMapView> {
       );
     }
   }
-  
 
   void _mostrarMenu(BuildContext context, CercaViewModel vm) {
     showModalBottomSheet(
