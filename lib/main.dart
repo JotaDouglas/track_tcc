@@ -35,14 +35,10 @@ void main() async {
   final themeProvider = ThemeProvider();
   await themeProvider.loadTheme();
 
-  // // Enable verbose logging for debugging (remove in production)
-  // OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-  // Initialize with your OneSignal App ID
+  // Inicializa o OneSignal App ID
   OneSignal.initialize(dotenv.env['MESSAGE_KEY']!);
-  // Use this method to prompt for push notifications.
-  // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
-  OneSignal.Notifications.requestPermission(false);
 
+  OneSignal.Notifications.requestPermission(false);
 
   runApp(
     MultiProvider(
@@ -52,7 +48,8 @@ void main() async {
         Provider<AmizadeViewModel>(create: (_) => AmizadeViewModel()),
         Provider<CercaViewModel>(create: (_) => CercaViewModel()),
         Provider<TrackingViewModel>(create: (_) => TrackingViewModel()),
-        Provider<GrupoViewModel>(create: (_) => GrupoViewModel(LoginViewModel())),
+        Provider<GrupoViewModel>(
+            create: (_) => GrupoViewModel(LoginViewModel())),
       ],
       child: const MyApp(),
     ),
