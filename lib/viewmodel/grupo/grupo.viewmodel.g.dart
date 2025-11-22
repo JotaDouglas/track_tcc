@@ -81,6 +81,25 @@ mixin _$GrupoViewModel on GrupoViewModelBase, Store {
     return _$carregarGruposAsyncAction.run(() => super.carregarGrupos());
   }
 
+  late final _$carregarMembrosAsyncAction =
+      AsyncAction('GrupoViewModelBase.carregarMembros', context: context);
+
+  @override
+  Future<void> carregarMembros(String grupoId) {
+    return _$carregarMembrosAsyncAction
+        .run(() => super.carregarMembros(grupoId));
+  }
+
+  late final _$obterMessageIdsDoGrupoAsyncAction = AsyncAction(
+      'GrupoViewModelBase.obterMessageIdsDoGrupo',
+      context: context);
+
+  @override
+  Future<List<String>> obterMessageIdsDoGrupo(String grupoId) {
+    return _$obterMessageIdsDoGrupoAsyncAction
+        .run(() => super.obterMessageIdsDoGrupo(grupoId));
+  }
+
   late final _$criarGrupoAsyncAction =
       AsyncAction('GrupoViewModelBase.criarGrupo', context: context);
 
@@ -100,15 +119,6 @@ mixin _$GrupoViewModel on GrupoViewModelBase, Store {
         .run(() => super.entrarPorCodigo(codigo));
   }
 
-  late final _$carregarMembrosAsyncAction =
-      AsyncAction('GrupoViewModelBase.carregarMembros', context: context);
-
-  @override
-  Future<void> carregarMembros(String grupoId) {
-    return _$carregarMembrosAsyncAction
-        .run(() => super.carregarMembros(grupoId));
-  }
-
   late final _$removerMembroAsyncAction =
       AsyncAction('GrupoViewModelBase.removerMembro', context: context);
 
@@ -116,16 +126,6 @@ mixin _$GrupoViewModel on GrupoViewModelBase, Store {
   Future<void> removerMembro(String grupoId, String membroId) {
     return _$removerMembroAsyncAction
         .run(() => super.removerMembro(grupoId, membroId));
-  }
-
-  late final _$obterMessageIdsDoGrupoAsyncAction = AsyncAction(
-      'GrupoViewModelBase.obterMessageIdsDoGrupo',
-      context: context);
-
-  @override
-  Future<List<String>> obterMessageIdsDoGrupo(String grupoId) {
-    return _$obterMessageIdsDoGrupoAsyncAction
-        .run(() => super.obterMessageIdsDoGrupo(grupoId));
   }
 
   late final _$GrupoViewModelBaseActionController =
@@ -143,11 +143,11 @@ mixin _$GrupoViewModel on GrupoViewModelBase, Store {
   }
 
   @override
-  dynamic changeMembros(List<GroupMember>? m) {
+  void changeMembros(List<GroupMember>? newMembers) {
     final _$actionInfo = _$GrupoViewModelBaseActionController.startAction(
         name: 'GrupoViewModelBase.changeMembros');
     try {
-      return super.changeMembros(m);
+      return super.changeMembros(newMembers);
     } finally {
       _$GrupoViewModelBaseActionController.endAction(_$actionInfo);
     }

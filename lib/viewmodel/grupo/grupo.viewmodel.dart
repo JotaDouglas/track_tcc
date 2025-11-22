@@ -16,21 +16,21 @@ class GrupoViewModel = GrupoViewModelBase with _$GrupoViewModel;
 abstract class GrupoViewModelBase with Store {
   final LoginViewModel loginVM;
   final SupabaseClient _client = Supabase.instance.client;
-  late GroupRepositorySupabase _repo;
-  late GrupoLocalRepository _localRepo;
+  late final GroupRepositorySupabase _repo;
+  late final GrupoLocalRepository _localRepo;
 
   GrupoViewModelBase(this.loginVM) {
     _repo = GroupRepositorySupabase(_client);
     _localRepo = GrupoLocalRepository();
   }
 
+  /// ID do usuário atual
   String? get userId =>
       loginVM.loginUser?.uidUsuario ?? _client.auth.currentUser?.id;
 
   @observable
   ObservableList<Group> grupos = ObservableList<Group>();
 
-  // 🔹 Adicionando o campo que a tela usa:
   @observable
   ObservableList<GroupMember> members = ObservableList<GroupMember>();
 
@@ -44,6 +44,13 @@ abstract class GrupoViewModelBase with Store {
   void changeLoading(bool value) => loading = value;
 
   @action
+  void changeMembros(List<GroupMember>? newMembers) {
+    members = ObservableList.of(newMembers ?? []);
+  }
+
+  /// Carrega todos os grupos do usuário
+  /// Tenta buscar do Supabase primeiro, em caso de erro usa o cache local
+  @action
   Future<void> carregarGrupos() async {
     if (userId == null) {
       changeLoading(false);
@@ -51,70 +58,76 @@ abstract class GrupoViewModelBase with Store {
     }
 
     changeLoading(true);
-
     errorMessage = null;
 
     try {
-      // Limpa a lista de grupos antes de buscar novos dados
       grupos.clear();
 
-      // 1️⃣ Busca dados atualizados do Supabase
+      // Busca dados online do Supabase
       final result = await _repo.listGroupsForUser(userId!);
 
-      // Carrega os membros de cada grupo
-      for (var g in result) {
-        g.membros = await _repo.listMembers(g.id);
+      // Carrega membros de cada grupo
+      for (var grupo in result) {
+        grupo.membros = await _repo.listMembers(grupo.id);
       }
 
-      // 2️⃣ Se houver dados do Supabase, limpa e atualiza o SQLite
+      // Sincroniza com cache local
       if (result.isNotEmpty) {
-        log('📥 ${result.length} grupos recebidos do Supabase');
-
-        // Limpa as tabelas locais antes de inserir novos dados
-        await _localRepo.limparTabelasGrupos();
-
-        // Salva os grupos no SQLite
-        await _localRepo.salvarGrupos(result);
-
-        // Salva os membros de cada grupo no SQLite
-        for (var grupo in result) {
-          if (grupo.membros != null && grupo.membros!.isNotEmpty) {
-            await _localRepo.salvarMembrosGrupo(grupo.id, grupo.membros!);
-          }
-        }
-
-        log('✅ Dados sincronizados com SQLite local');
+        await _syncGroupsToLocal(result);
+        log('📥 ${result.length} grupos sincronizados');
       }
 
-      // 3️⃣ Atualiza a lista observável com os novos dados
       grupos = ObservableList.of(result);
     } catch (e) {
       errorMessage = e.toString();
       log("⚠️ Erro ao carregar grupos online: $e");
 
-      // 4️⃣ Em caso de erro, tenta carregar do cache local
-      try {
-        log('🔄 Tentando carregar grupos do cache local...');
-        final localGrupos = await _localRepo.carregarGrupos();
-        grupos = ObservableList.of(localGrupos);
-        log('📖 ${localGrupos.length} grupos carregados do cache local');
-      } catch (localError) {
-        log("❌ Erro ao carregar do cache local: $localError");
-      }
+      // Fallback: tenta carregar do cache local
+      await _loadGroupsFromLocal();
     } finally {
-      // Garante que o loading sempre será desativado
       changeLoading(false);
     }
   }
 
+  /// Carrega os membros de um grupo específico
   @action
-  changeMembros(List<GroupMember>? m) => members = ObservableList.of(m ?? []);
-
-  @action
-  Future<Group?> criarGrupo(String nome,
-      {String? descricao, bool aberto = false}) async {
-    if (userId == null) return null;
+  Future<void> carregarMembros(String grupoId) async {
     loading = true;
+
+    try {
+      final result = await _repo.listMembers(grupoId);
+      members = ObservableList.of(result);
+    } catch (e) {
+      errorMessage = e.toString();
+      log("Erro ao carregar membros: $e");
+    } finally {
+      loading = false;
+    }
+  }
+
+  /// Retorna os message IDs (OneSignal) dos membros do grupo
+  @action
+  Future<List<String>> obterMessageIdsDoGrupo(String grupoId) async {
+    try {
+      return await _repo.getGroupMemberMessageIds(grupoId);
+    } catch (e) {
+      log("⚠️ Erro ao obter message_ids do grupo: $e");
+      return [];
+    }
+  }
+
+  /// Cria um novo grupo
+  /// Retorna o grupo criado ou null em caso de erro
+  @action
+  Future<Group?> criarGrupo(
+    String nome, {
+    String? descricao,
+    bool aberto = false,
+  }) async {
+    if (userId == null) return null;
+
+    loading = true;
+
     try {
       final group = await _repo.createGroup(
         nome: nome,
@@ -123,7 +136,7 @@ abstract class GrupoViewModelBase with Store {
         aberto: aberto,
       );
 
-      // 🔹 Cria linha na tabela 'cercas'
+      // Cria registro de cercas para o grupo
       final cercaRepo = CercaSupabaseRepository(_client);
       await cercaRepo.criarRegistroGrupo(group.id, userId!);
 
@@ -131,68 +144,90 @@ abstract class GrupoViewModelBase with Store {
       return group;
     } catch (e) {
       errorMessage = e.toString();
+      log("Erro ao criar grupo: $e");
       return null;
     } finally {
       loading = false;
     }
   }
 
+  /// Entra em um grupo usando código de convite
+  /// Retorna true se entrou com sucesso
   @action
   Future<bool> entrarPorCodigo(String codigo) async {
     if (userId == null) return false;
+
     loading = true;
+
     try {
       final group = await _repo.getGroupByCode(codigo);
-      if (group == null) throw Exception('Código inválido');
+
+      if (group == null) {
+        throw Exception('Código inválido');
+      }
+
       await _repo.addMember(
-          grupoId: group.id, userId: userId!, adicionadoPor: userId!);
+        grupoId: group.id,
+        userId: userId!,
+        adicionadoPor: userId!,
+      );
+
       await carregarGrupos();
       return true;
     } catch (e) {
       errorMessage = e.toString();
+      log("Erro ao entrar no grupo: $e");
       return false;
     } finally {
       loading = false;
     }
   }
 
-  // 🔹 Novo método para carregar os membros do grupo:
-  @action
-  Future<void> carregarMembros(String grupoId) async {
-    loading = true;
-    try {
-      final result = await _repo.listMembers(grupoId);
-      members = ObservableList.of(result);
-    } catch (e) {
-      errorMessage = e.toString();
-    } finally {
-      loading = false;
-    }
-  }
-
+  /// Remove um membro de um grupo
   @action
   Future<void> removerMembro(String grupoId, String membroId) async {
     if (userId == null) return;
+
     loading = true;
+
     try {
       await _repo.removeMember(grupoId: grupoId, userId: membroId);
       members.removeWhere((m) => m.userId == membroId);
     } catch (e) {
       errorMessage = e.toString();
+      log("Erro ao remover membro: $e");
     } finally {
       loading = false;
     }
   }
 
-  /// Retorna todos os message_ids (OneSignal player IDs) dos membros de um grupo
-  /// excluindo o usuário atual
-  @action
-  Future<List<String>> obterMessageIdsDoGrupo(String grupoId) async {
+  /// Sincroniza grupos com o cache local (SQLite)
+  Future<void> _syncGroupsToLocal(List<Group> groups) async {
     try {
-      return await _repo.getGroupMemberMessageIds(grupoId);
+      await _localRepo.limparTabelasGrupos();
+      await _localRepo.salvarGrupos(groups);
+
+      for (var grupo in groups) {
+        if (grupo.membros != null && grupo.membros!.isNotEmpty) {
+          await _localRepo.salvarMembrosGrupo(grupo.id, grupo.membros!);
+        }
+      }
+
+      log('✅ Dados sincronizados com SQLite local');
     } catch (e) {
-      log("⚠️ Erro ao obter message_ids do grupo: $e");
-      return [];
+      log("Erro ao sincronizar com SQLite: $e");
+    }
+  }
+
+  /// Carrega grupos do cache local
+  Future<void> _loadGroupsFromLocal() async {
+    try {
+      log('🔄 Tentando carregar grupos do cache local...');
+      final localGrupos = await _localRepo.carregarGrupos();
+      grupos = ObservableList.of(localGrupos);
+      log('📖 ${localGrupos.length} grupos carregados do cache local');
+    } catch (localError) {
+      log("❌ Erro ao carregar do cache local: $localError");
     }
   }
 }

@@ -13,8 +13,8 @@ part 'login.viewmodel.g.dart';
 class LoginViewModel = LoginViewModelBase with _$LoginViewModel;
 
 abstract class LoginViewModelBase with Store {
-  AuthRepository authRepository = AuthRepository();
-  final supabase = Supabase.instance.client;
+  final AuthRepository _authRepository = AuthRepository();
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   @observable
   Login? loginUser;
@@ -28,70 +28,96 @@ abstract class LoginViewModelBase with Store {
   @observable
   String? emailUser;
 
-  //Criação de conta via email e senha
-  Future createEmailAndPassword({
+  /// Cria uma nova conta de usuário com email e senha
+  /// Retorna true se a conta foi criada com sucesso
+  Future<bool> createEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      AuthResponse? create = await authRepository
-          .createUserWithEmailAndPassword(email: email, password: password);
-      if (create?.user != null) {
-        idNewUser = create?.user!.id;
-        emailUser = create?.user?.email;
+      final response = await _authRepository.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response?.user != null) {
+        idNewUser = response!.user!.id;
+        emailUser = response.user?.email;
         return true;
-      } else {
-        return false;
       }
+
+      return false;
     } catch (e) {
       log("Erro ao criar usuário: $e");
       return false;
     }
   }
 
-  // login com shared preferences
+  /// Realiza login com email e senha
+  /// Carrega dados do usuário e salva localmente
   Future<void> loginWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      var usuario =
-          await authRepository.loginWithEmail(email: email, password: password);
-      if (usuario.user != null) {
-        var dadosUsuario = await loadUsuario(usuario.user!.id);
+      final authResponse = await _authRepository.loginWithEmail(
+        email: email,
+        password: password,
+      );
 
-        loginUser = Login(
-          email: usuario.user!.email,
-          uidUsuario: usuario.user!.id,
-          id: dadosUsuario != null ? dadosUsuario['id_usuario'] : 000,
-          username: dadosUsuario != null ? dadosUsuario['nome'] : "usuario",
-          sobrenome: dadosUsuario != null ? dadosUsuario['sobrenome'] : "",
-          bio: dadosUsuario != null ? dadosUsuario['biografia'] : "",
-        );
-        saveUserData(loginUser!);
-        await userIdMessage();
+      if (authResponse.user == null) {
+        errorMessage = "Falha no login";
+        return;
       }
+
+      await _loadAndSaveUserData(authResponse.user!);
+      await _updateUserMessageId();
+
       errorMessage = null;
     } catch (e) {
       errorMessage = e.toString();
+      log("Erro ao fazer login: $e");
     }
   }
 
-  Future<void> userIdMessage() async {
-    await Future.delayed(Duration(seconds: 1));
-    final userId = supabase.auth.currentUser?.id;
+  /// Carrega dados do usuário do banco e salva no estado local
+  Future<void> _loadAndSaveUserData(User user) async {
+    final dadosUsuario = await _loadUsuarioData(user.id);
+
+    loginUser = Login(
+      email: user.email,
+      uidUsuario: user.id,
+      id: dadosUsuario?['id_usuario'] ?? 0,
+      username: dadosUsuario?['nome'] ?? "usuario",
+      sobrenome: dadosUsuario?['sobrenome'] ?? "",
+      bio: dadosUsuario?['biografia'] ?? "",
+    );
+
+    await _saveUserToPreferences(loginUser!);
+  }
+
+  /// Atualiza o ID de mensagem do usuário (OneSignal)
+  Future<void> _updateUserMessageId() async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    final userId = _supabase.auth.currentUser?.id;
     final playerId = OneSignal.User.pushSubscription.id;
 
     if (playerId != null && userId != null) {
-      await supabase.from('usuarios').update(
-        {'message_id': playerId},
-      ).eq('user_id', userId);
-    }    
+      await _supabase.from('usuarios').update({
+        'message_id': playerId,
+      }).eq('user_id', userId);
+    }
   }
 
+  /// Recarrega os dados do usuário atual do banco
   Future<void> reloadUser() async {
-    var dadosUsuario = await loadUsuario(loginUser!.uidUsuario!);
-    var usuario = loginUser!;
+    if (loginUser == null) return;
+
+    final dadosUsuario = await _loadUsuarioData(loginUser!.uidUsuario!);
+    if (dadosUsuario == null) return;
+
+    final usuario = loginUser!;
 
     loginUser = Login(
       email: usuario.email,
@@ -101,27 +127,31 @@ abstract class LoginViewModelBase with Store {
       sobrenome: dadosUsuario['sobrenome'] ?? "",
       bio: dadosUsuario['biografia'] ?? "",
     );
-    saveUserData(loginUser!);
+
+    await _saveUserToPreferences(loginUser!);
   }
 
-  // Salva os dados do usuário no SharedPreferences
-  Future<void> saveUserData(Login login) async {
+  /// Realiza logout e limpa dados salvos
+  Future<void> logout() async {
+    await _authRepository.signOut();
+    await _clearUserFromPreferences();
+    loginUser = null;
+  }
+
+  /// Salva os dados do usuário no SharedPreferences
+  Future<void> _saveUserToPreferences(Login login) async {
     final prefs = await SharedPreferences.getInstance();
-    String jsonString = jsonEncode(login.toJson());
+    final jsonString = jsonEncode(login.toJson());
     await prefs.setString('user_data', jsonString);
   }
 
-  // Recupera os dados do usuário salvo no SharedPreferences
+  /// Recupera os dados do usuário do SharedPreferences
   Future<void> loadUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-
-    String? jsonString = prefs.getString('user_data');
+    final jsonString = prefs.getString('user_data');
 
     if (jsonString != null) {
-      // log("Usuário carregado do SharedPreferences: $jsonString");
-
-      Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-
+      final jsonMap = jsonDecode(jsonString);
       runInAction(() {
         loginUser = Login.fromJson(jsonMap);
       });
@@ -130,32 +160,37 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  //Esqueci minha senha
-  Future<bool> forgetKey({required String email}) async {
-    await authRepository.forgetKey(email);
-    return true;
-  }
-
-  //Faz logout e limpa os dados salvos
-  Future<void> logout() async {
-    await authRepository.signOut();
+  /// Remove os dados do usuário do SharedPreferences
+  Future<void> _clearUserFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_data'); // Remove os dados do usuário
-    loginUser = null; // Limpa o estado local
+    await prefs.remove('user_data');
   }
 
-  Future insertUsuario({
+  /// Envia email de recuperação de senha
+  Future<bool> forgetKey({required String email}) async {
+    try {
+      await _authRepository.forgetKey(email);
+      return true;
+    } catch (e) {
+      log("Erro ao enviar email de recuperação: $e");
+      return false;
+    }
+  }
+
+  /// Insere um novo usuário no banco de dados
+  Future<bool> insertUsuario({
     required String nome,
     required String sobrenome,
     String? uuid,
     String? biografia,
     bool termo = false,
   }) async {
-    if (uuid != null) {
-      emailUser = loginUser!.email;
-    }
-    await supabase.from('usuarios').insert(
-      {
+    try {
+      if (uuid != null) {
+        emailUser = loginUser!.email;
+      }
+
+      await _supabase.from('usuarios').insert({
         'nome': nome,
         'sobrenome': sobrenome,
         "email": emailUser,
@@ -163,16 +198,20 @@ abstract class LoginViewModelBase with Store {
         "tipo_usuario": "responsavel",
         'biografia': biografia,
         'termo': termo,
-      },
-    );
+      });
 
-    if (uuid != null) {
-      await reloadUser();
+      if (uuid != null) {
+        await reloadUser();
+      }
+
+      return true;
+    } catch (e) {
+      log("Erro ao inserir usuário: $e");
+      return false;
     }
-
-    return true;
   }
 
+  /// Atualiza os dados do usuário no banco
   Future<bool> updateUsuario({
     required int userId,
     required String nome,
@@ -180,40 +219,27 @@ abstract class LoginViewModelBase with Store {
     required String biografia,
   }) async {
     try {
-      log(idNewUser.toString());
       final data = {
         'nome': nome,
         'sobrenome': sobrenome,
         'biografia': biografia,
       };
 
-      final response = await supabase
+      final response = await _supabase
           .from('usuarios')
           .update(data)
           .eq('id_usuario', userId)
-          .select(); // importante para ver o resultado da atualização
+          .select();
 
       if (response.isEmpty) {
         log('Nenhum registro foi atualizado.');
-        return false; // não atualizou nada
+        return false;
       }
 
-      var dados = response.first;
+      _updateLoginUserFromResponse(response.first);
+      await _saveUserToPreferences(loginUser!);
+      await loadUserFromPrefs();
 
-      loginUser = Login(
-        email: dados['email'],
-        uidUsuario: dados['user_id'],
-        id: dados['id_usuario'],
-        username: dados['nome'] ?? "usuario",
-        sobrenome: dados['sobrenome'] ?? "",
-        bio: dados['biografia'] ?? "",
-      );
-
-      saveUserData(loginUser!);
-
-      loadUserFromPrefs();
-
-      // log('Atualização bem-sucedida: $response');
       return true;
     } catch (e) {
       log('Erro ao atualizar: $e');
@@ -221,11 +247,24 @@ abstract class LoginViewModelBase with Store {
     }
   }
 
-  Future loadUsuario(String id) async {
+  /// Atualiza o objeto loginUser com os dados da resposta do banco
+  void _updateLoginUserFromResponse(Map<String, dynamic> dados) {
+    loginUser = Login(
+      email: dados['email'],
+      uidUsuario: dados['user_id'],
+      id: dados['id_usuario'],
+      username: dados['nome'] ?? "usuario",
+      sobrenome: dados['sobrenome'] ?? "",
+      bio: dados['biografia'] ?? "",
+    );
+  }
+
+  /// Carrega os dados do usuário do banco pelo ID
+  Future<Map<String, dynamic>?> _loadUsuarioData(String id) async {
     try {
-      var res = await authRepository.loadUsuario(id);
-      return res;
+      return await _authRepository.loadUsuario(id);
     } catch (e) {
+      log("Erro ao carregar dados do usuário: $e");
       return null;
     }
   }

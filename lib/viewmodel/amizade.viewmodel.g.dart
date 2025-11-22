@@ -41,29 +41,39 @@ mixin _$AmizadeViewModel on AmizadeViewModelBase, Store {
     });
   }
 
-  late final _$changeFriendsAsyncAction =
-      AsyncAction('AmizadeViewModelBase.changeFriends', context: context);
-
-  @override
-  Future changeFriends(List<Map<String, dynamic>> f) {
-    return _$changeFriendsAsyncAction.run(() => super.changeFriends(f));
-  }
-
-  late final _$changeRequestsAsyncAction =
-      AsyncAction('AmizadeViewModelBase.changeRequests', context: context);
-
-  @override
-  Future changeRequests(List<Map<String, dynamic>> r) {
-    return _$changeRequestsAsyncAction.run(() => super.changeRequests(r));
-  }
-
   late final _$readMyFriendsAsyncAction =
       AsyncAction('AmizadeViewModelBase.readMyFriends', context: context);
 
   @override
-  Future readMyFriends({bool onlyFriends = false, bool solicitations = false}) {
+  Future<void> readMyFriends(
+      {bool onlyFriends = false, bool solicitations = false}) {
     return _$readMyFriendsAsyncAction.run(() => super
         .readMyFriends(onlyFriends: onlyFriends, solicitations: solicitations));
+  }
+
+  late final _$AmizadeViewModelBaseActionController =
+      ActionController(name: 'AmizadeViewModelBase', context: context);
+
+  @override
+  void changeFriends(List<Map<String, dynamic>> newFriends) {
+    final _$actionInfo = _$AmizadeViewModelBaseActionController.startAction(
+        name: 'AmizadeViewModelBase.changeFriends');
+    try {
+      return super.changeFriends(newFriends);
+    } finally {
+      _$AmizadeViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void changeRequests(List<Map<String, dynamic>> newRequests) {
+    final _$actionInfo = _$AmizadeViewModelBaseActionController.startAction(
+        name: 'AmizadeViewModelBase.changeRequests');
+    try {
+      return super.changeRequests(newRequests);
+    } finally {
+      _$AmizadeViewModelBaseActionController.endAction(_$actionInfo);
+    }
   }
 
   @override

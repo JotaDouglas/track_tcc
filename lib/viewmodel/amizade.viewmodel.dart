@@ -10,8 +10,7 @@ class AmizadeViewModel = AmizadeViewModelBase with _$AmizadeViewModel;
 
 abstract class AmizadeViewModelBase with Store {
   final AmizadesRepository _amizadesRepository = AmizadesRepository();
-
-  final supabase = Supabase.instance.client;
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   @observable
   List<Map<String, dynamic>> friends = [];
@@ -20,94 +19,120 @@ abstract class AmizadeViewModelBase with Store {
   List<Map<String, dynamic>> requests = [];
 
   @action
-  changeFriends(List<Map<String, dynamic>> f) async => friends = List.from(f);
-
-  @action
-  changeRequests(List<Map<String, dynamic>> r) async => requests = List.from(r);
-
-  @action
-  readMyFriends({bool onlyFriends = false, bool solicitations = false}) async {
-    final currentUserId = supabase.auth.currentUser?.id;
-    var dados = await _amizadesRepository.getAllAmigos(currentUserId!);
-
-    List<Map<String, dynamic>> aux = dados
-        .where((e) => e['status'] == 'aceito')
-        .cast<Map<String, dynamic>>()
-        .toList();
-
-    changeFriends(aux);
-    List<Map<String, dynamic>> auxRequest = dados
-        .where((e) => e['status'] == 'pendente')
-        .cast<Map<String, dynamic>>()
-        .toList();
-
-    changeRequests(auxRequest);
+  void changeFriends(List<Map<String, dynamic>> newFriends) {
+    friends = List.from(newFriends);
   }
 
-  Future enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
-    try {
-      bool sendSolicitacao =
-          await _amizadesRepository.enviarSolicitacaoAmizade(meuId, idAmigo);
+  @action
+  void changeRequests(List<Map<String, dynamic>> newRequests) {
+    requests = List.from(newRequests);
+  }
 
-      return sendSolicitacao;
+  /// Carrega todas as amizades do usuário atual
+  /// Separa amigos aceitos e solicitações pendentes
+  @action
+  Future<void> readMyFriends({
+    bool onlyFriends = false,
+    bool solicitations = false,
+  }) async {
+    final currentUserId = _supabase.auth.currentUser?.id;
+
+    if (currentUserId == null) {
+      log("Erro: Usuário não autenticado");
+      return;
+    }
+
+    try {
+      final dados = await _amizadesRepository.getAllAmigos(currentUserId);
+
+      // Filtra amizades aceitas
+      final friendsList = dados
+          .where((e) => e['status'] == 'aceito')
+          .cast<Map<String, dynamic>>()
+          .toList();
+
+      changeFriends(friendsList);
+
+      // Filtra solicitações pendentes
+      final requestsList = dados
+          .where((e) => e['status'] == 'pendente')
+          .cast<Map<String, dynamic>>()
+          .toList();
+
+      changeRequests(requestsList);
     } catch (e) {
-      log("erro ao enviar a solicitação: $e");
-      return false;
+      log("Erro ao carregar amizades: $e");
     }
   }
 
-  Future cancelarSolicitacaoAmizade(int idAmigo) async {
+  /// Envia uma solicitação de amizade para outro usuário
+  /// Retorna true se enviada com sucesso
+  Future<bool> enviarSolicitacaoAmizade(String meuId, String idAmigo) async {
     try {
-      var amigo = friends.firstWhere(
-        (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo,
-        orElse: () => {},
+      final sucesso = await _amizadesRepository.enviarSolicitacaoAmizade(
+        meuId,
+        idAmigo,
       );
 
-      // if (amigo.isEmpty) return false;
+      return sucesso;
+    } catch (e) {
+      log("Erro ao enviar solicitação de amizade: $e");
+      return false;
+    }
+  }
 
-      bool delete = await _amizadesRepository.desfazerAmizade(idAmigo);
+  /// Aceita uma solicitação de amizade
+  /// Retorna true se aceita com sucesso
+  Future<bool> aceitarAmizade(int idSolicitacao) async {
+    try {
+      final sucesso = await _amizadesRepository.aceitarAmizade(idSolicitacao);
+      return sucesso;
+    } catch (e) {
+      log("Erro ao aceitar solicitação de amizade: $e");
+      return false;
+    }
+  }
 
-      if (delete) {
-        friends.removeWhere(
-            (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo);
-        readMyFriends();
+  /// Cancela uma amizade ou solicitação pendente
+  /// Retorna true se cancelada com sucesso
+  Future<bool> cancelarSolicitacaoAmizade(int idAmigo) async {
+    try {
+      final sucesso = await _amizadesRepository.desfazerAmizade(idAmigo);
+
+      if (sucesso) {
+        _removeFriendFromList(idAmigo);
+        await readMyFriends();
       }
 
-      return delete;
+      return sucesso;
     } catch (e) {
-      log("erro ao enviar a solicitação: $e");
+      log("Erro ao cancelar amizade: $e");
       return false;
     }
   }
 
-  Future aceitarAmizade(int idSolicitacao) async {
-    try {
-      //enviar o id no repository
-      bool aceite = await _amizadesRepository.aceitarAmizade(idSolicitacao);
-
-      return aceite;
-
-      //retornar true ou false
-    } catch (e) {
-      log("erro ao enviar a solicitação: $e");
-      return false;
-    }
-  }
-
+  /// Busca usuários por termo de pesquisa
+  /// Retorna lista de usuários encontrados
   Future<List<Map<String, dynamic>>> buscarAmigos(String termo) async {
-    final currentUserId = supabase.auth.currentUser?.id;
-    List<Map<String, dynamic>> response = [];
+    final currentUserId = _supabase.auth.currentUser?.id;
 
     if (termo.isEmpty || currentUserId == null) {
-      return response;
+      return [];
     }
 
     try {
-      response = await _amizadesRepository.buscarAmigos(termo);
-      final data = List<Map<String, dynamic>>.from(response);
-      return data;
+      final response = await _amizadesRepository.buscarAmigos(termo);
+      return List<Map<String, dynamic>>.from(response);
     } catch (e) {
+      log("Erro ao buscar amigos: $e");
       return [];
     }
+  }
+
+  /// Remove um amigo da lista local
+  void _removeFriendFromList(int idAmigo) {
+    friends.removeWhere(
+      (e) => e['usuario_id'] == idAmigo || e['amigo_id'] == idAmigo,
+    );
   }
 }

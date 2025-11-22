@@ -26,6 +26,7 @@ abstract class TrackingViewModelBase with Store {
   final CercaViewModel cercaViewModel = CercaViewModel();
 
   int? currentRotaId;
+  bool _isTracking = false;
 
   @observable
   ObservableList<PlaceModel> trackList = ObservableList<PlaceModel>();
@@ -38,8 +39,6 @@ abstract class TrackingViewModelBase with Store {
 
   @observable
   bool loading = false;
-
-  //Sistema de track
 
   @observable
   bool trackingLoop = false;
@@ -66,35 +65,40 @@ abstract class TrackingViewModelBase with Store {
   Timer? temp;
 
   @observable
-  int trackingInterval = 30; // valor padrão (Eficiente)
+  int trackingInterval = 30; // Intervalo padrão em segundos
 
   @observable
-  String? cercaSelecionada; // nome da cerca escolhida
+  String? cercaSelecionada;
 
   @observable
-  Group? grupoSelecionado; // nome da cerca escolhida
+  Group? grupoSelecionado;
 
   @action
-  void setTrackingInterval(int seconds) async {
+  Future<void> setTrackingInterval(int seconds) async {
     trackingInterval = seconds;
 
-    // Atualizar o intervalo no SharedPreferences para o background service
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('tracking_interval', seconds);
+    await prefs.setInt('tracking_interval', trackingInterval);
   }
 
   @action
-  changeDistance(double value, {bool reset = false}) {
-    distanceMeters += value;
-
+  void changeDistance(double value, {bool reset = false}) {
     if (reset) {
       distanceMeters = 0.0;
+    } else {
+      distanceMeters += value;
     }
   }
 
   @action
-  changeLoading(bool value) => loading = value;
+  void changeLoading(bool value) => loading = value;
 
+  @action
+  void toggleTrackingState() {
+    trackingLoop = !trackingLoop;
+  }
+
+  /// Inicia uma nova rota de rastreamento
   @action
   Future<void> insertTracking(PlaceModel initialLocation) async {
     try {
@@ -108,11 +112,7 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  @action
-  Future<void> removeRota(int rotaId) async {
-    await trackRepository.deleteRota(rotaId);
-  }
-
+  /// Adiciona uma localização à rota atual
   @action
   Future<void> trackLocation(PlaceModel location, String name) async {
     if (currentRotaId == null) {
@@ -126,7 +126,282 @@ abstract class TrackingViewModelBase with Store {
       return;
     }
 
-    // 🔹 Sempre salva localmente primeiro
+    // Salva localmente primeiro (SQLite)
+    await _saveLocationLocally(location);
+
+    // Tenta enviar para Supabase (sem travar o app)
+    await _syncLocationToSupabase(location, name, uid);
+  }
+
+  /// Finaliza o rastreamento da rota atual
+  @action
+  Future<void> stopTracking(PlaceModel finalLocation) async {
+    if (currentRotaId == null) {
+      log('Rastreamento já estava parado.');
+      return;
+    }
+
+    try {
+      await trackRepository.updateRotaFinal(currentRotaId!, finalLocation);
+
+      // Remove localização do Supabase
+      final uid = _supabase.auth.currentUser?.id;
+      if (uid != null) {
+        await _supabase.from('localizacoes').delete().eq("user_id", uid);
+        log('Localização final removida do Supabase');
+      }
+
+      // Sincroniza rota online após finalizar
+      await _autoSyncCurrentRoute();
+
+      currentRotaId = null;
+    } catch (e) {
+      log("Erro ao parar rastreamento: $e");
+    }
+  }
+
+  /// Remove uma rota do banco local
+  @action
+  Future<void> removeRota(int rotaId) async {
+    await trackRepository.deleteRota(rotaId);
+  }
+
+  /// Carrega todas as rotas salvas localmente
+  Future<void> getAllRotas() async {
+    final rotasAux = await trackRepository.getAllRotas();
+    listRotasLocal = List.from(rotasAux);
+  }
+
+  /// Carrega rotas sincronizadas online
+  @action
+  Future<void> getRotasOnline() async {
+    changeLoading(true);
+
+    try {
+      final uid = _supabase.auth.currentUser?.id;
+      if (uid == null) return;
+
+      final rotasOnline = await trackRepository.getRotasOnline(uid);
+
+      listRotasOnline = _convertToPlaceModelList(rotasOnline);
+
+      if (listRotasOnline.isNotEmpty) {
+        listRotasOnline.sort((a, b) => b.id!.compareTo(a.id!));
+      }
+    } catch (e) {
+      log("Erro ao carregar rotas online: $e");
+    } finally {
+      changeLoading(false);
+    }
+  }
+
+  /// Retorna os pontos de uma rota específica
+  Future<List<PlaceModel>> getPontosByRota(int rotaId) async {
+    return await trackRepository.getPontosByRotaId(rotaId);
+  }
+
+  /// Converte string JSON de coordenadas em lista de PlaceModel
+  Future<List<PlaceModel>> readCordenadas(String cordenadas) async {
+    if (cordenadas.isEmpty) return [];
+
+    try {
+      final decoded = jsonDecode(cordenadas);
+      final posicoes = decoded[0]['pontos'];
+
+      return posicoes.map<PlaceModel>((p) {
+        return PlaceModel(
+          id: p['id'],
+          latitude: p['latitude'],
+          longitude: p['longitude'],
+          dateInicial: p['data'],
+        );
+      }).toList();
+    } catch (e) {
+      log("Erro ao converter as coordenadas: $e");
+      return [];
+    }
+  }
+
+  /// Sincroniza uma rota local com o Supabase
+  @action
+  Future<bool> syncRota(PlaceModel rota) async {
+    try {
+      if (rota.id == null || rota.idSistema != null) return false;
+
+      final uid = _supabase.auth.currentUser?.id;
+      if (uid == null) return false;
+
+      final trajetoJson =
+          await trackRepository.gerarJsonRotasComPontos(rota.id!);
+
+      final dados = {
+        "user_id": uid,
+        "data_inicio": rota.dateInicial,
+        "data_fim": rota.dateFinal ?? DateTime.now().toString(),
+        "cordenadas": trajetoJson,
+      };
+
+      final sucesso = await trackRepository.syncRotas(dados, rota.id!);
+
+      if (sucesso) {
+        await removeRota(rota.id ?? -1);
+        await getAllRotas();
+        await getRotasOnline();
+      }
+
+      return sucesso;
+    } catch (e) {
+      log("Erro ao sincronizar rota: $e");
+      return false;
+    }
+  }
+
+  /// Deleta uma rota online
+  Future<void> deleteRotaOnline(String id) async {
+    changeLoading(true);
+
+    try {
+      await trackRepository.deleteRotaOnline(id);
+      await getRotasOnline();
+    } catch (e) {
+      log("Erro ao deletar rota online: $e");
+    } finally {
+      changeLoading(false);
+    }
+  }
+
+  /// Inicia ou para o rastreamento em tempo real
+  @action
+  Future<void> startTracking(String userName) async {
+    final gpsOn = await _locationHelper.checkGps(null);
+    if (gpsOn != true) return;
+
+    toggleTrackingState();
+    trackingMode = trackingLoop;
+    changeDistance(0, reset: true);
+
+    if (trackingLoop) {
+      await _iniciarRastreamento(userName);
+    } else {
+      await _pararRastreamento();
+    }
+  }
+
+  /// Inicia o loop de rastreamento contínuo
+  @action
+  Future<void> _startTrackingLoop(String userName) async {
+    if (_isTracking) return;
+    _isTracking = true;
+
+    log('Iniciando rastreamento com intervalo de $trackingInterval segundos');
+
+    while (_isTracking) {
+      final start = DateTime.now();
+
+      try {
+        final newLocal = await _locationHelper.actuallyPosition();
+
+        if (newLocal != null) {
+          await _processNewLocation(newLocal, userName);
+        } else {
+          log('Localização retornou null.');
+        }
+      } catch (e, stack) {
+        log('Erro no rastreamento: $e\n$stack');
+      }
+
+      // Aguarda o intervalo configurado
+      final elapsed = DateTime.now().difference(start);
+      final waitTime = Duration(seconds: trackingInterval) - elapsed;
+
+      if (waitTime.isNegative) {
+        log('Envio demorou mais que o intervalo, iniciando novo ciclo');
+        continue;
+      }
+
+      await Future.delayed(waitTime);
+    }
+
+    log('Rastreamento encerrado');
+  }
+
+  /// Para o loop de rastreamento
+  void stopTrackingLoop() {
+    _isTracking = false;
+    log('Solicitada parada do rastreamento');
+  }
+
+  /// Realiza um único rastreamento
+  @action
+  Future<void> _trackOnce(String userName) async {
+    try {
+      final newLocal = await _locationHelper.actuallyPosition();
+
+      if (newLocal != null) {
+        await _processNewLocation(newLocal, userName);
+      } else {
+        log('Localização retornou null.');
+      }
+    } catch (e) {
+      log('Erro no rastreamento: $e');
+      _stopSharing();
+      toggleTrackingState();
+    }
+  }
+
+  /// Método auxiliar usado para compatibilidade
+  Future<void> primeiroTrack() async {
+    final userName = authViewModel.loginUser?.username ?? 'Sem nome';
+    await _trackOnce(userName);
+  }
+
+  /// Valida se o ponto está dentro de alguma cerca do grupo
+  Future<void> validarDentroDeAlgumaCerca(LatLng ponto) async {
+    final grupo = grupoSelecionado;
+
+    if (grupo == null) {
+      log("⚠️ Nenhum grupo selecionado.");
+      return;
+    }
+
+    if (grupo.cercasPoligonos.isEmpty) {
+      log("⚠️ Grupo selecionado não possui cercas.");
+      return;
+    }
+
+    for (var cerca in grupo.cercasPoligonos) {
+      if (pontoDentroDaCerca(ponto, cerca.pontos)) {
+        log('✅ DENTRO de uma cerca do grupo: ${cerca.nome}');
+        return;
+      }
+    }
+
+    log('🚧 FORA de todas as cercas do grupo: ${grupo.nome}');
+  }
+
+  /// Algoritmo Ray Casting para verificar se ponto está dentro do polígono
+  bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
+    int intersectCount = 0;
+
+    for (int j = 0; j < poligono.length; j++) {
+      final a = poligono[j];
+      final b = poligono[(j + 1) % poligono.length];
+
+      if (((a.latitude > ponto.latitude) != (b.latitude > ponto.latitude)) &&
+          (ponto.longitude <
+              (b.longitude - a.longitude) *
+                      (ponto.latitude - a.latitude) /
+                      (b.latitude - a.latitude) +
+                  a.longitude)) {
+        intersectCount++;
+      }
+    }
+
+    return (intersectCount % 2) == 1;
+  }
+
+  /// Salva localização localmente no SQLite
+  Future<void> _saveLocationLocally(PlaceModel location) async {
     try {
       trackList.insert(0, location);
       await trackRepository.insertRotaPoint(currentRotaId!, location);
@@ -134,8 +409,14 @@ abstract class TrackingViewModelBase with Store {
     } catch (e, stack) {
       log('Erro ao salvar localmente: $e\n$stack');
     }
+  }
 
-    // 🔹 Depois tenta enviar para o Supabase (sem travar o app)
+  /// Sincroniza localização com Supabase
+  Future<void> _syncLocationToSupabase(
+    PlaceModel location,
+    String name,
+    String uid,
+  ) async {
     try {
       final row = {
         'user_id': uid,
@@ -152,408 +433,143 @@ abstract class TrackingViewModelBase with Store {
     }
   }
 
-  @action
-  Future<void> stopTracking(PlaceModel finalLocation) async {
-    if (currentRotaId == null) {
-      log('Rastreamento já estava parado.');
-      return;
-    }
-
+  /// Sincroniza automaticamente a rota atual
+  Future<void> _autoSyncCurrentRoute() async {
     try {
-      await trackRepository.updateRotaFinal(currentRotaId!, finalLocation);
-      final uid = _supabase.auth.currentUser?.id;
-      if (uid != null) {
-        await _supabase.from('localizacoes').delete().eq("user_id", uid);
-        log('Localização final removida do Supabase');
-      }
+      await getAllRotas();
 
-      //Processo de sincronizar a rota online após finalizar o trajeto
-      try {
-        await getAllRotas();
-        PlaceModel rotaAuxiliar = listRotasLocal.firstWhere(
-          (element) {
-            return element.id == currentRotaId;
-          },
-        );
+      final rotaAuxiliar = listRotasLocal.firstWhere(
+        (element) => element.id == currentRotaId,
+      );
 
-        syncRota(rotaAuxiliar);
-      } catch (e) {
-        log("erro ao sincronizar automaticamente");
-      }
-
-      currentRotaId = null;
+      await syncRota(rotaAuxiliar);
     } catch (e) {
-      log("Erro ao parar rastreamento: $e");
+      log("Erro ao sincronizar automaticamente: $e");
     }
   }
 
-  @action
-  Future<bool> syncRota(PlaceModel rota) async {
-    try {
-      if (rota.id == null || rota.idSistema != null) return false;
-
-      final uid = _supabase.auth.currentUser?.id;
-      //Criar o json com todos os pontos da rota
-      var trajetoJson = await trackRepository.gerarJsonRotasComPontos(rota.id!);
-
-      //Criar o corpo do arquivo para realizar o insert
-      var dados = {
-        "user_id": uid,
-        "data_inicio": rota.dateInicial,
-        "data_fim": rota.dateFinal ?? DateTime.now().toString(),
-        "cordenadas": trajetoJson,
-      };
-
-      bool res = await trackRepository.syncRotas(dados, rota.id!);
-
-      if (res) {
-        await removeRota(rota.id ?? -1);
-        getAllRotas();
-        getRotasOnline();
-      }
-
-      return res;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future getAllRotas() async {
-    List<PlaceModel> rotasAux = await trackRepository.getAllRotas();
-    listRotasLocal = List.from(rotasAux);
-  }
-
-  Future<List<PlaceModel>> getPontosByRota(int rotaId) async {
-    return await trackRepository.getPontosByRotaId(rotaId);
-  }
-
-  @action
-  Future getRotasOnline() async {
-    changeLoading(true);
-
-    final uid = _supabase.auth.currentUser?.id;
-    List<Map<String, dynamic>> rotasOnline =
-        await trackRepository.getRotasOnline(uid!);
-
+  /// Converte lista de mapas em lista de PlaceModel
+  List<PlaceModel> _convertToPlaceModelList(
+    List<Map<String, dynamic>> rotasOnline,
+  ) {
     int index = -1;
 
-    //converter o response em objeto do tipo placemodel
-    List<PlaceModel> aux = rotasOnline.map(
-      (e) {
-        index++;
-        return PlaceModel(
-          id: index,
-          dateInicial: e['data_inicio'],
-          dateFinal: e['data_fim'],
-          coordenadas: e['cordenadas'],
-          idSistema: e['id_rota'],
-        );
-      },
-    ).toList();
-
-    //reordenar a lista
-
-    listRotasOnline = List.from(aux);
-
-    if (listRotasOnline.isNotEmpty) {
-      listRotasOnline.sort(
-        (a, b) => b.id!.compareTo(a.id!),
+    return rotasOnline.map((e) {
+      index++;
+      return PlaceModel(
+        id: index,
+        dateInicial: e['data_inicio'],
+        dateFinal: e['data_fim'],
+        coordenadas: e['cordenadas'],
+        idSistema: e['id_rota'],
       );
+    }).toList();
+  }
+
+  /// Processa nova localização no rastreamento
+  Future<void> _processNewLocation(
+    PlaceModel newLocal,
+    String userName,
+  ) async {
+    final newLatLng = LatLng(
+      newLocal.latitude ?? 0.0,
+      newLocal.longitude ?? 0.0,
+    );
+
+    // Calcula distância percorrida
+    if (lastPosition != null) {
+      final distance = const Distance().as(
+        LengthUnit.Meter,
+        lastPosition!,
+        newLatLng,
+      );
+      changeDistance(distance);
     }
 
-    changeLoading(false);
+    // Atualiza estado
+    lastPosition = newLatLng;
+    lastPlace = newLocal;
+    addressLabel = newLocal.adress ?? 'Endereço não encontrado';
+
+    // Salva localização
+    await trackLocation(newLocal, userName);
+
+    // Mantém histórico
+    trackListLoop.insert(0, newLocal);
+
+    // Valida cercas
+    await validarDentroDeAlgumaCerca(newLatLng);
   }
 
-  Future<List<PlaceModel>> readCordenadas(String cordenadas) async {
-    List<PlaceModel> trajeto = [];
+  /// Inicia o processo de rastreamento
+  Future<void> _iniciarRastreamento(String userName) async {
+    final newLocal = await _locationHelper.actuallyPosition();
 
-    if (cordenadas.isEmpty) return trajeto;
-
-    try {
-      var decoded = jsonDecode(cordenadas);
-
-      //criar variavel auxiliar para converter os pontos
-      var posicoes = decoded[0]['pontos'];
-
-      for (var p in posicoes) {
-        trajeto.add(PlaceModel(
-          id: p['id'],
-          latitude: p['latitude'],
-          longitude: p['longitude'],
-          dateInicial: p['data'],
-        ));
-      }
-    } catch (e) {
-      log("Erro ao converter as coordenadas");
-    }
-
-    return trajeto;
-  }
-
-  Future deleteRotaOnline(String id) async {
-    changeLoading(true);
-
-    await trackRepository.deleteRotaOnline(id);
-    getRotasOnline();
-
-    changeLoading(false);
-  }
-
-  //Sistema de tracking
-
-  // tracking.viewmodel.dart
-
-  bool _isTracking = false;
-
-  @action
-  Future<void> startTracking(String userName) async {
-    final gpsOn = await _locationHelper.checkGps(null);
-    if (gpsOn != true) return;
-
-    toggleTrackingState();
-    trackingMode = trackingLoop;
-    changeDistance(0, reset: true);
-
-    if (trackingLoop) {
-      final newLocal = await _locationHelper.actuallyPosition();
-
-      if (newLocal != null) {
-        if (currentRotaId == null) {
-          await insertTracking(newLocal);
-        }
-
-        lastPlace = newLocal;
-        lastPosition = LatLng(
-          newLocal.latitude ?? 0.0,
-          newLocal.longitude ?? 0.0,
-        );
-        addressLabel = newLocal.adress ?? 'Endereço não encontrado';
-
-        trackListLoop.insert(0, newLocal);
-
-        // Salvar dados do usuário no SharedPreferences para o background service
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user_id', _supabase.auth.currentUser?.id ?? '');
-        await prefs.setString('user_name', userName);
-        await prefs.setInt('tracking_interval', trackingInterval);
-
-        // 🔹 Faz a primeira leitura imediatamente
-        await _trackOnce(userName);
-
-        // 🔹 Inicia o serviço em background
-        await BackgroundLocationService.startService();
-
-        // 🔹 Inicia o loop contínuo com intervalo controlado (também funciona em background)
-        _startTrackingLoop(userName);
-      } else {
-        toggleTrackingState();
-        trackingLoop = false;
-      }
-    } else {
-      if (trackListLoop.isNotEmpty) {
-        await stopTracking(trackListLoop.first);
-      }
-
-      // 🔹 Para o serviço em background
-      await BackgroundLocationService.stopService();
-
-      _stopSharing();
-      trackListLoop.clear();
-      addressLabel = '';
-      lastPlace = null;
-      lastPosition = null;
-      distanceMeters = 0.0;
-
-      // 🔹 Encerra o loop se estiver rodando
-      stopTrackingLoop();
-    }
-  }
-
-  @action
-  Future<void> _startTrackingLoop(String userName) async {
-    if (_isTracking) return; // evita duplicidade
-    _isTracking = true;
-
-    log('Iniciando rastreamento com intervalo de $trackingInterval segundos');
-
-    while (_isTracking) {
-      final start = DateTime.now();
-
-      try {
-        // Obtém a nova posição
-        final newLocal = await _locationHelper.actuallyPosition();
-
-        if (newLocal != null) {
-          final newLatLng = LatLng(
-            newLocal.latitude ?? 0.0,
-            newLocal.longitude ?? 0.0,
-          );
-
-          // Calcula distância percorrida
-          if (lastPosition != null) {
-            distanceMeters += const Distance().as(
-              LengthUnit.Meter,
-              lastPosition!,
-              newLatLng,
-            );
-          }
-
-          // Atualiza estado atual
-          lastPosition = newLatLng;
-          lastPlace = newLocal;
-          addressLabel = newLocal.adress ?? 'Endereço não encontrado';
-
-          // 🔹 Salva no SQLite e tenta enviar ao Supabase
-          await trackLocation(newLocal, userName);
-
-          // Mantém histórico em memória
-          trackListLoop.insert(0, newLocal);
-          validarDentroDeAlgumaCerca(newLatLng);
-        } else {
-          log('Localização retornou null.');
-        }
-      } catch (e, stack) {
-        log('Erro no rastreamento: $e\n$stack');
-      }
-
-      // Calcula quanto tempo esperar até o próximo envio
-      final elapsed = DateTime.now().difference(start);
-      final waitTime = Duration(seconds: trackingInterval) - elapsed;
-
-      if (waitTime.isNegative) {
-        log('Envio demorou mais que o intervalo, iniciando novo ciclo imediatamente');
-        continue;
-      }
-
-      await Future.delayed(waitTime);
-    }
-
-    log('Rastreamento encerrado');
-  }
-
-  void stopTrackingLoop() {
-    _isTracking = false;
-    log('Solicitada parada do rastreamento');
-  }
-
-  @action
-  Future<void> _trackOnce(String userName) async {
-    try {
-      final newLocal = await _locationHelper.actuallyPosition();
-      if (newLocal != null) {
-        final newLatLng =
-            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
-
-        if (lastPosition != null) {
-          distanceMeters +=
-              const Distance().as(LengthUnit.Meter, lastPosition!, newLatLng);
-        }
-
-        lastPosition = newLatLng;
-        lastPlace = newLocal;
-        addressLabel = newLocal.adress ?? 'Endereço não encontrado';
-        await trackLocation(newLocal, userName);
-
-        trackListLoop.insert(0, newLocal);
-        validarDentroDeAlgumaCerca(newLatLng);
-      } else {
-        log('Localização retornou null.');
-      }
-    } catch (e) {
-      log('Erro no rastreamento: $e');
-      _stopSharing();
+    if (newLocal == null) {
       toggleTrackingState();
-    }
-  }
-
-  //Verificar a cerca
-
-  Future<void> validarDentroDeAlgumaCerca(LatLng ponto) async {
-    final grupo = grupoSelecionado;
-
-    if (grupo == null) {
-      log("⚠️ Nenhum grupo selecionado.");
+      trackingLoop = false;
       return;
     }
 
-    final cercas = grupo.cercasPoligonos;
-    if (cercas.isEmpty) {
-      log("⚠️ Grupo selecionado não possui cercas.");
-      return;
+    // Inicializa rota se necessário
+    if (currentRotaId == null) {
+      await insertTracking(newLocal);
     }
 
-    for (var cerca in grupo.cercasPoligonos) {
-      if (pontoDentroDaCerca(ponto, cerca.pontos)) {
-        log('✅ DENTRO de uma cerca do grupo: ${cerca.nome}');
-        return;
-      }
+    // Atualiza estado inicial
+    lastPlace = newLocal;
+    lastPosition = LatLng(
+      newLocal.latitude ?? 0.0,
+      newLocal.longitude ?? 0.0,
+    );
+    addressLabel = newLocal.adress ?? 'Endereço não encontrado';
+    trackListLoop.insert(0, newLocal);
+
+    // Salva dados para o background service
+    await _saveTrackingPreferences(userName);
+
+    // Primeira leitura imediata
+    await _trackOnce(userName);
+
+    // Inicia serviço em background
+    await BackgroundLocationService.startService();
+
+    // Inicia loop contínuo
+    await _startTrackingLoop(userName);
+  }
+
+  /// Para o processo de rastreamento
+  Future<void> _pararRastreamento() async {
+    if (trackListLoop.isNotEmpty) {
+      await stopTracking(trackListLoop.first);
     }
 
-    log('🚧 FORA de todas as cercas do grupo: ${grupo.nome}');
+    await BackgroundLocationService.stopService();
+
+    _stopSharing();
+    stopTrackingLoop();
+
+    // Limpa estado
+    trackListLoop.clear();
+    addressLabel = '';
+    lastPlace = null;
+    lastPosition = null;
+    distanceMeters = 0.0;
   }
 
-  bool pontoDentroDaCerca(LatLng ponto, List<LatLng> poligono) {
-    int intersectCount = 0;
-    for (int j = 0; j < poligono.length; j++) {
-      LatLng a = poligono[j];
-      LatLng b = poligono[(j + 1) % poligono.length];
-
-      if (((a.latitude > ponto.latitude) != (b.latitude > ponto.latitude)) &&
-          (ponto.longitude <
-              (b.longitude - a.longitude) *
-                      (ponto.latitude - a.latitude) /
-                      (b.latitude - a.latitude) +
-                  a.longitude)) {
-        intersectCount++;
-      }
-    }
-    return (intersectCount % 2) == 1;
+  /// Salva preferências de rastreamento
+  Future<void> _saveTrackingPreferences(String userName) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_id', _supabase.auth.currentUser?.id ?? '');
+    await prefs.setString('user_name', userName);
+    await prefs.setInt('tracking_interval', trackingInterval);
   }
 
-  //novo
-
-  toggleTrackingState() {
-    trackingLoop = !trackingLoop;
-  }
-
-  Future<void> primeiroTrack() async {
-    try {
-      final newLocal = await _locationHelper.actuallyPosition();
-
-      if (newLocal != null) {
-        // Calcular distância
-        final newLatLng =
-            LatLng(newLocal.latitude ?? 0.0, newLocal.longitude ?? 0.0);
-        if (lastPosition != null) {
-          distanceMeters += const Distance().as(
-            LengthUnit.Meter,
-            lastPosition!,
-            newLatLng,
-          );
-        }
-
-        lastPosition = newLatLng;
-        lastPlace = newLocal;
-        addressLabel = newLocal.adress ?? 'Endereço não encontrado';
-
-        await trackLocation(
-            newLocal, authViewModel.loginUser?.username ?? 'Sem nome');
-
-        trackListLoop.insert(0, newLocal);
-      } else {
-        log('Localização retornou null.');
-      }
-    } catch (e) {
-      log('Erro no rastreamento: $e');
-      _stopSharing();
-      toggleTrackingState();
-    }
-  }
-
-  void _stopSharing() async {
+  /// Finaliza compartilhamento
+  void _stopSharing() {
     temp?.cancel();
     temp = null;
-    log('Rastreamento finalizado');
     trackingMode = false;
+    log('Rastreamento finalizado');
   }
 }

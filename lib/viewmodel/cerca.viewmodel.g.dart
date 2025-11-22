@@ -153,26 +153,6 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
     });
   }
 
-  late final _$carregarTodasCercasLocaisAsyncAction = AsyncAction(
-      'CercaViewModelBase.carregarTodasCercasLocais',
-      context: context);
-
-  @override
-  Future<void> carregarTodasCercasLocais() {
-    return _$carregarTodasCercasLocaisAsyncAction
-        .run(() => super.carregarTodasCercasLocais());
-  }
-
-  late final _$sincronizarCercasLocaisAsyncAction = AsyncAction(
-      'CercaViewModelBase.sincronizarCercasLocais',
-      context: context);
-
-  @override
-  Future<void> sincronizarCercasLocais(String grupoId) {
-    return _$sincronizarCercasLocaisAsyncAction
-        .run(() => super.sincronizarCercasLocais(grupoId));
-  }
-
   late final _$carregarCercasGrupoAsyncAction =
       AsyncAction('CercaViewModelBase.carregarCercasGrupo', context: context);
 
@@ -209,6 +189,44 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
         .run(() => super.carregarCercaLocal(nome));
   }
 
+  late final _$deletarCercaLocalAsyncAction =
+      AsyncAction('CercaViewModelBase.deletarCercaLocal', context: context);
+
+  @override
+  Future<void> deletarCercaLocal(String nome) {
+    return _$deletarCercaLocalAsyncAction
+        .run(() => super.deletarCercaLocal(nome));
+  }
+
+  late final _$carregarTodasCercasLocaisAsyncAction = AsyncAction(
+      'CercaViewModelBase.carregarTodasCercasLocais',
+      context: context);
+
+  @override
+  Future<void> carregarTodasCercasLocais() {
+    return _$carregarTodasCercasLocaisAsyncAction
+        .run(() => super.carregarTodasCercasLocais());
+  }
+
+  late final _$carregarTodasCercasAsyncAction =
+      AsyncAction('CercaViewModelBase.carregarTodasCercas', context: context);
+
+  @override
+  Future<void> carregarTodasCercas() {
+    return _$carregarTodasCercasAsyncAction
+        .run(() => super.carregarTodasCercas());
+  }
+
+  late final _$sincronizarCercasLocaisAsyncAction = AsyncAction(
+      'CercaViewModelBase.sincronizarCercasLocais',
+      context: context);
+
+  @override
+  Future<void> sincronizarCercasLocais(String grupoId) {
+    return _$sincronizarCercasLocaisAsyncAction
+        .run(() => super.sincronizarCercasLocais(grupoId));
+  }
+
   late final _$listarCercasAsyncAction =
       AsyncAction('CercaViewModelBase.listarCercas', context: context);
 
@@ -223,24 +241,6 @@ mixin _$CercaViewModel on CercaViewModelBase, Store {
   @override
   Future<void> listarGrupos() {
     return _$listarGruposAsyncAction.run(() => super.listarGrupos());
-  }
-
-  late final _$carregarTodasCercasAsyncAction =
-      AsyncAction('CercaViewModelBase.carregarTodasCercas', context: context);
-
-  @override
-  Future<void> carregarTodasCercas() {
-    return _$carregarTodasCercasAsyncAction
-        .run(() => super.carregarTodasCercas());
-  }
-
-  late final _$deletarCercaLocalAsyncAction =
-      AsyncAction('CercaViewModelBase.deletarCercaLocal', context: context);
-
-  @override
-  Future<void> deletarCercaLocal(String nome) {
-    return _$deletarCercaLocalAsyncAction
-        .run(() => super.deletarCercaLocal(nome));
   }
 
   late final _$editarCercaAsyncAction =

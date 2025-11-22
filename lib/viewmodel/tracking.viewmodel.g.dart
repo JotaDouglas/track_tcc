@@ -249,6 +249,16 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
     });
   }
 
+  late final _$setTrackingIntervalAsyncAction = AsyncAction(
+      'TrackingViewModelBase.setTrackingInterval',
+      context: context);
+
+  @override
+  Future setTrackingInterval(int seconds) {
+    return _$setTrackingIntervalAsyncAction
+        .run(() => super.setTrackingInterval(seconds));
+  }
+
   late final _$insertTrackingAsyncAction =
       AsyncAction('TrackingViewModelBase.insertTracking', context: context);
 
@@ -256,14 +266,6 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
   Future<void> insertTracking(PlaceModel initialLocation) {
     return _$insertTrackingAsyncAction
         .run(() => super.insertTracking(initialLocation));
-  }
-
-  late final _$removeRotaAsyncAction =
-      AsyncAction('TrackingViewModelBase.removeRota', context: context);
-
-  @override
-  Future<void> removeRota(int rotaId) {
-    return _$removeRotaAsyncAction.run(() => super.removeRota(rotaId));
   }
 
   late final _$trackLocationAsyncAction =
@@ -284,20 +286,28 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
         .run(() => super.stopTracking(finalLocation));
   }
 
-  late final _$syncRotaAsyncAction =
-      AsyncAction('TrackingViewModelBase.syncRota', context: context);
+  late final _$removeRotaAsyncAction =
+      AsyncAction('TrackingViewModelBase.removeRota', context: context);
 
   @override
-  Future<bool> syncRota(PlaceModel rota) {
-    return _$syncRotaAsyncAction.run(() => super.syncRota(rota));
+  Future<void> removeRota(int rotaId) {
+    return _$removeRotaAsyncAction.run(() => super.removeRota(rotaId));
   }
 
   late final _$getRotasOnlineAsyncAction =
       AsyncAction('TrackingViewModelBase.getRotasOnline', context: context);
 
   @override
-  Future<dynamic> getRotasOnline() {
+  Future<void> getRotasOnline() {
     return _$getRotasOnlineAsyncAction.run(() => super.getRotasOnline());
+  }
+
+  late final _$syncRotaAsyncAction =
+      AsyncAction('TrackingViewModelBase.syncRota', context: context);
+
+  @override
+  Future<bool> syncRota(PlaceModel rota) {
+    return _$syncRotaAsyncAction.run(() => super.syncRota(rota));
   }
 
   late final _$startTrackingAsyncAction =
@@ -329,18 +339,7 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
       ActionController(name: 'TrackingViewModelBase', context: context);
 
   @override
-  void setTrackingInterval(int seconds) {
-    final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
-        name: 'TrackingViewModelBase.setTrackingInterval');
-    try {
-      return super.setTrackingInterval(seconds);
-    } finally {
-      _$TrackingViewModelBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic changeDistance(double value, {bool reset = false}) {
+  void changeDistance(double value, {bool reset = false}) {
     final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
         name: 'TrackingViewModelBase.changeDistance');
     try {
@@ -351,11 +350,22 @@ mixin _$TrackingViewModel on TrackingViewModelBase, Store {
   }
 
   @override
-  dynamic changeLoading(bool value) {
+  void changeLoading(bool value) {
     final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
         name: 'TrackingViewModelBase.changeLoading');
     try {
       return super.changeLoading(value);
+    } finally {
+      _$TrackingViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void toggleTrackingState() {
+    final _$actionInfo = _$TrackingViewModelBaseActionController.startAction(
+        name: 'TrackingViewModelBase.toggleTrackingState');
+    try {
+      return super.toggleTrackingState();
     } finally {
       _$TrackingViewModelBaseActionController.endAction(_$actionInfo);
     }
