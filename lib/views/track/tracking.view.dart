@@ -368,21 +368,30 @@ class _TrackPageState extends State<TrackPage> {
               label: 'Econômico',
               color: Colors.green,
               isSelected: trackVM.trackingInterval == 60,
-              onTap: () => setState(() => trackVM.setTrackingInterval(60)),
+              onTap: () async {
+                await trackVM.setTrackingInterval(60);
+                setState(() {});
+              },
             ),
             _buildModeButton(
               context,
               label: 'Eficiente',
               color: Colors.orange,
               isSelected: trackVM.trackingInterval == 30,
-              onTap: () => setState(() => trackVM.setTrackingInterval(30)),
+              onTap: () async {
+                await trackVM.setTrackingInterval(30);
+                setState(() {});
+              },
             ),
             _buildModeButton(
               context,
               label: 'Preciso',
               color: Colors.red,
-              isSelected: trackVM.trackingInterval == 10,
-              onTap: () => setState(() => trackVM.setTrackingInterval(10)),
+              isSelected: trackVM.trackingInterval == 15,
+              onTap: () async {
+                await trackVM.setTrackingInterval(15);
+                setState(() {});
+              },
             ),
           ],
         ),
@@ -567,7 +576,7 @@ class _TrackPageState extends State<TrackPage> {
             onPressed: () async {
               await _requestLocationPermission(context);
               await trackVM.startTracking(nome);
-              if (!trackVM.trackingMode) {
+              if (!trackVM.trackingMode && mounted) {
                 setState(() {
                   _currentStep = 0;
                 });
@@ -719,8 +728,8 @@ String _getModeDescription(int interval) {
       return 'Atualiza a cada 60 segundos — maior economia de bateria.';
     case 30:
       return 'Atualiza a cada 30 segundos — equilíbrio entre precisão e bateria.';
-    case 10:
-      return 'Atualiza a cada 10 segundos — localização em tempo real e maior consumo de bateria.';
+    case 15:
+      return 'Atualiza a cada 15 segundos — localização em tempo real e maior consumo de bateria.';
     default:
       return '';
   }

@@ -74,11 +74,13 @@ abstract class TrackingViewModelBase with Store {
   Group? grupoSelecionado;
 
   @action
-  Future<void> setTrackingInterval(int seconds) async {
+  setTrackingInterval(int seconds) async {
     trackingInterval = seconds;
 
+    // Atualizar o intervalo no SharedPreferences para o background service
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('tracking_interval', trackingInterval);
+    await prefs.setInt('tracking_interval', seconds);
+    return 1;
   }
 
   @action
