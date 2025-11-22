@@ -1,10 +1,16 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:track_tcc_app/utils/validators.util.dart';
 import 'package:track_tcc_app/views/widgets/loading.widget.dart';
+import 'package:track_tcc_app/views/widgets/login/auth_header.widget.dart';
+import 'package:track_tcc_app/views/widgets/login/auth_navigation_link.widget.dart';
+import 'package:track_tcc_app/views/widgets/login/auth_text_field.widget.dart';
+import 'package:track_tcc_app/views/widgets/login/primary_button.widget.dart';
+import 'package:track_tcc_app/views/widgets/login/terms_checkbox.widget.dart';
+import 'package:track_tcc_app/views/widgets/login/terms_dialog.widget.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 class CadastroView extends StatefulWidget {
@@ -16,77 +22,120 @@ class CadastroView extends StatefulWidget {
 
 class CadastroViewState extends State<CadastroView> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
-  LoginViewModel login = LoginViewModel();
-  bool aceitouTermos = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
-  Future _validateAndSubmit(String email, String password) async {
+  late LoginViewModel _loginViewModel;
+  bool _aceitouTermos = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<bool> _validateAndSubmit() async {
     if (!_formKey.currentState!.validate()) {
       return false;
-    } else {
-      return true;
+    }
+    return true;
+  }
+
+  Future<bool> _submit() async {
+    return await _loginViewModel.createEmailAndPassword(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+  }
+
+  Future<void> _handleCadastro() async {
+    try {
+      if (!_aceitouTermos) {
+        await Dialogs.showAlert(
+          context: context,
+          title: "Atenção!",
+          message: "Você precisa aceitar os termos de responsabilidade para continuar.",
+        );
+        return;
+      }
+
+      final isValid = await _validateAndSubmit();
+      if (!isValid) return;
+
+      if (!mounted) return;
+
+      Dialogs.showLoading(context, null);
+
+      final sucesso = await _submit();
+
+      if (sucesso) {
+        if (mounted) {
+          await Dialogs.showAlert(
+            context: context,
+            title: "Sucesso!",
+            message: "Sua conta foi criada com sucesso!",
+          );
+        }
+
+        if (mounted && Navigator.canPop(context)) {
+          GoRouter.of(context).pushReplacement('/login/register/name');
+        }
+      } else {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+
+        if (mounted) {
+          await Dialogs.showAlert(
+            context: context,
+            title: "Erro!",
+            message: "Ocorreu um erro ao criar sua conta. Verifique suas informações e tente novamente.",
+          );
+        }
+      }
+    } catch (e) {
+      log("Erro ao validar e enviar: $e");
+
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (mounted) {
+        await Dialogs.showAlert(
+          context: context,
+          title: "Erro!",
+          message: "Ocorreu um erro ao criar sua conta. Verifique a sua conexão e suas informações.",
+        );
+      }
     }
   }
 
-  Future _submit(String email, String password) async {
-    bool logar =
-        await login.createEmailAndPassword(email: email, password: password);
-    if (logar) {
-      return true;
-    } else {
-      return false;
-    }
+  void _handleTermsAccept() {
+    setState(() {
+      _aceitouTermos = true;
+    });
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'O e-mail é obrigatório';
-    }
-
-    final emailRegex =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-
-    if (!emailRegex.hasMatch(value)) {
-      return 'Digite um e-mail válido';
-    }
-
-    return null;
+  void _handleTermsToggle(bool value) {
+    setState(() {
+      _aceitouTermos = value;
+    });
   }
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'A senha é obrigatória';
-    }
-
-    if (value.length < 6 || value.length > 12) {
-      return 'A senha deve ter entre 6 e 12 caracteres';
-    }
-
-    final hasLetters = RegExp(r'[a-zA-Z]').hasMatch(value);
-    final hasNumbers = RegExp(r'\d').hasMatch(value);
-
-    if (!(hasLetters && hasNumbers)) {
-      return 'A senha deve conter letras e números';
-    }
-
-    return null;
-  }
-
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'A senha é obrigatória';
-    }
-    if (value != passwordController.text) {
-      return 'As senhas não coincidem';
-    }
-    return null;
+  void _showTermsDialog() {
+    TermsDialog.show(
+      context: context,
+      onAccept: _handleTermsAccept,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    login = Provider.of<LoginViewModel>(context);
+    _loginViewModel = Provider.of<LoginViewModel>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -95,82 +144,60 @@ class CadastroViewState extends State<CadastroView> {
           key: _formKey,
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    colors: [
-                      Colors.orange.shade900,
-                      Colors.orange.shade800,
-                      Colors.orange.shade400,
-                    ],
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SizedBox(height: 80),
-                      FadeInUp(
-                        duration: const Duration(milliseconds: 1000),
-                        child: const Text("Cadastro",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 40)),
-                      ),
-                      const SizedBox(height: 10),
-                      FadeInUp(
-                        duration: const Duration(milliseconds: 1300),
-                        child: const Text("Crie sua conta",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 18)),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
+              const AuthHeader(
+                title: "Cadastro",
+                subtitle: "Crie sua conta",
               ),
               Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  // borderRadius:  BorderRadius.only(
-                  //     topLeft: Radius.circular(60), topRight: Radius.circular(60)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(30),
                   child: Column(
                     children: <Widget>[
                       const SizedBox(height: 40),
-                      FadeInUp(
-                          duration: const Duration(milliseconds: 1400),
-                          child: textFieldModelo("E-mail",
-                              icon: Icons.email,
-                              controller: emailController,
-                              validator: _validateEmail)),
-                      FadeInUp(
-                        duration: const Duration(milliseconds: 1400),
-                        child: textFieldModelo("Senha",
-                            icon: Icons.lock,
-                            controller: passwordController,
-                            isPassword: true,
-                            validator: _validatePassword),
+                      AuthTextField(
+                        hintText: "E-mail",
+                        icon: Icons.email,
+                        controller: _emailController,
+                        validator: Validators.validateEmail,
                       ),
-                      FadeInUp(
-                        duration: const Duration(milliseconds: 1400),
-                        child: textFieldModelo("Confirme a senha",
-                            icon: Icons.lock,
-                            controller: confirmPasswordController,
-                            isPassword: true,
-                            validator: _validateConfirmPassword),
+                      AuthTextField(
+                        hintText: "Senha",
+                        icon: Icons.lock,
+                        controller: _passwordController,
+                        isPassword: true,
+                        validator: Validators.validatePassword,
+                      ),
+                      AuthTextField(
+                        hintText: "Confirme a senha",
+                        icon: Icons.lock,
+                        controller: _confirmPasswordController,
+                        isPassword: true,
+                        validator: (value) => Validators.validateConfirmPassword(
+                          value,
+                          _passwordController.text,
+                        ),
                       ),
                       const SizedBox(height: 20),
-                      _checkboxTermos(),
+                      TermsCheckbox(
+                        value: _aceitouTermos,
+                        onChanged: _handleTermsToggle,
+                        onTermsTap: _showTermsDialog,
+                      ),
                       const SizedBox(height: 40),
-                      _btnCadastrar(),
+                      PrimaryButton(
+                        text: "Cadastrar",
+                        onPressed: _handleCadastro,
+                      ),
                       const SizedBox(height: 50),
-                      _btnTelaLogin(),
+                      AuthNavigationLink(
+                        text: "Já tem uma conta?",
+                        linkText: "Fazer login",
+                        onPressed: () => GoRouter.of(context).pop(),
+                      ),
                     ],
                   ),
                 ),
@@ -178,263 +205,6 @@ class CadastroViewState extends State<CadastroView> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget textFieldModelo(String hint,
-      {bool isPassword = false,
-      required TextEditingController controller,
-      required String? Function(String?) validator,
-      required IconData icon}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isPassword,
-        validator: validator,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: Icon(icon),
-          hintStyle: const TextStyle(color: Colors.grey),
-          // border: InputBorder.none,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _mostrarTermos() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            "Termo de Consentimento e Compartilhamento de Dados",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Ao utilizar este aplicativo, o usuário declara estar ciente e de acordo com a coleta e o tratamento de dados de localização, identificação e autenticação estritamente para fins de rastreamento pessoal e compartilhamento voluntário com contatos autorizados.",
-                  style: TextStyle(fontSize: 14, height: 1.5),
-                  textAlign: TextAlign.justify,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Nenhuma informação é tornada pública ou utilizada para fins comerciais.",
-                  style: TextStyle(fontSize: 14, height: 1.5),
-                  textAlign: TextAlign.justify,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "O usuário pode encerrar o compartilhamento a qualquer momento e solicitar a exclusão definitiva de seus dados conforme os direitos previstos na Lei nº 13.709/2018 (Lei Geral de Proteção de Dados - LGPD).",
-                  style: TextStyle(fontSize: 14, height: 1.5),
-                  textAlign: TextAlign.justify,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Ao clicar em \"Aceito os termos\", o usuário consente com o uso dos dados nos limites descritos acima.",
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.5,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange[900],
-                  ),
-                  textAlign: TextAlign.justify,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                "Fechar",
-                style: TextStyle(color: Colors.orange[900]),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  aceitouTermos = true;
-                });
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange[900],
-              ),
-              child: const Text(
-                "Aceitar",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _checkboxTermos() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1500),
-      child: Row(
-        children: [
-          Checkbox(
-            value: aceitouTermos,
-            onChanged: (bool? value) {
-              setState(() {
-                aceitouTermos = value ?? false;
-              });
-            },
-            activeColor: Colors.orange[900],
-          ),
-          Expanded(
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      aceitouTermos = !aceitouTermos;
-                    });
-                  },
-                  child: Text(
-                    "Aceito os ",
-                    style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _mostrarTermos,
-                  child: Text(
-                    "termos de responsabilidade",
-                    style: TextStyle(
-                      color: Colors.orange[900],
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      aceitouTermos = !aceitouTermos;
-                    });
-                  },
-                  child: Text(
-                    " e uso do aplicativo",
-                    style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _btnCadastrar() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1600),
-      child: MaterialButton(
-        onPressed: () async {
-          try {
-            // Valida se os termos foram aceitos
-            if (!aceitouTermos) {
-              await Dialogs.showAlert(
-                context: context,
-                title: "Atenção!",
-                message: "Você precisa aceitar os termos de responsabilidade para continuar.",
-              );
-              return;
-            }
-
-            var validate = await _validateAndSubmit(
-                emailController.text, passwordController.text);
-
-            if (!validate) return;
-
-            if (!mounted) return;
-
-            Dialogs.showLoading(context, null);
-            //123345
-            bool criar =
-                await _submit(emailController.text, passwordController.text);
-            if (criar) {
-              if (mounted) {
-                await Dialogs.showAlert(
-                    context: context,
-                    title: "Sucesso!",
-                    message: "Sua conta foi criada com sucesso!");
-              }
-
-              if (mounted) {
-                if (mounted && Navigator.canPop(context)) {
-                  GoRouter.of(context).pushReplacement('/login/register/name');
-                }
-              }
-            } else {
-              if (mounted && Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-              if (mounted) {
-                await Dialogs.showAlert(
-                  context: context,
-                  title: "Erro!",
-                  message:
-                      "Ocorreu um erro ao criar sua conta. Verifique suas informações e tente novamente.",
-                );
-              }
-            }
-          } catch (e) {
-            log("Erro ao validar e enviar: $e");
-            if (mounted && Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
-            if (mounted) {
-              await Dialogs.showAlert(
-                context: context,
-                title: "Erro!",
-                message:
-                    "Ocorreu um erro ao criar sua conta. Verifique a sua conexão e suas informações.",
-              );
-            }
-          }
-        },
-        height: 50,
-        color: Colors.orange[900],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        child: const Center(
-          child: Text("Cadastrar",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-      ),
-    );
-  }
-
-  Widget _btnTelaLogin() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1500),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Já tem uma conta?", style: TextStyle(color: Colors.grey[700])),
-          TextButton(
-            onPressed: () {
-              GoRouter.of(context).pop();
-            },
-            child: Text("Fazer login",
-                style: TextStyle(
-                    color: Colors.orange[900], fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
