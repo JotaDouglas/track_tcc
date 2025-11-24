@@ -268,4 +268,28 @@ abstract class LoginViewModelBase with Store {
       return null;
     }
   }
+
+  // Exclui a conta do usuário permanentemente
+  Future<bool> deleteUsuario() async {
+    try {
+      if (loginUser?.uidUsuario == null) {
+        log("Usuário não está logado");
+        return false;
+      }
+
+      final success = await _authRepository.deleteAccount(loginUser!.uidUsuario!);
+
+      if (success) {
+        // Limpa os dados locais após exclusão bem-sucedida
+        await _clearUserFromPreferences();
+        loginUser = null;
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      log("Erro ao excluir conta do usuário: $e");
+      return false;
+    }
+  }
 }
