@@ -228,6 +228,8 @@ class _TrackPageState extends State<TrackPage> {
   // Step 1: Seleção de Cerca
   Widget _buildStep1(
       BuildContext context, CercaViewModel cercaVM, TrackingViewModel track) {
+    final grupoVM = Provider.of<GrupoViewModel>(context, listen: false);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -304,6 +306,7 @@ class _TrackPageState extends State<TrackPage> {
                               .firstWhere((g) => g.nome == value);
                           cercaVM.grupoSelecionado = grupoSelected;
                           track.grupoSelecionado = grupoSelected;
+                          track.grupoViewModel = grupoVM;
                         }
                       },
                     ),

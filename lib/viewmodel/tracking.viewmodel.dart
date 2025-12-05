@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +12,9 @@ import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/model/place.model.dart';
 import 'package:track_tcc_app/repository/track.repository.dart';
 import 'package:track_tcc_app/services/background_location_service.dart';
+import 'package:track_tcc_app/utils/message.util.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/grupo/grupo.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
 
 part 'tracking.viewmodel.g.dart';
@@ -72,6 +75,21 @@ abstract class TrackingViewModelBase with Store {
 
   @observable
   Group? grupoSelecionado;
+
+  @observable
+  String? _userName;
+
+  // Controle de estado de cerca para notificações
+  @observable
+  Map<String, bool> estadoCercaAnterior = {}; // cercaNome -> estaDentro
+
+  @observable
+  String? ultimaCercaNotificada;
+
+  GrupoViewModel? grupoViewModel;
+
+  @action
+  changeUserName(String name) => _userName = name;
 
   @action
   setTrackingInterval(int seconds) async {
@@ -355,6 +373,7 @@ abstract class TrackingViewModelBase with Store {
   Future<void> primeiroTrack() async {
     final userName = authViewModel.loginUser?.username ?? 'Sem nome';
     await _trackOnce(userName);
+    await changeUserName(userName);
   }
 
   // Valida se o ponto está dentro de alguma cerca do grupo
@@ -371,14 +390,60 @@ abstract class TrackingViewModelBase with Store {
       return;
     }
 
+    final nomeUsuario = _userName ?? 'Usuário';
+    bool dentroDeAlgumaCerca = false;
+
+    // Verifica em qual cerca o usuário está
     for (var cerca in grupo.cercasPoligonos) {
       if (pontoDentroDaCerca(ponto, cerca.pontos)) {
         log('DENTRO de uma cerca do grupo: ${cerca.nome}');
-        return;
+        dentroDeAlgumaCerca = true;
+
+        // Verifica se houve mudança de estado para esta cerca
+        final estadoAnterior = estadoCercaAnterior[cerca.nome];
+
+        if (estadoAnterior == null || estadoAnterior == false) {
+          // Entrou na cerca (estava fora ou é a primeira vez)
+          log('MUDANÇA DE ESTADO: Entrou na cerca ${cerca.nome}');
+
+          await enviarNotificacaoCerca(
+            nomeCerca: cerca.nome,
+            estaDentro: true,
+            nomeUsuario: nomeUsuario,
+          );
+
+          // Atualiza o estado
+          estadoCercaAnterior[cerca.nome] = true;
+          ultimaCercaNotificada = cerca.nome;
+        }
+
+        break; // Considera apenas a primeira cerca em que está dentro
       }
     }
 
-    log('FORA de todas as cercas do grupo: ${grupo.nome}');
+    // Se não está dentro de nenhuma cerca
+    if (!dentroDeAlgumaCerca) {
+      log('FORA de todas as cercas do grupo: ${grupo.nome}');
+
+      // Verifica se saiu de alguma cerca
+      for (var cerca in grupo.cercasPoligonos) {
+        final estadoAnterior = estadoCercaAnterior[cerca.nome];
+
+        if (estadoAnterior == true) {
+          // Saiu da cerca
+          log('MUDANÇA DE ESTADO: Saiu da cerca ${cerca.nome}');
+
+          await enviarNotificacaoCerca(
+            nomeCerca: cerca.nome,
+            estaDentro: false,
+            nomeUsuario: nomeUsuario,
+          );
+
+          // Atualiza o estado
+          estadoCercaAnterior[cerca.nome] = false;
+        }
+      }
+    }
   }
 
   // Algoritmo Ray Casting para verificar se ponto está dentro do polígono
@@ -400,6 +465,57 @@ abstract class TrackingViewModelBase with Store {
     }
 
     return (intersectCount % 2) == 1;
+  }
+
+  // Envia notificação de cerca aos membros do grupo
+  @action
+  Future<void> enviarNotificacaoCerca({
+    required String nomeCerca,
+    required bool estaDentro,
+    required String nomeUsuario,
+  }) async {
+    try {
+      final grupo = grupoSelecionado;
+
+      if (grupo == null) {
+        log("Nenhum grupo selecionado para enviar notificação");
+        return;
+      }
+
+      // Obtém os message IDs dos membros do grupo
+      if (grupoViewModel == null) {
+        log("GrupoViewModel não inicializado");
+        return;
+      }
+
+      final messageIds = await grupoViewModel!.obterMessageIdsDoGrupo(grupo.id);
+
+      if (messageIds.isEmpty) {
+        log("Nenhum membro com message_id no grupo");
+        return;
+      }
+
+      // Formata a hora no formato HH:mm
+      final horaAtual = DateFormat('HH:mm').format(DateTime.now());
+
+      // Define o título e mensagem baseado no estado
+      final titulo = estaDentro
+          ? "Entrou na cerca: $nomeCerca"
+          : "Saiu da cerca: $nomeCerca";
+
+      final mensagem = "De: $nomeUsuario às $horaAtual";
+
+      // Envia notificação via OneSignal
+      await enviarNotificacaoOneSignal(
+        playerId: messageIds,
+        titulo: titulo,
+        mensagem: mensagem,
+      );
+
+      log("Notificação de cerca enviada: $titulo - $mensagem");
+    } catch (e) {
+      log("Erro ao enviar notificação de cerca: $e");
+    }
   }
 
   // Salva localização localmente no SQLite
@@ -506,6 +622,8 @@ abstract class TrackingViewModelBase with Store {
   // Inicia o processo de rastreamento
   Future<void> _iniciarRastreamento(String userName) async {
     final newLocal = await _locationHelper.actuallyPosition();
+
+    changeUserName(userName);
 
     if (newLocal == null) {
       toggleTrackingState();
