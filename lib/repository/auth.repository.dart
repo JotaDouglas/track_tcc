@@ -57,16 +57,33 @@ class AuthRepository {
 
   Future loadUsuario(String id) async {
     try {
-      
+
       final data = await supabase
           .from('usuarios')
           .select()
-          .eq('user_id', id); 
-      
+          .eq('user_id', id);
+
       return data.first;
-          
+
     } catch (e) {
       return null;
+    }
+  }
+
+  // Exclui o usuário da tabela usuarios e faz sign out
+  Future<bool> deleteAccount(String userId) async {
+    try {
+      // Deleta os dados do usuário da tabela usuarios
+      await supabase.from('usuarios').delete().eq('user_id', userId);
+
+      // Faz sign out da conta
+      await supabase.auth.signOut();
+
+      log("Conta do usuário excluída com sucesso");
+      return true;
+    } catch (e) {
+      log("Erro ao excluir conta: $e");
+      return false;
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/login.viewmodel.dart';
+import 'package:track_tcc_app/viewmodel/tracking.viewmodel.dart';
 
 class PerfilView extends StatefulWidget {
   const PerfilView({super.key});
@@ -12,10 +13,28 @@ class PerfilView extends StatefulWidget {
 }
 
 class _PerfilViewState extends State<PerfilView> {
+  final TrackingViewModel trackingVM = TrackingViewModel();
+  bool isLoadingRotas = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarTrajetos();
+  }
+
+  Future<void> _carregarTrajetos() async {
+    await trackingVM.getAllRotas();
+    await trackingVM.getRotasOnline();
+    if (mounted) {
+      setState(() {
+        isLoadingRotas = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     int amigos = 120;
-    final int rotasCompartilhadas = 45;
     final double totalKm = 327.8;
 
     final authViewModel = Provider.of<LoginViewModel>(context);
@@ -23,6 +42,10 @@ class _PerfilViewState extends State<PerfilView> {
     var user = authViewModel.loginUser;
 
     amigos = amizadeVM.friends.length;
+
+    // Calcula a contagem real de trajetos
+    final int totalTrajetos = trackingVM.listRotasLocal.length +
+                               trackingVM.listRotasOnline.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -80,42 +103,25 @@ class _PerfilViewState extends State<PerfilView> {
 
                 const SizedBox(height: 16),
 
-                // Botão de ação (opcional)
-
                 // Contagens
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Column(
                       children: [
-                        Text(
-                          '$amigos',
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const Text('Amigos'),
-                      ],
-                    ),
-                    const SizedBox(width: 40),
-                    Column(
-                      children: [
-                        Text(
-                          '$rotasCompartilhadas',
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
+                        isLoadingRotas
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                '$totalTrajetos',
+                                style: const TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                        const SizedBox(height: 4),
                         const Text('Trajetos', textAlign: TextAlign.center),
-                      ],
-                    ),
-                    const SizedBox(width: 40),
-                    Column(
-                      children: [
-                        Text(
-                          totalKm.toStringAsFixed(1),
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const Text('Km', textAlign: TextAlign.center),
                       ],
                     ),
                   ],

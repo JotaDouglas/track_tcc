@@ -215,6 +215,175 @@ class _EditarPerfilViewState extends State<EditarPerfilView> {
                       style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),
+
+              const SizedBox(height: 48),
+
+              // Divisor
+              const Divider(thickness: 1),
+              const SizedBox(height: 16),
+
+              // Texto de aviso
+              const Text(
+                'Zona de Perigo',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Esta ação é irreversível e excluirá permanentemente sua conta.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+
+              // Botão Excluir Conta
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    // Primeira confirmação
+                    final confirmacao1 = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Excluir Conta'),
+                        content: const Text(
+                          'Você tem certeza que deseja excluir sua conta? '
+                          'Esta ação não pode ser desfeita e todos os seus dados serão perdidos.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            child: const Text('Continuar'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmacao1 != true) return;
+
+                    // Segunda confirmação
+                    final confirmacao2 = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text(
+                          'Confirmação Final',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        content: const Text(
+                          'Esta é sua última chance. Deseja realmente excluir sua conta permanentemente?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancelar'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Text(
+                              'Sim, excluir minha conta',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmacao2 != true) return;
+
+                    try {
+                      // Mostra loading
+                      Dialogs.showLoading(context, null);
+
+                      // Chama o método de exclusão
+                      final sucesso = await loginVM.deleteUsuario();
+
+                      // Fecha o loading
+                      Navigator.pop(context);
+
+                      if (sucesso) {
+                        if (mounted) {
+                          // Mostra mensagem de sucesso e redireciona para login
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => AlertDialog(
+                              title: const Text("Conta Excluída"),
+                              content: const Text(
+                                "Sua conta foi excluída com sucesso.",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    GoRouter.of(context).go('/');
+                                  },
+                                  child: const Text("OK"),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Não foi possível excluir a conta. Tente novamente.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      // Fecha o loading em caso de erro
+                      Navigator.pop(context);
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Ocorreu um erro ao excluir a conta.',
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    side: const BorderSide(color: Colors.red, width: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text(
+                    'Excluir Conta',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
