@@ -467,6 +467,25 @@ abstract class TrackingViewModelBase with Store {
     return (intersectCount % 2) == 1;
   }
 
+  // Obtém o message_id do usuário atual do banco
+  Future<String?> _obterMessageIdUsuarioAtual() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return null;
+
+      final resultado = await _supabase
+          .from('usuarios')
+          .select('message_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      return resultado?['message_id'] as String?;
+    } catch (e) {
+      log("Erro ao obter message_id do usuário atual: $e");
+      return null;
+    }
+  }
+
   // Envia notificação de cerca aos membros do grupo
   @action
   Future<void> enviarNotificacaoCerca({
@@ -495,6 +514,9 @@ abstract class TrackingViewModelBase with Store {
         return;
       }
 
+      // Obtém o message_id do usuário atual para ignorá-lo
+      final meuMessageId = await _obterMessageIdUsuarioAtual();
+
       // Formata a hora no formato HH:mm
       final horaAtual = DateFormat('HH:mm').format(DateTime.now());
 
@@ -505,11 +527,12 @@ abstract class TrackingViewModelBase with Store {
 
       final mensagem = "De: $nomeUsuario às $horaAtual";
 
-      // Envia notificação via OneSignal
+      // Envia notificação via OneSignal, ignorando o próprio usuário
       await enviarNotificacaoOneSignal(
         playerId: messageIds,
         titulo: titulo,
         mensagem: mensagem,
+        ignorarPlayerId: meuMessageId,
       );
 
       log("Notificação de cerca enviada: $titulo - $mensagem");
