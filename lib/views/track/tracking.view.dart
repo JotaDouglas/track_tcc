@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:track_tcc_app/model/grupo/grupo.model.dart';
 import 'package:track_tcc_app/viewmodel/amizade.viewmodel.dart';
 import 'package:track_tcc_app/viewmodel/cerca.viewmodel.dart';
@@ -228,6 +229,8 @@ class _TrackPageState extends State<TrackPage> {
   // Step 1: Seleção de Cerca
   Widget _buildStep1(
       BuildContext context, CercaViewModel cercaVM, TrackingViewModel track) {
+    final grupoVM = Provider.of<GrupoViewModel>(context, listen: false);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -304,6 +307,7 @@ class _TrackPageState extends State<TrackPage> {
                               .firstWhere((g) => g.nome == value);
                           cercaVM.grupoSelecionado = grupoSelected;
                           track.grupoSelecionado = grupoSelected;
+                          track.grupoViewModel = grupoVM;
                         }
                       },
                     ),
@@ -467,6 +471,25 @@ class _TrackPageState extends State<TrackPage> {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () async {
+                    // Obtém o message_id do usuário atual antes das operações assíncronas
+                    final loginVM = Provider.of<LoginViewModel>(context, listen: false);
+                    final userId = loginVM.loginUser?.uidUsuario;
+                    String? meuMessageId;
+
+                    if (userId != null) {
+                      try {
+                        final supabase = Supabase.instance.client;
+                        final resultado = await supabase
+                            .from('usuarios')
+                            .select('message_id')
+                            .eq('user_id', userId)
+                            .maybeSingle();
+                        meuMessageId = resultado?['message_id'] as String?;
+                      } catch (e) {
+                        // Ignora erro silenciosamente
+                      }
+                    }
+
                     // Busca os message_ids do grupo selecionado
                     List<String> messageIds = [];
                     if (trackVM.grupoSelecionado != null) {
@@ -483,6 +506,7 @@ class _TrackPageState extends State<TrackPage> {
                         context,
                         messageIds,
                         nomeCompleto,
+                        meuMessageId: meuMessageId,
                       );
                     }
                   },
@@ -502,6 +526,25 @@ class _TrackPageState extends State<TrackPage> {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () async {
+                    // Obtém o message_id do usuário atual antes das operações assíncronas
+                    final loginVM = Provider.of<LoginViewModel>(context, listen: false);
+                    final userId = loginVM.loginUser?.uidUsuario;
+                    String? meuMessageId;
+
+                    if (userId != null) {
+                      try {
+                        final supabase = Supabase.instance.client;
+                        final resultado = await supabase
+                            .from('usuarios')
+                            .select('message_id')
+                            .eq('user_id', userId)
+                            .maybeSingle();
+                        meuMessageId = resultado?['message_id'] as String?;
+                      } catch (e) {
+                        // Ignora erro silenciosamente
+                      }
+                    }
+
                     // Busca os message_ids do grupo selecionado
                     List<String> messageIds = [];
                     if (trackVM.grupoSelecionado != null) {
@@ -518,6 +561,7 @@ class _TrackPageState extends State<TrackPage> {
                         context,
                         messageIds: messageIds,
                         nomeCompleto: nomeCompleto,
+                        meuMessageId: meuMessageId,
                       );
                     }
                   },

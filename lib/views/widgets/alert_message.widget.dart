@@ -7,6 +7,7 @@ void showEmergencyConfirmationDialog(
   BuildContext context, {
   required List<String> messageIds,
   required String nomeCompleto,
+  String? meuMessageId,
 }) {
   showDialog(
     context: context,
@@ -15,6 +16,7 @@ void showEmergencyConfirmationDialog(
       return _EmergencyDialog(
         messageIds: messageIds,
         nomeCompleto: nomeCompleto,
+        meuMessageId: meuMessageId,
       );
     },
   );
@@ -23,10 +25,12 @@ void showEmergencyConfirmationDialog(
 class _EmergencyDialog extends StatefulWidget {
   final List<String> messageIds;
   final String nomeCompleto;
+  final String? meuMessageId;
 
   const _EmergencyDialog({
     required this.messageIds,
     required this.nomeCompleto,
+    this.meuMessageId,
   });
 
   @override
@@ -52,6 +56,7 @@ class _EmergencyDialogState extends State<_EmergencyDialog> {
             context,
             messageIds: widget.messageIds,
             nomeCompleto: widget.nomeCompleto,
+            meuMessageId: widget.meuMessageId,
           );
         }
       } else {
@@ -115,6 +120,7 @@ Future<void> sendEmergencyAlert(
   BuildContext context, {
   required List<String> messageIds,
   required String nomeCompleto,
+  String? meuMessageId,
 }) async {
   print("🚨 Alerta de perigo enviado!");
 
@@ -124,6 +130,7 @@ Future<void> sendEmergencyAlert(
       playerId: messageIds,
       titulo: '🚨 ALERTA DE EMERGÊNCIA!',
       mensagem: '$nomeCompleto está em PERIGO! Verifique a localização imediatamente.',
+      ignorarPlayerId: meuMessageId,
     );
 
     if (context.mounted) {
