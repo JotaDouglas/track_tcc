@@ -15,10 +15,13 @@ Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário com
 - ✅ Histórico de rotas realizadas (com visualização via mapa)
 - ✅ Visualização de trajetos com **polylines**
 - ✅ **Armazenamento offline** da localização, com envio posterior quando houver conexão
-- ✅ **Compartilhamento de localização controlado** com os amigos
-- ✅ Botões de **alerta rápido** para suporte em caso de emergência
+- ✅ **Compartilhamento de localização controlado** com os grupos
+- ✅ Botões de **mensagens rápidas** para facilitar comunicação
+- ✅ Botão de **emergência** para suporte em caso de ocorrências
 - ✅ Compartilhamento online em tempo real
 - ✅ Notificações para contatos chave
+- ✅ Sistema de Grupos
+- ✅ Integração com o Supabase
 
 ---
 
@@ -54,3 +57,5 @@ Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário com
 
 4. Rode o projeto
    flutter run
+   
+6. É necessário um arquivo **.env** para conectar com o supabase e onesignal 
