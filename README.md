@@ -55,7 +55,6 @@ Oferecer uma **ferramenta de geolocalização momentânea**, onde o usuário com
    git clone https://github.com/seu-usuario/zelo_app.git
    cd zelo_app
 
-4. Rode o projeto
-   flutter run
-   
-6. É necessário um arquivo **.env** para conectar com o supabase e onesignal 
+4. É necessário um arquivo **.env** para conectar com o supabase e onesignal
+5. Rode o projeto com flutter run
+    
